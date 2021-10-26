@@ -1,0 +1,42 @@
+#ramkag {
+    
+    padding: 23px;
+    width: 97,5%;
+    height: 100px;
+    
+    font-size: 65px;
+    
+    
+  }
+body {
+  background-image: url(back.gif);
+}
+#ramkap {
+  margin: auto;
+  width: 100px;
+  
+}
+
+.r {
+border-radius: 25px;
+border: 1px solid gray;
+background-color: blanchedalmond;
+font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+
+}
+
+#a{
+width: 49%;
+
+}
+
+#b {
+  width: 49%;
+  margin-left: auto;
+}
+
+h1 {
+color:red;
+
+
+}
