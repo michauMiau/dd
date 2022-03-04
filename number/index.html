@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/x-icon" href="favicon.jpg">
+    <title>Generator Liczb</title>
+</head>
+
+<style>
+
+#Liczba {
+font-size:9vw;
+text-align: center;
+border: 2px solid black;
+  border-radius: 5px;
+  animation-name: example;
+  animation-duration: 1s;
+  background-color: aliceblue;
+
+}
+
+
+
+#przycisk {
+    font-size:5vw;
+     
+
+}
+@keyframes example {
+  from {border: 24px solid gray;}
+  to {border: 2px solid black;}
+}
+
+
+body {
+background-image: url("background.jpeg");
+font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+
+}
+#btun {
+    display: flex; /* or display:grid */
+  justify-content: center;
+}
+
+
+
+</style>
+
+<script>
+function gen(){
+    document.getElementById("Liczba").innerHTML = "wynik to";
+
+    let liczba = generateRandomInteger(10);
+
+
+
+
+    var audio = new Audio(liczba+".mp3");
+    audio.play();
+    
+
+    document.getElementById("Liczba").innerHTML = liczba;
+}
+function generateRandomInteger(max) {
+    return Math.floor(Math.random() * max) + 1;
+}
+
+
+    </script>
+
+<body>
+    <div id="Liczba">Kliknij przycisk</div>
+    <div id="btun">
+    <button id="przycisk" onclick="gen()">Kliknij mnie!</button>
+   </div>
+</body>
+</html>
