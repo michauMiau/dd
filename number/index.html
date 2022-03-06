@@ -28,14 +28,22 @@ border: 2px solid black;
      
 
 }
+
 @keyframes example {
   from {border: 24px solid gray;}
   to {border: 2px solid black;}
 }
 
+@keyframes tapeta {
+  from {background-color: aliceblue;}
+  to {background-color: grey;}
+}
 
 body {
-background-image: url("background.jpeg");
+  animation-name: tapeta;
+  animation-duration: 4s;
+  animation-iteration-count: infinite;
+  animation-direction: alternate;
 font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 
 }
