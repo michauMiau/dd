@@ -1,7 +1,7 @@
 #ramkag {
     
     padding: 23px;
-    width: 97,5%;
+    width: 97%;
     height: 100px;
     
     font-size: 5vw;
@@ -36,7 +36,7 @@ border-radius: 25px;
 border: 1px solid gray;
 background-color: blanchedalmond;
 font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-height: 50px;
+min-height: 100px;
 text-align: center;
 margin-bottom: 5px;
 
