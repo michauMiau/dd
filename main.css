@@ -5,7 +5,8 @@
     height: 100px;
     
     font-size: 5vw;
-    
+    animation-name: textg;
+  animation-duration: 4s;
     
   }
 body {
@@ -53,6 +54,10 @@ margin-bottom: 5px;
 }
 */
 
+@keyframes textg {
+  from {font-size: 1vw;}
+  to {font-size: 5vw;}
+}
 h1 {
 color:red;
 
