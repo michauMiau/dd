@@ -1,9 +1,9 @@
 #ramkag {
     
     padding: 23px;
-    width: 97%;
+    max-width: 97%;
     height: 100px;
-    
+    min-width: 17%;
     font-size: 5vw;
     animation-name: textg;
   animation-duration: 3s;
