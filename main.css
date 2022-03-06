@@ -37,9 +37,11 @@ background-color: blanchedalmond;
 font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 height: 5vw;
 text-align: center;
+margin-bottom: 5px;
 
 }
 
+/*
 #a{
  
 
@@ -49,6 +51,7 @@ text-align: center;
 
   
 }
+*/
 
 h1 {
 color:red;
