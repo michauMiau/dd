@@ -348,7 +348,7 @@ function nyan() {
 // reference y : 415 
 
 function text() {
-	var text = '';
+	var text = "";
 
 	context.fillStyle = 'hsl(' + (Math.random() * 360) + ',100%,50%)';
 	context.font = '100px Arial';
