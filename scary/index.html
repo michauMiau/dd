@@ -8,6 +8,9 @@
     background-color: transparent;
     font-family: 'MyWebFont', Fallback, sans-serif;
     color: darkred;
+    text-align: center;
+    margin: 0 auto;
+
 }
 body {
     background-image: url(bfor.jpg);
@@ -63,13 +66,19 @@ audio.play();
 document.getElementById("bu").innerHTML = "AAAAAAAAAAAAA";
     }
 
-    
+    function urlinput() {
+var input = document.getElementById("userInput").value;
+alert(input);
+}
 </script>
 
 
 <button class="b" id="bu" onclick="dd()">Uruchom</button>
 <input type="button" class="b" id="home" onclick="location.href='https://michaumiau.github.io/dd/';" value="Z powrotem" />
-<input type="url" class="b" id="inputurl">
+<form id="form" onsubmit="return false;">
+  <input style="position:absolute; top:80%; left:5%; width:40%;" type="text" id="userInput" />
+  <input style="position:absolute; top:50%; left:5%; width:40%;" type="submit" onclick="urlinput();" />
+</form>
 
 
 </body>
