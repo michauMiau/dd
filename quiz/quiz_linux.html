@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Quiz Linux Bash - Technikum</title>
+  <style>
+    :root {
+      --bg: #f8fafc;
+      --card: #ffffff;
+      --primary: #2563eb;
+      --primary-hover: #1d4ed8;
+      --success: #10b981;
+      --success-bg: #d1fae5;
+      --error: #ef4444;
+      --error-bg: #fee2e2;
+      --text: #1e293b;
+      --hint: #64748b;
+      --border: #cbd5e1;
+      --radius: 12px;
+      --shadow: 0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -2px rgba(0,0,0,0.05);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+    }
+
+    .container {
+      max-width: 640px;
+      width: 100%;
+      background: var(--card);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 2rem;
+      position: relative;
+      overflow: hidden;
+    }
+
+    header { text-align: center; margin-bottom: 1.5rem; }
+    h1 { color: var(--primary); font-size: 1.8rem; margin-bottom: 0.5rem; }
+    .subtitle { color: var(--hint); font-size: 0.95rem; }
+
+    .progress {
+      text-align: center;
+      font-weight: 600;
+      color: var(--primary);
+      margin-bottom: 1rem;
+      font-size: 1.1rem;
+    }
+
+    .question-box {
+      background: #f1f5f9;
+      border: 1px solid var(--border);
+      padding: 1.2rem;
+      border-radius: var(--radius);
+      margin-bottom: 1.5rem;
+      font-weight: 500;
+      font-size: 1.1rem;
+    }
+
+    .input-group { display: flex; gap: 10px; margin-bottom: 1rem; }
+    input[type="text"] {
+      flex: 1;
+      padding: 12px;
+      border: 2px solid var(--border);
+      border-radius: 8px;
+      font-size: 1rem;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    input[type="text"]:focus { border-color: var(--primary); }
+    input[type="text"]:disabled { background: #f1f5f9; cursor: not-allowed; }
+
+    button {
+      padding: 12px 20px;
+      background: var(--primary);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s;
+      font-size: 1rem;
+    }
+    button:hover { background: var(--primary-hover); }
+    button:disabled { background: #94a3b8; cursor: not-allowed; }
+
+    .feedback {
+      margin-top: 1rem;
+      padding: 1rem;
+      border-radius: 8px;
+      display: none;
+      font-weight: 500;
+    }
+    .feedback.correct { display: block; background: var(--success-bg); color: #065f46; border: 1px solid #34d399; }
+    .feedback.incorrect { display: block; background: var(--error-bg); color: #991b1b; border: 1px solid #f87171; }
+    .hint { margin-top: 0.5rem; font-style: italic; color: var(--hint); font-weight: 400; }
+
+    .end-screen {
+      display: none;
+      text-align: center;
+      padding: 2rem 0;
+    }
+    .end-screen h2 { color: var(--primary); margin-bottom: 1rem; }
+    .end-screen p { margin-bottom: 1.5rem; font-size: 1.1rem; }
+    .restart-btn { margin-top: 1rem; background: var(--success); }
+    .restart-btn:hover { background: #059669; }
+
+    .info {
+      margin-top: 1.5rem;
+      padding: 1rem;
+      background: #f8fafc;
+      border: 1px dashed var(--border);
+      border-radius: 8px;
+      font-size: 0.9rem;
+      color: var(--hint);
+    }
+
+    @media (max-width: 480px) {
+      .container { padding: 1.5rem; }
+      h1 { font-size: 1.5rem; }
+      .question-box { font-size: 1rem; padding: 1rem; }
+      input[type="text"], button { padding: 14px; font-size: 1rem; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>🐧 Quiz Linux (Bash)</h1>
+      <p class="subtitle">Poziom Technikum • Elastyczne sprawdzanie • Komendy procesowe</p>
+    </header>
+
+    <main id="quiz-container">
+      <div class="progress" id="progress"></div>
+      <div class="question-box" id="question-text"></div>
+      <form id="quiz-form" class="input-group">
+        <input type="text" id="answer-input" placeholder="Wpisz komendę bash..." autocomplete="off" autofocus>
+        <button type="submit" id="submit-btn">Sprawdź</button>
+      </form>
+      <div class="feedback" id="feedback"></div>
+      <div class="info">
+        💡 Opcje (`-p`, `-l`, `-a` itp.) mogą być w dowolnej kolejności lub połączone (np. `-la` = `-l -a`).<br>
+        Wpisz <code>q</code> lub <code>quit</code> aby zakończyć quiz.
+      </div>
+    </main>
+
+    <div class="end-screen" id="end-screen"></div>
+  </div>
+
+  <script>
+    // Baza pytań
+    const questions = [
+      { task: "Stwórz użytkownika o nazwie 'uzytk1'", correct_answers: ["useradd uzytk1"], hint: "useradd <nazwa_użytkownika>" },
+      { task: "Stwórz katalog 'dane'", correct_answers: ["mkdir dane"], hint: "mkdir <nazwa_katalogu>" },
+      { task: "Stwórz katalogi 'projekt/etap1/etap2' rekursywnie", correct_answers: ["mkdir -p projekt/etap1/etap2", "mkdir projekt/etap1/etap2 -p", "mkdir -p projekt/etap1/etap2"], hint: "Opcja -p tworzy wszystkie brakujące katalogi w ścieżce" },
+      { task: "Wyświetl zawartość katalogu bieżącego z ukrytymi plikami i szczegółami", correct_answers: ["ls -la", "ls -a -l", "ls -l -a", "ls -al", "ls -la"], hint: "Opcje: -l (szczegóły), -a (ukryte pliki). Kolejność opcji nie ma znaczenia." },
+      { task: "Skopiuj plik 'tekst.txt' do katalogu 'backup'", correct_answers: ["cp tekst.txt backup"], hint: "cp <źródło> <cel>" },
+      { task: "Zmień nazwę pliku 'stary.txt' na 'nowy.txt'", correct_answers: ["mv stary.txt nowy.txt"], hint: "mv <stara_nazwa> <nowa_nazwa>" },
+      { task: "Usuń plik 'log.txt'", correct_answers: ["rm log.txt"], hint: "rm <plik>" },
+      { task: "Przejdź do katalogu 'dom'", correct_answers: ["cd dom"], hint: "cd <katalog>" },
+      { task: "Stwórz pusty plik 'dane.csv'", correct_answers: ["touch dane.csv"], hint: "touch <plik>" },
+      { task: "Wyświetl zawartość pliku 'info.txt'", correct_answers: ["cat info.txt"], hint: "cat <plik>" },
+      { task: "Wyświetl bieżący katalog roboczy", correct_answers: ["pwd"], hint: "Print Working Directory" },
+      { task: "Pokaż aktualną nazwę użytkownika", correct_answers: ["whoami"], hint: "whoami" },
+      { task: "Wyświetl listę wszystkich procesów", correct_answers: ["ps aux", "ps -ef", "ps -aux", "ps -e -f"], hint: "ps aux lub ps -ef. Opcje mogą być w dowolnej kolejności." },
+      { task: "Zatrzymaj proces o PID 1234", correct_answers: ["kill 1234"], hint: "kill <PID>" },
+      { task: "Wymuś natychmiastowe zatrzymanie procesu o PID 5678", correct_answers: ["kill -9 5678", "kill -SIGKILL 5678", "kill 5678 -9"], hint: "kill -9 <PID> lub kill -SIGKILL <PID>" },
+      { task: "Wyświetl aktywne procesy i zużycie zasobów w czasie rzeczywistym", correct_answers: ["top"], hint: "top" },
+      { task: "Wyświetl zadania uruchomione w tle", correct_answers: ["jobs", "jobs -l"], hint: "jobs lub jobs -l (dla szczegółów)" },
+      { task: "Przenieś zadanie z pierwszego planu na tło", correct_answers: ["bg", "bg %1"], hint: "bg lub bg %<numer_zadania>" },
+      { task: "Przenieś zadanie z tła na pierwszy plan", correct_answers: ["fg", "fg %1"], hint: "fg lub fg %<numer_zadania>" },
+      { task: "Uruchom skrypt './app.sh' z niższym priorytetem (nice -n 10)", correct_answers: ["nice -n 10 ./app.sh", "nice -10 ./app.sh", "nice ./app.sh -n 10"], hint: "nice -n <priorytet> <skrypt> lub nice -<priorytet> <skrypt>" },
+      { task: "Zmień uprawnienia pliku 'skrypt.sh' na 644", correct_answers: ["chmod 644 skrypt.sh"], hint: "chmod <uprawnienia> <plik>" },
+      { task: "Zmień właściciela pliku 'raport.log' na 'uzytk1'", correct_answers: ["chown uzytk1 raport.log"], hint: "chown <użytkownik> <plik>" }
+    ];
+
+    let currentIndex = 0;
+    let score = 0;
+    let validAnswers = [];
+    let shuffledQuestions = [];
+
+    // Funkcja mieszająca tablicę
+    function shuffleArray(arr) {
+      const newArr = [...arr];
+      for (let i = newArr.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [newArr[i], newArr[j]] = [newArr[j], newArr[i]];
+      }
+      return newArr;
+    }
+
+    // Parsowanie komendy (JS wersja)
+    function parseCommand(cmdStr) {
+      const parts = cmdStr.trim().split(/\s+/);
+      if (!parts.length) return null;
+      const cmd = parts[0].toLowerCase();
+      let opts = [];
+      let args = [];
+      for (let i = 1; i < parts.length; i++) {
+        if (parts[i].startsWith('-')) opts.push(parts[i]);
+        else args.push(parts[i]);
+      }
+      let normalizedOpts = [];
+      opts.forEach(o => {
+        if (o.startsWith('-') && o.length > 2) {
+          for (let c of o.slice(1)) normalizedOpts.push(`-${c}`);
+        } else {
+          normalizedOpts.push(o);
+        }
+      });
+      normalizedOpts.sort();
+      return { cmd, opts: normalizedOpts, args };
+    }
+
+    function toValidAnswers(answers) {
+      return answers.map(a => parseCommand(a));
+    }
+
+    function initQuiz() {
+      shuffledQuestions = shuffleArray(questions);
+      currentIndex = 0;
+      score = 0;
+      validAnswers = [];
+      document.getElementById('quiz-container').style.display = 'block';
+      document.getElementById('end-screen').style.display = 'none';
+      renderQuestion();
+    }
+
+    function renderQuestion() {
+      const q = shuffledQuestions[currentIndex];
+      validAnswers = toValidAnswers(q.correct_answers);
+      document.getElementById('question-text').textContent = q.task;
+      document.getElementById('progress').textContent = `Zadanie ${currentIndex + 1}/${shuffledQuestions.length}`;
+      document.getElementById('feedback').className = 'feedback';
+      document.getElementById('feedback').innerHTML = '';
+      document.getElementById('answer-input').value = '';
+      document.getElementById('answer-input').disabled = false;
+      document.getElementById('submit-btn').disabled = false;
+      document.getElementById('answer-input').focus();
+    }
+
+    function checkAnswer() {
+      const input = document.getElementById('answer-input').value.trim();
+      if (!input) return;
+      if (input.toLowerCase() === 'q' || input.toLowerCase() === 'quit') {
+        showEndScreen();
+        return;
+      }
+
+      const userParsed = parseCommand(input);
+      const isCorrect = validAnswers.some(v =>
+        v && v.cmd === userParsed.cmd &&
+        JSON.stringify(v.opts) === JSON.stringify(userParsed.opts) &&
+        JSON.stringify(v.args) === JSON.stringify(userParsed.args)
+      );
+
+      const feedbackEl = document.getElementById('feedback');
+      if (isCorrect) {
+        score++;
+        feedbackEl.className = 'feedback correct';
+        feedbackEl.innerHTML = `✅ Poprawnie! Brawo.<br><div class="hint">💡 Wskazówka: ${shuffledQuestions[currentIndex].hint}</div>`;
+      } else {
+        feedbackEl.className = 'feedback incorrect';
+        const correctEx = shuffledQuestions[currentIndex].correct_answers.slice(0, 3).join(', ');
+        feedbackEl.innerHTML = `❌ Niepoprawnie.<br>📖 Poprawna odpowiedź: ${correctEx}<br><div class="hint">💡 Wskazówka: ${shuffledQuestions[currentIndex].hint}</div>`;
+      }
+
+      // Blokuj input na czas czytania feedbacku
+      document.getElementById('answer-input').disabled = true;
+      document.getElementById('submit-btn').disabled = true;
+
+      currentIndex++;
+      if (currentIndex < shuffledQuestions.length) {
+        setTimeout(renderQuestion, 1500);
+      } else {
+        showEndScreen();
+      }
+    }
+
+    function showEndScreen() {
+      document.getElementById('quiz-container').style.display = 'none';
+      const endScreen = document.getElementById('end-screen');
+      endScreen.style.display = 'block';
+      let msg = '';
+      if (score === shuffledQuestions.length) msg = '🎉 Świetny wynik! Gotowy na kartkówkę!';
+      else if (score >= shuffledQuestions.length * 0.7) msg = '👍 Dobra postawa. Warto jeszcze powtórzyć komendy procesowe.';
+      else msg = '📚 Warto jeszcze powtórzyć komendy. Spróbuj ponownie!';
+
+      endScreen.innerHTML = `
+        <h2>🏆 Twój wynik: ${score}/${shuffledQuestions.length}</h2>
+        <p>${msg}</p>
+        <button class="restart-btn" onclick="initQuiz()">🔄 Restart Quiz</button>
+      `;
+    }
+
+    // Event listeners
+    document.getElementById('quiz-form').addEventListener('submit', (e) => {
+      e.preventDefault();
+      checkAnswer();
+    });
+
+    document.getElementById('answer-input').addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        checkAnswer();
+      }
+    });
+
+    // Start
+    initQuiz();
+  </script>
+</body>
+</html>
