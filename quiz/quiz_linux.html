@@ -192,7 +192,8 @@
       { task: "Skonfiguruj interfejs 'eth0' z adresem IP 192.168.1.10 i maską 255.255.255.0", correct_answers: ["ifconfig eth0 192.168.1.10 netmask 255.255.255.0"], hint: "ifconfig <interfejs> <adres_IP> netmask <maska>" },
       { task: "Sprawdź łączność z adresem lokalnym 192.168.1.1", correct_answers: ["ping 192.168.1.1"], hint: "ping <adres>" },
       { task: "Spakuj plik 'raport.txt' do archiwum gzip o nazwie 'raport.tar.gz'", correct_answers: ["tar -czf raport.tar.gz raport.txt", "tar -cfz raport.tar.gz raport.txt", "tar --gzip -cf raport.tar.gz raport.txt"], hint: "tar -czf <archiwum> <plik>" },
-      { task: "Wyświetl zawartość archiwum 'raport.tar.gz' bez wypakowywania", correct_answers: ["tar -tzf raport.tar.gz", "tar -tfz raport.tar.gz", "tar --gzip -tf raport.tar.gz"], hint: "tar -tzf <archiwum> lub tar -tfz <archiwum>" }
+      { task: "Wyświetl zawartość archiwum 'raport.tar.gz' bez wypakowywania", correct_answers: ["tar -tzf raport.tar.gz", "tar -tfz raport.tar.gz", "tar --gzip -tf raport.tar.gz"], hint: "tar -tzf <archiwum> lub tar -tfz <archiwum>" },
+      { task: "Zapisz wynik komendy 'cat dane.txt' do pliku 'wynik.txt'", correct_answers: ["cat dane.txt > wynik.txt"], hint: "Komenda > nadpisuje zawartość pliku" }
     ];
 
     let currentIndex = 0;
