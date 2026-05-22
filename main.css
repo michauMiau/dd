@@ -1,28 +1,30 @@
 #ramkag {
-    
     padding: 23px;
     max-width: 98%;
     height: 100px;
     min-width: 17%;
     font-size: 5vw;
     animation-name: textg;
-  animation-duration: 3s;
-    
-  }
+    animation-duration: 3s;
+    font-family: 'Times New Roman', Georgia, serif;
+    text-align: center;
+    margin-bottom: 40px;
+}
 body {
-  background-color: red;
+  background-color: #0a0a2e;
   animation-name: example;
-  animation-duration: 4s;
+  animation-duration: 8s;
   animation-iteration-count: infinite;
   animation-direction: alternate;
 
 }
 
 @keyframes example {
-  0%   {background-color: red;}
-  25%  {background-color: yellow;}
-  50%  {background-color: blue;}
-  100% {background-color: green;}
+  0%   {background-color: #0a0a2e;}
+  25%  {background-color: #4a0e4e;}
+  50%  {background-color: #0d0d0d;}
+  75%  {background-color: #39ff14;}
+  100% {background-color: #dc143c;}
 }
 
 #ramkap {
