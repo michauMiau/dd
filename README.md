@@ -2,15 +2,4 @@ Proudly made with no AI*
 
 https://michaumiau.github.io/dd/
 
-
-
-
-
-
-
-
-
-
-
-
-###### some newer parts may have been made with ai
+## Archive version of website, before the overhaul and AI, kept for nostalgia reasons (and also since github has unlimited storage)
