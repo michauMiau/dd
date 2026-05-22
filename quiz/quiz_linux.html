@@ -148,7 +148,7 @@
       <div class="progress" id="progress"></div>
       <div class="question-box" id="question-text"></div>
       <form id="quiz-form" class="input-group">
-        <input type="text" id="answer-input" placeholder="Wpisz komendę bash..." autocomplete="off" autofocus>
+        <input type="text" id="answer-input" placeholder="Wpisz komendę bash..." autocomplete="off" autocorrect="off" spellcheck="false" autofocus>
         <button type="submit" id="submit-btn">Sprawdź</button>
       </form>
       <div class="feedback" id="feedback"></div>
@@ -185,7 +185,14 @@
       { task: "Przenieś zadanie z tła na pierwszy plan", correct_answers: ["fg", "fg %1"], hint: "fg lub fg %<numer_zadania>" },
       { task: "Uruchom skrypt './app.sh' z niższym priorytetem (nice -n 10)", correct_answers: ["nice -n 10 ./app.sh", "nice -10 ./app.sh", "nice ./app.sh -n 10"], hint: "nice -n <priorytet> <skrypt> lub nice -<priorytet> <skrypt>" },
       { task: "Zmień uprawnienia pliku 'skrypt.sh' na 644", correct_answers: ["chmod 644 skrypt.sh"], hint: "chmod <uprawnienia> <plik>" },
-      { task: "Zmień właściciela pliku 'raport.log' na 'uzytk1'", correct_answers: ["chown uzytk1 raport.log"], hint: "chown <użytkownik> <plik>" }
+      { task: "Zmień właściciela pliku 'raport.log' na 'uzytk1'", correct_answers: ["chown uzytk1 raport.log"], hint: "chown <użytkownik> <plik>" },
+      { task: "Zmień hasło swojego użytkownika", correct_answers: ["passwd"], hint: "passwd" },
+      { task: "Wymuś zmianę hasła przy następnym logowaniu dla użytkownika 'uzytk1'", correct_answers: ["passwd -e uzytk1", "passwd --expire uzytk1"], hint: "passwd -e <nazwa_użytkownika> lub passwd --expire <nazwa_użytkownika>" },
+      { task: "Wyświetl listę zalogowanych użytkowników", correct_answers: ["who", "w", "users"], hint: "who, w lub users" },
+      { task: "Skonfiguruj interfejs 'eth0' z adresem IP 192.168.1.10 i maską 255.255.255.0", correct_answers: ["ifconfig eth0 192.168.1.10 netmask 255.255.255.0"], hint: "ifconfig <interfejs> <adres_IP> netmask <maska>" },
+      { task: "Sprawdź łączność z adresem lokalnym 192.168.1.1", correct_answers: ["ping 192.168.1.1"], hint: "ping <adres>" },
+      { task: "Spakuj plik 'raport.txt' do archiwum gzip o nazwie 'raport.tar.gz'", correct_answers: ["tar -czf raport.tar.gz raport.txt", "tar -cfz raport.tar.gz raport.txt", "tar --gzip -cf raport.tar.gz raport.txt"], hint: "tar -czf <archiwum> <plik>" },
+      { task: "Wyświetl zawartość archiwum 'raport.tar.gz' bez wypakowywania", correct_answers: ["tar -tzf raport.tar.gz", "tar -tfz raport.tar.gz", "tar --gzip -tf raport.tar.gz"], hint: "tar -tzf <archiwum> lub tar -tfz <archiwum>" }
     ];
 
     let currentIndex = 0;
