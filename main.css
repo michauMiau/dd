@@ -3,7 +3,7 @@
     max-width: 98%;
     height: 100px;
     min-width: 17%;
-    font-size: 5vw;
+    font-size: clamp(28px, 6vh, 72px);
     animation-name: textg;
     animation-duration: 3s;
     font-family: 'Times New Roman', Georgia, serif;
@@ -66,8 +66,8 @@ padding-right: 15px;
 */
 
 @keyframes textg {
-  from {font-size: 1vw;}
-  to {font-size: 4.5vw;}
+  from {font-size: clamp(18px, 2vh, 24px);}
+  to {font-size: clamp(36px, 7vh, 72px);}
 }
 h1 {
 color:red;
