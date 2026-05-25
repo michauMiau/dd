@@ -149,7 +149,7 @@
       <div class="progress" id="progress"></div>
       <div class="question-box" id="question-text"></div>
       <form id="quiz-form" class="input-group">
-        <input type="text" id="answer-input" placeholder="Wpisz komendę bash..." autocomplete="off" autocorrect="off" spellcheck="false" autofocus>
+        <input type="text" id="answer-input" placeholder="Wpisz komendę bash..." autocomplete="off" autocorrect="off" spellcheck="false" inputmode="text" enterkeyhint="done" autofocus>
         <button type="submit" id="submit-btn">Sprawdź</button>
       </form>
       <div class="feedback" id="feedback"></div>
@@ -182,10 +182,13 @@
       { task: "Wymuś natychmiastowe zatrzymanie procesu o PID 5678", correct_answers: ["kill -9 5678", "kill -SIGKILL 5678", "kill 5678 -9"], hint: "kill -9 <PID> lub kill -SIGKILL <PID>" },
       { task: "Wyświetl aktywne procesy i zużycie zasobów w czasie rzeczywistym", correct_answers: ["top"], hint: "top" },
       { task: "Wyświetl zadania uruchomione w tle", correct_answers: ["jobs", "jobs -l"], hint: "jobs lub jobs -l (dla szczegółów)" },
-      { task: "Przenieś zadanie z pierwszego planu na tło", correct_answers: ["bg", "bg %1"], hint: "bg lub bg %<numer_zadania>" },
-      { task: "Przenieś zadanie z tła na pierwszy plan", correct_answers: ["fg", "fg %1"], hint: "fg lub fg %<numer_zadania>" },
+
       { task: "Przełącz się na użytkownika root (administratora) ", correct_answers: ["sudo su", "su", "su root"], hint: "su - Switch User" },
       { task: "Zmień uprawnienia pliku 'skrypt.sh' na 644", correct_answers: ["chmod 644 skrypt.sh"], hint: "chmod <uprawnienia> <plik>" },
+      { task: "Zmień uprawnienia pliku 'raport.txt' na tylko do odczytu dla właściciela, grupy i innych (444)", correct_answers: ["chmod 444 raport.txt", "chmod a=r raport.txt"], hint: "chmod 444 lub chmod a=r" },
+      { task: "Zmień grupę pliku 'dane.csv' na 'grupa1'", correct_answers: ["chgrp grupa1 dane.csv"], hint: "chgrp <nazwa_grupy> <plik>" },
+      { task: "Zamontuj pendrive '/dev/sdb1' do katalogu '/mnt/usb'", correct_answers: ["mount /dev/sdb1 /mnt/usb", "mount -t vfat /dev/sdb1 /mnt/usb"], hint: "mount <urządzenie> <katalog_montażu>" },
+      { task: "Zamontuj pendrive '/dev/sdc1' automatycznie z uwzględnieniem kodowania polskich znaków", correct_answers: ["mount -t vfat -o utf8 /dev/sdc1 /mnt/usb"], hint: "mount -t <typ> -o <opcje> <urządzenie> <katalog>" },
       { task: "Zmień właściciela pliku 'raport.log' na 'uzytk1'", correct_answers: ["chown uzytk1 raport.log"], hint: "chown <użytkownik> <plik>" },
       { task: "Zmień hasło swojego użytkownika", correct_answers: ["passwd"], hint: "passwd" },
       { task: "Wymuś zmianę hasła przy następnym logowaniu dla użytkownika 'uzytk1'", correct_answers: ["passwd -e uzytk1", "passwd --expire uzytk1"], hint: "passwd -e <nazwa_użytkownika> lub passwd --expire <nazwa_użytkownika>" },
