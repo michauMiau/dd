@@ -188,7 +188,6 @@
       { task: "Zmień uprawnienia pliku 'raport.txt' na tylko do odczytu dla właściciela, grupy i innych (444)", correct_answers: ["chmod 444 raport.txt", "chmod a=r raport.txt"], hint: "chmod 444 lub chmod a=r" },
       { task: "Zmień grupę pliku 'dane.csv' na 'grupa1'", correct_answers: ["chgrp grupa1 dane.csv"], hint: "chgrp <nazwa_grupy> <plik>" },
       { task: "Zamontuj pendrive '/dev/sdb1' do katalogu '/mnt/usb'", correct_answers: ["mount /dev/sdb1 /mnt/usb", "mount -t vfat /dev/sdb1 /mnt/usb"], hint: "mount <urządzenie> <katalog_montażu>" },
-      { task: "Zamontuj pendrive '/dev/sdc1' automatycznie z uwzględnieniem kodowania polskich znaków", correct_answers: ["mount -t vfat -o utf8 /dev/sdc1 /mnt/usb"], hint: "mount -t <typ> -o <opcje> <urządzenie> <katalog>" },
       { task: "Zmień właściciela pliku 'raport.log' na 'uzytk1'", correct_answers: ["chown uzytk1 raport.log"], hint: "chown <użytkownik> <plik>" },
       { task: "Zmień hasło swojego użytkownika", correct_answers: ["passwd"], hint: "passwd" },
       { task: "Wymuś zmianę hasła przy następnym logowaniu dla użytkownika 'uzytk1'", correct_answers: ["passwd -e uzytk1", "passwd --expire uzytk1"], hint: "passwd -e <nazwa_użytkownika> lub passwd --expire <nazwa_użytkownika>" },
