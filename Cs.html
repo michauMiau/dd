@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CS2 — Komendy Konsoli</title>
+</head>
+<body>
+
+<!-- ============================================
+     EDYTUJ TUTAJ: Komendy CS2
+     Format: { "cmd": "...", "desc": "...", "cat": "..." }
+     Dodawaj nowe komendy w dowolnym miejscu listy.
+     Quickgames dodajesz z "cat": "quickgames"
+     ============================================ -->
+<script type="application/json" id="commands-data">
+[
+    { "cmd": "toggleconsole", "desc": "Otwiera/zamyka konsolę deweloperską", "cat": "ogólne" },
+    { "cmd": "cl_showpos 1", "desc": "Pokazuje pozycję, prędkość i kierunek gracza na ekranie", "cat": "poruszanie się" },
+    { "cmd": "sv_cheats 1", "desc": "Włącza tryb cheat — wymagane do wielu komend", "cat": "serwer" },
+    { "cmd": "mat_monitorgamma 16.0", "desc": "Ustawia jasność monitora (wartość 1–24)", "cat": "grafika" },
+    { "cmd": "cl_radar_scale 0.4", "desc": "Skala minimapy na HUDzie (0.1–0.8)", "cat": "grafika" },
+    { "cmd": "cl_hud_playercount_show 1", "desc": "Pokazuje licznik graczy w HUDzie", "cat": "grafika" },
+    { "cmd": "r_drawothermodels 1", "desc": "Renderuje inne modele (np. cienie broni)", "cat": "grafika" },
+    { "cmd": "volume 0.5", "desc": "Głośność muzyki w grze (0–1)", "cat": "audio" },
+    { "cmd": "speak_language polish", "desc": "Ustawia język głosowych komend na polski", "cat": "audio" },
+    { "cmd": "cl_showloadouttext 0", "desc": "Chowa teksty ekwipunku na HUDzie", "cat": "rozgrywka" },
+    { "cmd": "sv_grenade_trajectory_prac_trailtime 1", "desc": "Czas wyświetlania trajektorii granatu w praktyce", "cat": "rozgrywka" },
+    { "cmd": "sv_grenade_trajectory_prac_trailsenabled 1", "desc": "Włącza widok trajektorii granatów", "cat": "rozgrywka" },
+    { "cmd": "net_graph 1", "desc": "Pokazuje statystyki sieci (ping, packet loss) na dole ekranu", "cat": "sieć" },
+    { "cmd": "net_graphproportionalfont 1", "desc": "Responsywna czcionka net grafu", "cat": "sieć" },
+    { "cmd": "cl_interp_ratio 1", "desc": "Interpolacja klienta — stosunek do tickrate'u serwera", "cat": "sieć" },
+    { "cmd": "cl_interp 0", "desc": "Interpolacja klienta — stała wartość (sekundy)", "cat": "sieć" },
+    { "cmd": "host_timescale 0.5", "desc": "Zwolnia czas gry do połowy (0.1–2)", "cat": "dev" },
+    { "cmd": "god", "desc": "Tryb nieśmiertelności (wymaga sv_cheats 1)", "cat": "dev" },
+    { "cmd": "noclip", "desc": "Lot przez ściany (wymaga sv_cheats 1)", "cat": "dev" },
+    { "cmd": "sv_glow_on_team S", "desc": "Podświetla graczy z danej drużyny (CT/T)", "cat": "dev" },
+
+    { "cmd": "map de_dust2", "desc": "Ładuje mapę Dust II", "cat": "quickgames" },
+    { "cmd": "map de_mirage", "desc": "Ładuje mapę Mirage", "cat": "quickgames" },
+    { "cmd": "map de_inferno", "desc": "Ładuje mapę Inferno", "cat": "quickgames" },
+    { "cmd": "map de_nuke", "desc": "Ładuje mapę Nuke", "cat": "quickgames" },
+    { "cmd": "map de_anubis", "desc": "Ładuje mapę Anubis", "cat": "quickgames" },
+    { "cmd": "map de_overpass", "desc": "Ładuje mapę Overpass", "cat": "quickgames" },
+    { "cmd": "map de_ancient", "desc": "Ładuje mapę Ancient", "cat": "quickgames" },
+    { "cmd": "map de_vertigo", "desc": "Ładuje mapę Vertigo", "cat": "quickgames" },
+    { "cmd": "map de_train", "desc": "Ładuje mapę Train", "cat": "quickgames" }
+]
+</script>
+
+<div class="container">
+    <h1>CS2 — Komendy Konsoli</h1>
+    <p class="subtitle">Wyszukaj, skopiuj i wklej do konsoli Dev Console</p>
+
+    <!-- Wyszukiwarka -->
+    <div class="search-wrapper">
+        <span class="search-icon">&#128269;</span>
+        <input type="text" class="search-input" id="searchInput" placeholder="Szukaj komendy, opisu lub kategorii...">
+    </div>
+
+    <!-- Filtry kategorii -->
+    <div class="filter-bar" id="filterBar"></div>
+
+    <!-- Quickgames (renderowane dynamicznie) -->
+    <div class="quickgames-section" id="quickgamesSection">
+        <div class="section-title"><span class="icon">&#9889;</span> Quickgames</div>
+        <div class="quickgames-grid" id="quickgamesGrid"></div>
+    </div>
+
+    <!-- Lista komend -->
+    <div class="commands-list" id="commandsList"></div>
+
+    <!-- Brak wyników -->
+    <div class="no-results" id="noResults">Brak wyników wyszukiwania 😿</div>
+</div>
+
+
+<!-- ============================================
+     CSS
+     ============================================ -->
+<style>
+:root {
+    --orange: #ff8c42;
+    --orange-dark: #e06f25;
+    --blue: #3a86ff;
+    --blue-dark: #2563eb;
+    --bg: #0d1117;
+    --card-bg: #161b22;
+    --card-border: #30363d;
+    --text: #e6edf3;
+    --text-muted: #8b949e;
+    --input-bg: #0d1117;
+    --success: #3fb950;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    line-height: 1.6;
+}
+
+.container {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 32px 20px;
+}
+
+h1 {
+    text-align: center;
+    font-size: 2rem;
+    margin-bottom: 8px;
+    background: linear-gradient(135deg, var(--orange), var(--blue));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.subtitle {
+    text-align: center;
+    color: var(--text-muted);
+    font-size: 0.9rem;
+    margin-bottom: 28px;
+}
+
+.search-wrapper {
+    position: relative;
+    margin-bottom: 24px;
+    animation: fadeSlideDown 0.5s ease-out;
+}
+
+.search-input {
+    width: 100%;
+    padding: 14px 20px 14px 48px;
+    font-size: 1rem;
+    border: 2px solid var(--card-border);
+    border-radius: 12px;
+    background: var(--input-bg);
+    color: var(--text);
+    outline: none;
+    transition: border-color 0.3s, box-shadow 0.3s;
+}
+
+.search-input:focus {
+    border-color: var(--blue);
+    box-shadow: 0 0 0 4px rgba(58, 134, 255, 0.15);
+}
+
+.search-icon {
+    position: absolute;
+    left: 16px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-muted);
+    font-size: 1.2rem;
+    pointer-events: none;
+}
+
+.filter-bar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 24px;
+    animation: fadeSlideDown 0.5s ease-out 0.1s both;
+}
+
+.filter-btn {
+    padding: 6px 16px;
+    font-size: 0.85rem;
+    border: 1.5px solid var(--card-border);
+    border-radius: 20px;
+    background: transparent;
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: all 0.25s ease;
+}
+
+.filter-btn:hover {
+    border-color: var(--blue);
+    color: var(--blue);
+}
+
+.filter-btn.active {
+    background: var(--blue);
+    border-color: var(--blue);
+    color: #fff;
+}
+
+.quickgames-section {
+    margin-bottom: 28px;
+    animation: fadeSlideDown 0.5s ease-out 0.15s both;
+}
+
+.section-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.section-title .icon { color: var(--orange); }
+
+.quickgames-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 8px;
+}
+
+.quickgame-item {
+    padding: 10px 14px;
+    background: var(--card-bg);
+    border: 1.5px solid var(--card-border);
+    border-radius: 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+    transition: border-color 0.2s, transform 0.15s;
+}
+
+.quickgame-item:hover {
+    border-color: var(--orange);
+    transform: translateY(-1px);
+}
+
+.quickgame-name {
+    font-size: 0.9rem;
+    color: var(--text);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.commands-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.command-card {
+    background: var(--card-bg);
+    border: 1.5px solid var(--card-border);
+    border-radius: 12px;
+    padding: 14px 18px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    transition: border-color 0.2s, transform 0.15s, opacity 0.3s;
+    animation: fadeSlideUp 0.4s ease-out both;
+}
+
+.command-card:hover {
+    border-color: var(--blue);
+    transform: translateY(-1px);
+}
+
+.command-card.hidden { display: none; }
+
+.cmd-info { flex: 1; min-width: 0; }
+
+.cmd-text {
+    font-family: 'Cascadia Code', 'Fira Code', 'Consolas', monospace;
+    font-size: 0.95rem;
+    color: var(--orange);
+    word-break: break-all;
+}
+
+.cmd-desc {
+    font-size: 0.82rem;
+    color: var(--text-muted);
+    margin-top: 3px;
+}
+
+.cmd-category {
+    display: inline-block;
+    padding: 2px 10px;
+    font-size: 0.72rem;
+    border-radius: 12px;
+    background: rgba(58, 134, 255, 0.15);
+    color: var(--blue);
+    margin-top: 5px;
+}
+
+.copy-btn {
+    flex-shrink: 0;
+    padding: 8px 14px;
+    font-size: 0.82rem;
+    border: 1.5px solid var(--card-border);
+    border-radius: 8px;
+    background: transparent;
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+}
+
+.copy-btn:hover {
+    border-color: var(--success);
+    color: var(--success);
+}
+
+.copy-btn.copied {
+    border-color: var(--success);
+    background: rgba(63, 185, 80, 0.12);
+    color: var(--success);
+}
+
+.no-results {
+    text-align: center;
+    padding: 40px 20px;
+    color: var(--text-muted);
+    display: none;
+}
+
+.no-results.visible { display: block; animation: fadeIn 0.3s ease-out; }
+
+@keyframes fadeSlideDown {
+    from { opacity: 0; transform: translateY(-12px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeSlideUp {
+    from { opacity: 0; transform: translateY(10px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+}
+
+@media (max-width: 500px) {
+    h1 { font-size: 1.5rem; }
+    .container { padding: 20px 14px; }
+    .quickgames-grid { grid-template-columns: 1fr; }
+    .command-card { flex-wrap: wrap; }
+}
+</style>
+
+
+<!-- ============================================
+     JS
+     ============================================ -->
+<script>
+const rawData = JSON.parse(document.getElementById('commands-data').textContent);
+let commands = [...rawData];
+
+const searchInput = document.getElementById('searchInput');
+const filterBar = document.getElementById('filterBar');
+const commandsList = document.getElementById('commandsList');
+const quickgamesGrid = document.getElementById('quickgamesGrid');
+const quickgamesSection = document.getElementById('quickgamesSection');
+const noResults = document.getElementById('noResults');
+
+let activeCategory = 'Wszystkie';
+
+function renderQuickgames() {
+    const qgs = commands.filter(c => c.cat === 'quickgames');
+    if (qgs.length === 0) { quickgamesSection.style.display = 'none'; return; }
+    
+    quickgamesSection.style.display = 'block';
+    quickgamesGrid.innerHTML = '';
+    qgs.forEach((q, i) => {
+        const el = document.createElement('div');
+        el.className = 'quickgame-item';
+        el.style.animationDelay = `${i * 0.05}s`;
+        el.innerHTML = `
+            <span class="quickgame-name">${escapeHtml(q.cmd)}</span>
+            <button class="copy-btn" data-copy="${escapeHtml(q.cmd)}">Kopiuj</button>
+        `;
+        quickgamesGrid.appendChild(el);
+    });
+}
+
+function getCategories() {
+    const cats = new Set();
+    commands.forEach(c => cats.add(c.cat));
+    return ['Wszystkie', ...Array.from(cats).sort((a,b) => a === 'quickgames' ? -1 : b === 'quickgames' ? 1 : a.localeCompare(b))];
+}
+
+function renderFilters() {
+    filterBar.innerHTML = '';
+    getCategories().forEach(cat => {
+        const btn = document.createElement('button');
+        btn.className = 'filter-btn' + (cat === activeCategory ? ' active' : '');
+        btn.textContent = cat;
+        btn.addEventListener('click', () => {
+            activeCategory = cat;
+            renderFilters();
+            filterCommands();
+        });
+        filterBar.appendChild(btn);
+    });
+}
+
+function renderCommands(filtered) {
+    commandsList.innerHTML = '';
+    if (filtered.length === 0) {
+        noResults.classList.add('visible');
+        return;
+    }
+    noResults.classList.remove('visible');
+
+    filtered.forEach((c, i) => {
+        const card = document.createElement('div');
+        card.className = 'command-card';
+        card.style.animationDelay = `${i * 0.04}s`;
+        card.innerHTML = `
+            <div class="cmd-info">
+                <div class="cmd-text">${escapeHtml(c.cmd)}</div>
+                <div class="cmd-desc">${escapeHtml(c.desc)}</div>
+                <span class="cmd-category">${escapeHtml(c.cat)}</span>
+            </div>
+            <button class="copy-btn" data-copy="${escapeHtml(c.cmd)}">Kopiuj</button>
+        `;
+        commandsList.appendChild(card);
+    });
+
+    document.querySelectorAll('.copy-btn').forEach(btn => {
+        btn.addEventListener('click', handleCopy);
+    });
+}
+
+function filterCommands() {
+    const query = normalizeQuery(searchInput.value.trim());
+    let filtered = commands.filter(c => c.cat !== 'quickgames');
+
+    if (activeCategory !== 'Wszystkie') {
+        filtered = filtered.filter(c => c.cat === activeCategory);
+    }
+
+    if (query) {
+        filtered = filtered.filter(c => {
+            return matchesQuery(normalizeText(c.cmd), query) ||
+                   matchesQuery(normalizeText(c.desc), query) ||
+                   matchesQuery(normalizeText(c.cat), query);
+        });
+    }
+
+    renderCommands(filtered);
+}
+
+function normalizeText(text) { return text.toLowerCase().replace(/_/g, ' '); }
+function normalizeQuery(q) { return q.toLowerCase().replace(/_/g, ' '); }
+function matchesQuery(text, query) { const terms = query.split(/\s+/).filter(Boolean); return terms.every(term => text.includes(term)); }
+
+function handleCopy(e) {
+    const btn = e.target;
+    const text = btn.getAttribute('data-copy');
+    if (!text) return;
+
+    navigator.clipboard.writeText(text).then(() => {
+        btn.textContent = 'Skopiowano!';
+        btn.classList.add('copied');
+        setTimeout(() => { btn.textContent = 'Kopiuj'; btn.classList.remove('copied'); }, 1500);
+    }).catch(() => {
+        const ta = document.createElement('textarea');
+        ta.value = text; ta.style.position = 'fixed'; ta.style.opacity = '0';
+        document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta);
+        btn.textContent = 'Skopiowano!'; btn.classList.add('copied');
+        setTimeout(() => { btn.textContent = 'Kopiuj'; btn.classList.remove('copied'); }, 1500);
+    });
+}
+
+function escapeHtml(str) { const d = document.createElement('div'); d.textContent = str; return d.innerHTML; }
+
+searchInput.addEventListener('input', filterCommands);
+
+renderQuickgames();
+renderFilters();
+filterCommands();
+</script>
+</body>
+</html>
