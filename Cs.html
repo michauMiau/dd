@@ -109,9 +109,9 @@ body {
 }
 
 .container {
-    max-width: 720px;
+    max-width: 960px;
     margin: 0 auto;
-    padding: 32px 20px;
+    padding: 32px 24px;
 }
 
 h1 {
@@ -211,20 +211,20 @@ h1 {
 .section-title .icon { color: var(--orange); }
 
 .quickgames-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-    gap: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
 }
 
 .quickgame-item {
-    padding: 10px 14px;
+    padding: 14px 18px;
     background: var(--card-bg);
     border: 1.5px solid var(--card-border);
-    border-radius: 10px;
+    border-radius: 12px;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    gap: 8px;
+    gap: 12px;
     transition: border-color 0.2s, transform 0.15s;
 }
 
@@ -242,7 +242,7 @@ h1 {
 }
 
 .quickgame-name {
-    font-size: 0.9rem;
+    font-size: 0.95rem;
     color: var(--text);
     white-space: nowrap;
     overflow: hidden;
@@ -252,10 +252,10 @@ h1 {
 .quickgame-cmd {
     display: block;
     font-family: 'Cascadia Code', 'Fira Code', 'Consolas', monospace;
-    font-size: 0.78rem;
+    font-size: 0.82rem;
     color: var(--orange);
     background: rgba(255, 140, 66, 0.08);
-    padding: 3px 8px;
+    padding: 4px 10px;
     border-radius: 6px;
     white-space: nowrap;
     overflow-x: auto;
@@ -474,8 +474,9 @@ function filterCommands() {
         });
     }
 
-    // Ukryj quickgames przy wyszukiwaniu
-    quickgamesSection.style.display = query ? 'none' : '';
+    // Ukryj quickgames przy wyszukiwaniu lub filtrze innej kategorii
+    const showQg = !query && (activeCategory === 'Wszystkie' || activeCategory === 'quickgames');
+    quickgamesSection.style.display = showQg ? '' : 'none';
 
     renderCommands(filtered);
 }
