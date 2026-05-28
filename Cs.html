@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CS2 — Komendy Konsoli</title>
+    <title>CS2 — Komendy</title>
 </head>
 <body>
 
@@ -33,7 +33,9 @@
     { "cmd": "god", "desc": "Tryb nieśmiertelności", "cat": "Cheats" },
     { "cmd": "noclip", "desc": "Lot przez ściany", "cat": "Cheats" },
     { "cmd": "weapon_accuracy_nospread true", "desc": "Bronie są zawsze celne", "cat": "Cheats" },
-    { "cmd": "sv_gravity 400", "desc": "Zmniejsza grawitację, domyślna wartość to 800", "cat": "Cheats" },
+    { "cmd": "sv_gravity 400", "desc": "Zmniejsza grawitację, domyślna wartość to 800", "cat": "Cheats" }
+    { "cmd": "r_aoproxy_show 1", "desc": "WallHack, działa tylko przy włączonym AO", "cat": "Cheats" },
+    { "cmd": "cl_ent_bbox *", "desc": "Wallhack 2, brzydszy ale powinien działać zawsze", "cat": "Cheats" }
     { "cmd": "mp_autokick false", "desc": "Wyłącza automatyczne wyrzucanie, banowanie graczy", "cat": "Multiplayer" },
     { "cmd": "mp_autoteambalance false", "desc": "Wyłącza Autobalans graczy", "cat": "Multiplayer" },
     { "cmd": "mp_anyone_can_pickup_c4 true", "desc": "Każdy może podnieść bombę (C4)", "cat": "Multiplayer" },
@@ -41,13 +43,13 @@
     { "cmd": "mp_pause_match", "desc": "Pausuje Mecz", "cat": "Multiplayer" },
     { "cmd": "mp_friendlyfire false", "desc": "Wyłącza Friendly Fire", "cat": "Multiplayer" },
     { "cmd": "mp_warmup_end", "desc": "Kończy rozgrzewkę wcześnie", "cat": "Multiplayer" },
-    
+     // ai dodaj więcej komend typu multiplayer np czas do wybuchu bomby, ilość osób w drużynie, ilość rund, zrób odrazu quickgame tryb więcej rund
     { "cmd": "sv_cheats 1; mp_damage_scale_ct_body 1000; mp_damage_scale_t_body 1000; mp_damage_scale_ct_head 1000; mp_damage_scale_t_head 1000; sv_cheats 0", "desc": "OHKO - Jeden strzał z broni, śmierć", "cat": "quickgames" },
-    { "cmd": "map de_mirage", "desc": "Ładuje mapę Mirage", "cat": "quickgames" },
-    { "cmd": "map de_inferno", "desc": "Ładuje mapę Inferno", "cat": "quickgames" },
-    { "cmd": "map de_nuke", "desc": "Ładuje mapę Nuke", "cat": "quickgames" },
-    { "cmd": "map de_anubis", "desc": "Ładuje mapę Anubis", "cat": "quickgames" },
-    { "cmd": "map de_overpass", "desc": "Ładuje mapę Overpass", "cat": "quickgames" },
+    { "cmd": "sv_cheats 1; sv_gravity 200 weapon_accuracy_nospread true; sv_cheats 0", "desc": "Latający skaut - bez SSG w zestawie", "cat": "quickgames" },
+    { "cmd": "sv_cheats 1; sv_enablebunnyhopping 1; sv_maxvelocity 7000; sv_staminamax 0; sv_staminalandcost 0; sv_staminajumpcost 0; sv_accelerate_use_weapon_speed 0; sv_staminarecoveryrate 0; sv_autobunnyhopping 1; sv_airaccelerate 2000; sv_cheats 0", "desc": "BHOP - Komendy na ekstrymalny bunnyhopping ", "cat": "quickgames" },
+    { "cmd": "sv_cheats 1; host_timescale 0.6; weapon_accuracy_nospread true; sv_cheats 0", "desc": "CS-Slow - Gra w wolnym tempie, w normalnym tempie wygłada jakbyś miał spinbot", "cat": "quickgames" }, //untestes may be brokern
+    { "cmd": "sv_cheats 1; host_timescale 2; sv_cheats 0", "desc": "KetamineCS - Wszystko jest szybsze od ciebie, jedyne co jest wolniejsze to twoje fps'y", "cat": "quickgames" }, //untestesd
+    { "cmd": "map de_overpass", "desc": "36 Rund - zwiększa ilość rund w grze", "cat": "quickgames" },
     { "cmd": "map de_ancient", "desc": "Ładuje mapę Ancient", "cat": "quickgames" },
     { "cmd": "map de_vertigo", "desc": "Ładuje mapę Vertigo", "cat": "quickgames" },
     { "cmd": "map de_train", "desc": "Ładuje mapę Train", "cat": "quickgames" }
@@ -56,7 +58,7 @@
 
 <div class="container">
     <h1>CS2 — Komendy Konsoli</h1>
-    <p class="subtitle">Wyszukaj, skopiuj i wklej do konsoli Dev Console</p>
+    <p class="subtitle">Wyszukaj, skopiuj i wklej do konsoli! :P </p>
 
     <!-- Wyszukiwarka -->
     <div class="search-wrapper">
