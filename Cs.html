@@ -31,10 +31,10 @@
     { "cmd": "net_graphproportionalfont 1", "desc": "Responsywna czcionka net grafu", "cat": "sieć" },
     { "cmd": "cl_interp_ratio 1", "desc": "Interpolacja klienta — stosunek do tickrate'u serwera", "cat": "sieć" },
     { "cmd": "cl_interp 0", "desc": "Interpolacja klienta — stała wartość (sekundy)", "cat": "sieć" },
-    { "cmd": "host_timescale 0.5", "desc": "Zwolnia czas gry do połowy (0.1–2)", "cat": "dev" },
-    { "cmd": "god", "desc": "Tryb nieśmiertelności (wymaga sv_cheats 1)", "cat": "dev" },
-    { "cmd": "noclip", "desc": "Lot przez ściany (wymaga sv_cheats 1)", "cat": "dev" },
-    { "cmd": "sv_glow_on_team S", "desc": "Podświetla graczy z danej drużyny (CT/T)", "cat": "dev" },
+    { "cmd": "host_timescale 0.5", "desc": "Zwolnia czas gry do połowy (0.1–2)", "cat": "Cheats" },
+    { "cmd": "god", "desc": "Tryb nieśmiertelności (wymaga sv_cheats 1)", "cat": "Cheats" },
+    { "cmd": "noclip", "desc": "Lot przez ściany (wymaga sv_cheats 1)", "cat": "Cheats" },
+    { "cmd": "sv_glow_on_team S", "desc": "Podświetla graczy z danej drużyny (CT/T)", "cat": "Cheats" },
 
     { "cmd": "map de_dust2", "desc": "Ładuje mapę Dust II", "cat": "quickgames" },
     { "cmd": "map de_mirage", "desc": "Ładuje mapę Mirage", "cat": "quickgames" },
@@ -228,6 +228,14 @@ h1 {
     transform: translateY(-1px);
 }
 
+.quickgame-info {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
 .quickgame-name {
     font-size: 0.9rem;
     color: var(--text);
@@ -235,6 +243,22 @@ h1 {
     overflow: hidden;
     text-overflow: ellipsis;
 }
+
+.quickgame-cmd {
+    display: block;
+    font-family: 'Cascadia Code', 'Fira Code', 'Consolas', monospace;
+    font-size: 0.78rem;
+    color: var(--orange);
+    background: rgba(255, 140, 66, 0.08);
+    padding: 3px 8px;
+    border-radius: 6px;
+    white-space: nowrap;
+    overflow-x: auto;
+    scrollbar-width: thin;
+}
+
+.quickgame-cmd::-webkit-scrollbar { height: 4px; }
+.quickgame-cmd::-webkit-scrollbar-thumb { background: var(--card-border); border-radius: 2px; }
 
 .commands-list {
     display: flex;
@@ -370,7 +394,10 @@ function renderQuickgames() {
         el.className = 'quickgame-item';
         el.style.animationDelay = `${i * 0.05}s`;
         el.innerHTML = `
-            <span class="quickgame-name">${escapeHtml(q.cmd)}</span>
+            <div class="quickgame-info">
+                <span class="quickgame-name">${escapeHtml(q.desc)}</span>
+                <code class="quickgame-cmd" title="${escapeHtml(q.cmd)}">${escapeHtml(q.cmd)}</code>
+            </div>
             <button class="copy-btn" data-copy="${escapeHtml(q.cmd)}">Kopiuj</button>
         `;
         quickgamesGrid.appendChild(el);
@@ -441,6 +468,9 @@ function filterCommands() {
                    matchesQuery(normalizeText(c.cat), query);
         });
     }
+
+    // Ukryj quickgames przy wyszukiwaniu
+    quickgamesSection.style.display = query ? 'none' : '';
 
     renderCommands(filtered);
 }
