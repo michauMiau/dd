@@ -467,9 +467,7 @@ function renderCommands(filtered, animate) {
         card.className = 'command-card';
         // Animuj tylko jeśli lista się zmieniła lub to pierwsze renderowanie
         if (animate) {
-            card.style.animationDelay = `${i * 0.04}s`;
-            card.style.animationName = 'fadeSlideUp';
-            card.style.animationFillMode = 'both';
+            card.style.animation = `fadeSlideUp 0.3s ease-out ${i * 0.04}s both`;
         }
         card.innerHTML = `
             <div class="cmd-info">
@@ -500,12 +498,12 @@ let lastFilteredIds = '';  // do wykrywania zmian — porównujemy ID komend zam
 function filterCommands(commands) {
     const query = normalizeQuery(searchInput.value.trim());
 
-    // Quickgames zawsze wykluczone z głównej listy (chyba że aktywna kategoria to "quickgames")
+    // Quickgames zawsze wykluczone z głównej listy — są tylko w sekcji na górze
     let filtered = commands.filter(c => c.cat !== 'quickgames');
 
     if (activeCategory === 'quickgames') {
-        // Jeśli użytkownik kliknął kategorię quickgames — pokaż je w głównej liście
-        filtered = commands.filter(c => c.cat === 'quickgames');
+        // Kliknięto kategorię quickgames — pokaż "Brak wyników", bo quickgames są tylko w sekcji na górze
+        filtered = [];
     } else if (activeCategory !== 'Wszystkie') {
         filtered = filtered.filter(c => c.cat === activeCategory);
     }
