@@ -26,8 +26,10 @@
 
         * { margin: 0; padding: 0; box-sizing: border-box; }
 
+        @import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&display=swap');
+
         body {
-            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            font-family: 'Rajdhani', system-ui, -apple-system, sans-serif;
             color: var(--text);
             min-height: 100vh;
             line-height: 1.6;
@@ -69,14 +71,17 @@
             padding: 32px 24px;
         }
 
+         /* --- Nagłówek z gradientem na każdej literze (JS) --- */
         h1 {
             text-align: center;
             font-size: 2rem;
             margin-bottom: 8px;
-            background: linear-gradient(135deg, var(--orange), var(--blue));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
+            line-height: 1.3;
+        }
+
+        .h1-letter {
+            display: inline-block;
+            transition: color 0.3s ease;
         }
 
         .subtitle {
@@ -289,11 +294,127 @@
             color: var(--success);
         }
 
-        .copy-btn.copied {
+         .copy-btn.copied {
             border-color: var(--success);
             background: rgba(63, 185, 80, 0.12);
             color: var(--success);
         }
+
+        /* --- Przyciski top (FAQ / Donate) --- */
+        .top-buttons {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            animation: fadeSlideDown 0.5s ease-out 0.1s both;
+        }
+
+        .top-btn {
+            padding: 8px 20px;
+            font-size: 0.9rem;
+            border: 1.5px solid var(--card-border);
+            border-radius: 8px;
+            background: transparent;
+            color: var(--text-muted);
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .top-btn:hover {
+            border-color: var(--orange);
+            color: var(--orange);
+        }
+
+        /* --- Modal --- */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-overlay.active { display: flex; }
+
+        .modal-box {
+            background: var(--card-bg);
+            border: 2px solid var(--card-border);
+            border-radius: 16px;
+            padding: 32px;
+            max-width: 500px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .modal-title {
+            font-size: 1.4rem;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 16px;
+            right: 16px;
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            font-size: 1.5rem;
+            cursor: pointer;
+            transition: color 0.2s;
+        }
+
+        .modal-close:hover { color: var(--text); }
+
+        .faq-item {
+            margin-bottom: 16px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid var(--card-border);
+        }
+
+        .faq-item:last-child { border-bottom: none; margin-bottom: 0; }
+
+        .faq-question {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--orange);
+            margin-bottom: 8px;
+        }
+
+        .faq-answer {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            line-height: 1.5;
+        }
+
+        .donate-methods {
+            display: flex;
+            gap: 12px;
+            margin-top: 16px;
+        }
+
+        .donate-method {
+            flex: 1;
+            padding: 14px;
+            border: 1.5px solid var(--card-border);
+            border-radius: 10px;
+            text-align: center;
+            color: var(--text-muted);
+            text-decoration: none;
+            transition: all 0.2s ease;
+        }
+
+        .donate-method:hover {
+            border-color: var(--orange);
+            color: var(--orange);
+        }
+
+        .donate-icon { font-size: 1.5rem; display: block; margin-bottom: 6px; }
 
         /* --- Brak wyników --- */
         .no-results {
@@ -340,8 +461,11 @@
 <body>
 
 <div class="container">
-    <h1>CS2 — Komendy do Konsoli</h1>
+    <h1 id="mainTitle"></h1>
     <p class="subtitle">Wyszukaj, skopiuj i wklej do konsoli! Bez reklam, szybkie</p>
+
+    <!-- Przyciski FAQ i Donate -->
+    <div class="top-buttons" id="topButtons"></div>
 
     <!-- Wyszukiwarka -->
     <div class="search-wrapper">
@@ -366,6 +490,46 @@
 
     <!-- Ładowanie -->
     <div class="loading" id="loading">Ładowanie komend... 🐾</div>
+
+    <!-- Modal FAQ -->
+    <div class="modal-overlay" id="faqModal">
+        <div class="modal-box">
+            <button class="modal-close" onclick="closeFaq()">&times;</button>
+            <h2 class="modal-title"><span style="color: var(--orange);">❓</span> FAQ — Najczęściej zadawane pytania</h2>
+            <div id="faqContent"></div>
+        </div>
+    </div>
+
+    <!-- Modal Donate -->
+    <div class="modal-overlay" id="donateModal">
+        <div class="modal-box">
+            <button class="modal-close" onclick="closeDonate()">&times;</button>
+            <h2 class="modal-title"><span style="color: var(--orange);">💛</span> <span id="donateTitle"></span></h2>
+            <p class="faq-answer" id="donateDesc"></p>
+            <div class="donate-methods" id="donateMethods"></div>
+        </div>
+    </div>
+
+    <!-- Modal Close Overlay -->
+    <script>
+        function closeFaq() { document.getElementById('faqModal').classList.remove('active'); }
+        function closeDonate() { document.getElementById('donateModal').classList.remove('active'); }
+        
+        // Zamknij modal po kliknięciu w tło
+        document.addEventListener('click', (e) => {
+            if (e.target.classList.contains('modal-overlay')) {
+                e.target.classList.remove('active');
+            }
+        });
+
+        // Escape key zamknięcie
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                closeFaq();
+                closeDonate();
+            }
+        });
+    </script>
 </div>
 
 
@@ -454,35 +618,76 @@ function renderFilters(commands) {
 
 
 function renderCommands(filtered, animate) {
-    commandsList.innerHTML = '';
+  commandsList.innerHTML = '';
 
-    if (filtered.length === 0) {
-        noResults.classList.add('visible');
-        return;
-    }
-    noResults.classList.remove('visible');
+  if (filtered.length === 0) {
+      noResults.classList.add('visible');
+      return;
+  }
+  noResults.classList.remove('visible');
 
-    filtered.forEach((c, i) => {
-        const card = document.createElement('div');
-        card.className = 'command-card';
-        // Animuj tylko jeśli lista się zmieniła lub to pierwsze renderowanie
-        if (animate) {
-            card.style.animation = `fadeSlideUp 0.3s ease-out ${i * 0.04}s both`;
-        }
-        card.innerHTML = `
-            <div class="cmd-info">
-                <div class="cmd-text">${escapeHtml(c.cmd)}</div>
-                <div class="cmd-desc">${escapeHtml(c.desc)}</div>
-                <span class="cmd-category">${escapeHtml(c.cat)}</span>
-            </div>
-            <button class="copy-btn" data-copy="${escapeHtml(c.cmd)}">Kopiuj</button>
-        `;
-        commandsList.appendChild(card);
-    });
+  // Grupuj komendy po kategoriach
+  const grouped = {};
+  filtered.forEach(c => {
+      if (!grouped[c.cat]) grouped[c.cat] = [];
+      grouped[c.cat].push(c);
+  });
 
-    document.querySelectorAll('.copy-btn').forEach(btn => {
-        btn.addEventListener('click', handleCopy);
-    });
+  // Ikony kategorii
+  const catIcons = {
+      'Ogólne': '&#128203;',
+      'Rozgrywka': '&#9975;',
+      'Cheats': '&#128640;',
+      'Grafika': '&#127912;',
+      'Audio': '&#127908;',
+      'Sieć': '&#128268;',
+      'Multiplayer': '&#128101;',
+      'Demo': '&#128394;',
+  };
+
+  const catOrder = ['Ogólne', 'Rozgrywka', 'Cheats', 'Grafika', 'Audio', 'Sieć', 'Multiplayer', 'Demo'];
+
+  // Sortuj kategorie — najpierw te z order, potem reszta alfabetycznie
+  const sortedCats = Object.keys(grouped).sort((a, b) => {
+      const aIdx = catOrder.indexOf(a);
+      const bIdx = catOrder.indexOf(b);
+      if (aIdx !== -1 && bIdx !== -1) return aIdx - bIdx;
+      if (aIdx !== -1) return -1;
+      if (bIdx !== -1) return 1;
+      return a.localeCompare(b);
+  });
+
+  sortedCats.forEach(cat => {
+      const catCommands = grouped[cat];
+        
+      // Nagłówek sekcji
+      const sectionTitle = document.createElement('div');
+      sectionTitle.className = 'section-title';
+      const icon = catIcons[cat] || '&#9881;';
+      sectionTitle.innerHTML = `<span class="icon">${icon}</span> ${escapeHtml(cat)}`;
+      commandsList.appendChild(sectionTitle);
+
+      // Komendy w sekcji
+      catCommands.forEach((c, i) => {
+          const card = document.createElement('div');
+          card.className = 'command-card';
+          if (animate) {
+              card.style.animation = `fadeSlideUp 0.3s ease-out ${(i + sortedCats.indexOf(cat) * 2) * 0.04}s both`;
+          }
+          card.innerHTML = `
+              <div class="cmd-info">
+                  <div class="cmd-text">${escapeHtml(c.cmd)}</div>
+                  <div class="cmd-desc">${escapeHtml(c.desc)}</div>
+              </div>
+              <button class="copy-btn" data-copy="${escapeHtml(c.cmd)}">Kopiuj</button>
+          `;
+          commandsList.appendChild(card);
+      });
+  });
+
+  document.querySelectorAll('.copy-btn').forEach(btn => {
+      btn.addEventListener('click', handleCopy);
+  });
 }
 
 
@@ -556,6 +761,133 @@ function escapeHtml(str) { const d = document.createElement('div'); d.textConten
 
 // --- MODUŁ 5: Inicjalizacja ---
 
+// Gradient na każdej literze h1
+const H1_TEXT = 'CS2 — Komendy do Konsoli';
+const GRADIENT_COLORS = [
+    '#ff8c42', // jasny pomarańcz
+    '#e07a35',
+    '#d46f2a',
+    '#c96320',
+    '#be5816',
+    '#b34c0c',
+    '#a84002',
+    '#9d3400',
+    '#922800',
+    '#871c00',
+    '#7c1000',
+    '#710400',
+    '#660000',
+    '#5a0000',
+    '#4e0000',
+    '#420000',
+    '#360000',
+    '#2a0000',
+    '#1e0000',
+    '#120000',
+    '#060000',
+    '#000000',
+    '#000814',
+    '#001028',
+    '#00183c',
+    '#002050',
+    '#002864',
+    '#003078',
+    '#00388c',
+    '#0040a0',
+    '#0048b4',
+    '#0050c8',
+    '#0058dc',
+    '#0060f0',
+    '#1a72ff', // ciemny niebieski
+];
+
+function gradientColor(index, total) {
+    const ratio = index / Math.max(total - 1, 1);
+    const colorIndex = Math.min(Math.floor(ratio * (GRADIENT_COLORS.length - 1)), GRADIENT_COLORS.length - 1);
+    return GRADIENT_COLORS[colorIndex];
+}
+
+function renderH1() {
+    const h1El = document.getElementById('mainTitle');
+    if (!h1El) return;
+    
+    // Usuń wszystkie znaki specjalne i spacje z gradientu
+    let charIndex = 0;
+    for (const ch of H1_TEXT) {
+        if (ch === ' ') {
+            h1El.innerHTML += '&nbsp;';
+        } else {
+            const span = document.createElement('span');
+            span.className = 'h1-letter';
+            span.textContent = ch;
+            span.style.color = gradientColor(charIndex, H1_TEXT.replace(/ /g, '').length);
+            h1El.appendChild(span);
+            charIndex++;
+        }
+    }
+}
+
+// Renderuj przyciski FAQ/Donate
+function renderTopButtons() {
+    const container = document.getElementById('topButtons');
+    if (!container) return;
+    
+    container.innerHTML = `
+        <button class="top-btn" onclick="openFaq()">❓ FAQ</button>
+        <button class="top-btn" onclick="openDonate()">💛 Donate</button>
+    `;
+}
+
+  // Renderuj FAQ z pliku JSON
+async function loadAndRenderFaq() {
+try {
+    const res = await fetch('cs/faq_pl.json');
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const faqData = await res.json();
+        
+    const contentEl = document.getElementById('faqContent');
+    if (contentEl && faqData.length > 0) {
+        contentEl.innerHTML = faqData.map(item => `
+            <div class="faq-item">
+                <h3>${escapeHtml(item.q)}</h3>
+                <p>${escapeHtml(item.a)}</p>
+            </div>
+        `).join('');
+    }
+} catch (err) {
+    console.error('Nie udało się załadować FAQ:', err);
+}
+}
+
+// Renderuj Donate z pliku JSON
+async function loadAndRenderDonate() {
+try {
+    const res = await fetch('cs/donate_pl.json');
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const donateData = await res.json();
+        
+    const titleEl = document.getElementById('donateTitle');
+    const descEl = document.getElementById('donateDesc');
+    const methodsEl = document.getElementById('donateMethods');
+        
+    if (titleEl) titleEl.textContent = donateData.title || 'Wspieraj projekt';
+    if (descEl) descEl.innerHTML = donateData.description || '';
+    if (methodsEl && donateData.methods) {
+        methodsEl.innerHTML = donateData.methods.map(m => `
+            <a href="${m.url}" class="donate-method" target="_blank">
+                <span class="donate-icon">${m.icon}</span>
+                ${escapeHtml(m.name)}
+            </a>
+        `).join('');
+    }
+} catch (err) {
+    console.error('Nie udało się załadować Donate:', err);
+}
+}
+
+function openFaq() { document.getElementById('faqModal').classList.add('active'); }
+function openDonate() { document.getElementById('donateModal').classList.add('active'); }
+
 searchInput.addEventListener('input', () => filterCommands(commands));
 
 let commands = [];
@@ -567,6 +899,12 @@ loadCommands().then(data => {
     renderFilters(commands);
     filterCommands(commands);
 });
+
+// Inicjalizacja — gradient h1, przyciski, FAQ, Donate
+renderH1();
+renderTopButtons();
+loadAndRenderFaq();
+loadAndRenderDonate();
 
 </script>
 </body>

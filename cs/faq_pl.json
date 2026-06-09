@@ -1,0 +1,22 @@
+[
+    {
+        "q": "Dlaczego komenda jest ucięta i nie widzę jej w całości?",
+        "a": "Komendy są wyświetlane z przewijaniem poziomym — wystarczy przesunąć palcem (na mobile) lub kółkiem myszy, aby zobaczyć całą treść. Na desktopie możesz też najechać kursorem na komendę i pokaże się pełny tekst jako tooltip."
+    },
+    {
+        "q": "Czy mogę zasugerować nową komendę?",
+        "a": "Tak! Możesz otworzyć issue na GitHubie z linkiem do repozytorium — po prostu opisz komendę, którą chciałbyś zobaczyć. Link znajdziesz w stopce strony."
+    },
+    {
+        "q": "Czy te komendy działają na serwerach?",
+        "a": "Niektóre tak (np. mp_*), ale wiele wymaga sv_cheats 1 i działa tylko na lokalnych serwerach z włączonymi cheatami."
+    },
+    {
+        "q": "Co to jest 'quickgames'?",
+        "a": "Quickgames to gotowe zestawy komend — jedna linijka, która uruchamia kilka poleceń naraz. Idealne na szybkie zabawy z kumplami bez ręcznego wpisywania każdej komendy."
+    },
+    {
+        "q": "Jak mogę pomóc w rozwoju projektu?",
+        "a": "Możesz dodać brakujące komendy, poprawić opisy lub zgłosić błędy — wszystko na GitHubie. Link do repozytorium znajdziesz pod spodem."
+    }
+]
