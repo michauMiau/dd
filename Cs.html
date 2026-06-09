@@ -5,6 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="icon" type="image/x-icon" href="cs/favicon.jpg">
     <title>CS2 — Komendy</title>
+    <!-- Rajdhani — energetyczna czcionka w stylu CS2 -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         /* ============================================
            CSS — Stylesheet (modularny)
@@ -12,7 +16,7 @@
 
         :root {
             --orange: #ff8c42;
-            --orange-dark: #e06f25;
+            --orange-light: #ffb366;
             --blue: #3a86ff;
             --blue-dark: #2563eb;
             --bg: #0d1117;
@@ -25,8 +29,6 @@
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; }
-
-        @import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&display=swap');
 
         body {
             font-family: 'Rajdhani', system-ui, -apple-system, sans-serif;
@@ -71,17 +73,29 @@
             padding: 32px 24px;
         }
 
-         /* --- Nagłówek z gradientem na każdej literze (JS) --- */
+        /* --- Nagłówek z gradientem na każdą literę --- */
         h1 {
             text-align: center;
-            font-size: 2rem;
+            font-size: 2.5rem;
+            font-weight: 700;
             margin-bottom: 8px;
-            line-height: 1.3;
+            letter-spacing: 2px;
+            line-height: 1.2;
         }
 
-        .h1-letter {
+        .gradient-letter {
             display: inline-block;
-            transition: color 0.3s ease;
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        /* Spacja — bez gradientu */
+        .gradient-letter.space {
+            -webkit-text-fill-color: var(--text);
+            background-clip: unset;
+            -webkit-background-clip: unset;
         }
 
         .subtitle {
@@ -89,6 +103,176 @@
             color: var(--text-muted);
             font-size: 0.9rem;
             margin-bottom: 28px;
+        }
+
+        /* --- Górny pasek z przyciskami FAQ i Donate --- */
+        .top-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+            animation: fadeSlideDown 0.5s ease-out;
+        }
+
+        .top-btn {
+            padding: 8px 20px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            border: 1.5px solid var(--card-border);
+            border-radius: 8px;
+            background: transparent;
+            color: var(--text-muted);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-family: inherit;
+        }
+
+        .top-btn:hover {
+            border-color: var(--orange);
+            color: var(--orange);
+        }
+
+        /* --- Modal --- */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            z-index: 1000;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(4px);
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal-box {
+            background: var(--card-bg);
+            border: 1.5px solid var(--card-border);
+            border-radius: 16px;
+            padding: 28px 32px;
+            max-width: 540px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+            animation: modalIn 0.3s ease-out;
+        }
+
+        @keyframes modalIn {
+            from { opacity: 0; transform: scale(0.95) translateY(10px); }
+            to   { opacity: 1; transform: scale(1) translateY(0); }
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .modal-title {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: var(--text);
+        }
+
+        .modal-close {
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            font-size: 1.5rem;
+            cursor: pointer;
+            transition: color 0.2s;
+            line-height: 1;
+        }
+
+        .modal-close:hover {
+            color: var(--text);
+        }
+
+        /* FAQ items */
+        .faq-item {
+            margin-bottom: 16px;
+            border-bottom: 1px solid var(--card-border);
+            padding-bottom: 16px;
+        }
+
+        .faq-item:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
+
+        .faq-question {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--orange);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: color 0.2s;
+        }
+
+        .faq-question:hover {
+            color: var(--orange-light);
+        }
+
+        .faq-arrow {
+            font-size: 0.7rem;
+            transition: transform 0.3s ease;
+        }
+
+        .faq-item.open .faq-arrow {
+            transform: rotate(90deg);
+        }
+
+        .faq-answer {
+            display: none;
+            padding-top: 8px;
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            line-height: 1.5;
+        }
+
+        .faq-item.open .faq-answer {
+            display: block;
+            animation: fadeSlideUp 0.2s ease-out;
+        }
+
+        /* Donate items */
+        .donate-methods {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .donate-item {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 14px 18px;
+            border: 1.5px solid var(--card-border);
+            border-radius: 12px;
+            text-decoration: none;
+            color: var(--text);
+            transition: all 0.2s ease;
+        }
+
+        .donate-item:hover {
+            border-color: var(--orange);
+            transform: translateY(-1px);
+        }
+
+        .donate-icon {
+            font-size: 1.5rem;
+        }
+
+        .donate-name {
+            font-weight: 600;
+            font-size: 1rem;
         }
 
         /* --- Wyszukiwarka --- */
@@ -108,6 +292,7 @@
             color: var(--text);
             outline: none;
             transition: border-color 0.3s, box-shadow 0.3s;
+            font-family: inherit;
         }
 
         .search-input:focus {
@@ -143,6 +328,7 @@
             color: var(--text-muted);
             cursor: pointer;
             transition: all 0.25s ease;
+            font-family: inherit;
         }
 
         .filter-btn:hover {
@@ -287,6 +473,7 @@
             cursor: pointer;
             transition: all 0.2s ease;
             white-space: nowrap;
+            font-family: inherit;
         }
 
         .copy-btn:hover {
@@ -294,127 +481,11 @@
             color: var(--success);
         }
 
-         .copy-btn.copied {
+        .copy-btn.copied {
             border-color: var(--success);
             background: rgba(63, 185, 80, 0.12);
             color: var(--success);
         }
-
-        /* --- Przyciski top (FAQ / Donate) --- */
-        .top-buttons {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-            animation: fadeSlideDown 0.5s ease-out 0.1s both;
-        }
-
-        .top-btn {
-            padding: 8px 20px;
-            font-size: 0.9rem;
-            border: 1.5px solid var(--card-border);
-            border-radius: 8px;
-            background: transparent;
-            color: var(--text-muted);
-            cursor: pointer;
-            transition: all 0.2s ease;
-        }
-
-        .top-btn:hover {
-            border-color: var(--orange);
-            color: var(--orange);
-        }
-
-        /* --- Modal --- */
-        .modal-overlay {
-            display: none;
-            position: fixed;
-            inset: 0;
-            background: rgba(0, 0, 0, 0.7);
-            z-index: 1000;
-            justify-content: center;
-            align-items: center;
-        }
-
-        .modal-overlay.active { display: flex; }
-
-        .modal-box {
-            background: var(--card-bg);
-            border: 2px solid var(--card-border);
-            border-radius: 16px;
-            padding: 32px;
-            max-width: 500px;
-            width: 90%;
-            max-height: 80vh;
-            overflow-y: auto;
-        }
-
-        .modal-title {
-            font-size: 1.4rem;
-            margin-bottom: 20px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .modal-close {
-            position: absolute;
-            top: 16px;
-            right: 16px;
-            background: transparent;
-            border: none;
-            color: var(--text-muted);
-            font-size: 1.5rem;
-            cursor: pointer;
-            transition: color 0.2s;
-        }
-
-        .modal-close:hover { color: var(--text); }
-
-        .faq-item {
-            margin-bottom: 16px;
-            padding-bottom: 16px;
-            border-bottom: 1px solid var(--card-border);
-        }
-
-        .faq-item:last-child { border-bottom: none; margin-bottom: 0; }
-
-        .faq-question {
-            font-size: 1rem;
-            font-weight: 600;
-            color: var(--orange);
-            margin-bottom: 8px;
-        }
-
-        .faq-answer {
-            font-size: 0.9rem;
-            color: var(--text-muted);
-            line-height: 1.5;
-        }
-
-        .donate-methods {
-            display: flex;
-            gap: 12px;
-            margin-top: 16px;
-        }
-
-        .donate-method {
-            flex: 1;
-            padding: 14px;
-            border: 1.5px solid var(--card-border);
-            border-radius: 10px;
-            text-align: center;
-            color: var(--text-muted);
-            text-decoration: none;
-            transition: all 0.2s ease;
-        }
-
-        .donate-method:hover {
-            border-color: var(--orange);
-            color: var(--orange);
-        }
-
-        .donate-icon { font-size: 1.5rem; display: block; margin-bottom: 6px; }
 
         /* --- Brak wyników --- */
         .no-results {
@@ -450,8 +521,28 @@
             font-size: 1.1rem;
         }
 
+        /* --- Stopka z GitHub --- */
+        .footer {
+            margin-top: 48px;
+            text-align: center;
+            padding: 20px;
+            border-top: 1px solid var(--card-border);
+            color: var(--text-muted);
+            font-size: 0.85rem;
+        }
+
+        .footer a {
+            color: var(--orange);
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+
+        .footer a:hover {
+            color: var(--orange-light);
+        }
+
         @media (max-width: 500px) {
-            h1 { font-size: 1.5rem; }
+            h1 { font-size: 1.8rem; }
             .container { padding: 20px 14px; }
             .quickgames-grid { grid-template-columns: 1fr; }
             .command-card { flex-wrap: wrap; }
@@ -461,11 +552,15 @@
 <body>
 
 <div class="container">
-    <h1 id="mainTitle"></h1>
-    <p class="subtitle">Wyszukaj, skopiuj i wklej do konsoli! Bez reklam, szybkie</p>
+    <!-- Nagłówek z gradientem na każdą literę -->
+    <h1 id="title"></h1>
+    <p class="subtitle">Wyszukaj, skopiuj i wklej do konsoli! Bez reklam, No BS (nieukończone)</p>
 
-    <!-- Przyciski FAQ i Donate -->
-    <div class="top-buttons" id="topButtons"></div>
+    <!-- Górny pasek z przyciskami FAQ i Donate -->
+    <div class="top-bar">
+        <button class="top-btn" id="faqBtn">FAQ</button>
+        <button class="top-btn" id="donateBtn">Donate</button>
+    </div>
 
     <!-- Wyszukiwarka -->
     <div class="search-wrapper">
@@ -491,45 +586,33 @@
     <!-- Ładowanie -->
     <div class="loading" id="loading">Ładowanie komend... 🐾</div>
 
-    <!-- Modal FAQ -->
-    <div class="modal-overlay" id="faqModal">
-        <div class="modal-box">
-            <button class="modal-close" onclick="closeFaq()">&times;</button>
-            <h2 class="modal-title"><span style="color: var(--orange);">❓</span> FAQ — Najczęściej zadawane pytania</h2>
-            <div id="faqContent"></div>
-        </div>
+    <!-- Stopka z GitHub -->
+    <div class="footer">
+        Projekt na <a href="https://github.com/michauMiau/dd" target="_blank">GitHubie</a> — zgłoś brakującą komendę lub błąd!
     </div>
+</div>
 
-    <!-- Modal Donate -->
-    <div class="modal-overlay" id="donateModal">
-        <div class="modal-box">
-            <button class="modal-close" onclick="closeDonate()">&times;</button>
-            <h2 class="modal-title"><span style="color: var(--orange);">💛</span> <span id="donateTitle"></span></h2>
-            <p class="faq-answer" id="donateDesc"></p>
-            <div class="donate-methods" id="donateMethods"></div>
+<!-- Modal FAQ -->
+<div class="modal-overlay" id="faqModal">
+    <div class="modal-box">
+        <div class="modal-header">
+            <span class="modal-title">FAQ — Pytania i odpowiedzi</span>
+            <button class="modal-close" id="faqClose">&times;</button>
         </div>
+        <div id="faqContent"></div>
     </div>
+</div>
 
-    <!-- Modal Close Overlay -->
-    <script>
-        function closeFaq() { document.getElementById('faqModal').classList.remove('active'); }
-        function closeDonate() { document.getElementById('donateModal').classList.remove('active'); }
-        
-        // Zamknij modal po kliknięciu w tło
-        document.addEventListener('click', (e) => {
-            if (e.target.classList.contains('modal-overlay')) {
-                e.target.classList.remove('active');
-            }
-        });
-
-        // Escape key zamknięcie
-        document.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape') {
-                closeFaq();
-                closeDonate();
-            }
-        });
-    </script>
+<!-- Modal Donate -->
+<div class="modal-overlay" id="donateModal">
+    <div class="modal-box">
+        <div class="modal-header">
+            <span class="modal-title">Wspieraj projekt</span>
+            <button class="modal-close" id="donateClose">&times;</button>
+        </div>
+        <p style="color: var(--text-muted); margin-bottom: 20px; font-size: 0.9rem;" id="donateDesc"></p>
+        <div class="donate-methods" id="donateMethods"></div>
+    </div>
 </div>
 
 
@@ -538,21 +621,45 @@
      ============================================ -->
 <script type="module">
 
-// --- MODUŁ 1: Ładowanie danych z pliku JSON ---
-const DATA_URL = 'cs/con_pl.json';
+// --- MODUŁ 0: Gradient na każdą literę w nagłówku ---
 
-async function loadCommands() {
+const TITLE_TEXT = 'CS2 — Komendy Konsoli';
+const GRADIENT_COLORS = ['#ffb366', '#ff8c42', '#e07030', '#d05a30', '#b04a35', '#904040', '#704050', '#504060', '#3a4070', '#2a4080', '#1a4090', '#1040a0'];
+
+function buildGradientTitle() {
+    const titleEl = document.getElementById('title');
+    let html = '';
+    for (let i = 0; i < TITLE_TEXT.length; i++) {
+        const char = TITLE_TEXT[i];
+        if (char === ' ') {
+            // Spacja — bez gradientu, zwykły biały kolor
+            html += '<span class="gradient-letter space">&nbsp;</span>';
+        } else {
+            // Gradient na każdą literę
+            const colorIndex = Math.floor((i / TITLE_TEXT.length) * (GRADIENT_COLORS.length - 1));
+            const color = GRADIENT_COLORS[colorIndex];
+            html += `<span class="gradient-letter" style="background: linear-gradient(135deg, ${color}, ${color});">${char}</span>`;
+        }
+    }
+    titleEl.innerHTML = html;
+}
+
+// --- MODUŁ 1: Ładowanie danych z plików JSON ---
+
+const DATA_URL = 'cs/con_pl.json';
+const FAQ_URL = 'cs/faq_pl.json';
+const DONATE_URL = 'cs/donate_pl.json';
+
+async function loadJSON(url) {
     try {
-        const res = await fetch(DATA_URL);
+        const res = await fetch(url);
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         return await res.json();
     } catch (err) {
-        console.error('Nie udało się załadować komend:', err);
-        document.getElementById('loading').textContent = 'Błąd ładowania danych 😿';
-        return [];
+        console.error(`Nie udało się załadować ${url}:`, err);
+        return null;
     }
 }
-
 
 // --- MODUŁ 2: Renderowanie (UI) ---
 
@@ -563,6 +670,13 @@ const quickgamesGrid= document.getElementById('quickgamesGrid');
 const quickgamesSection = document.getElementById('quickgamesSection');
 const noResults     = document.getElementById('noResults');
 const loadingEl     = document.getElementById('loading');
+
+// Modal elements
+const faqModal      = document.getElementById('faqModal');
+const donateModal   = document.getElementById('donateModal');
+const faqContent    = document.getElementById('faqContent');
+const donateDesc    = document.getElementById('donateDesc');
+const donateMethods = document.getElementById('donateMethods');
 
 let activeCategory = 'Wszystkie';
 
@@ -618,76 +732,35 @@ function renderFilters(commands) {
 
 
 function renderCommands(filtered, animate) {
-  commandsList.innerHTML = '';
+    commandsList.innerHTML = '';
 
-  if (filtered.length === 0) {
-      noResults.classList.add('visible');
-      return;
-  }
-  noResults.classList.remove('visible');
+    if (filtered.length === 0) {
+        noResults.classList.add('visible');
+        return;
+    }
+    noResults.classList.remove('visible');
 
-  // Grupuj komendy po kategoriach
-  const grouped = {};
-  filtered.forEach(c => {
-      if (!grouped[c.cat]) grouped[c.cat] = [];
-      grouped[c.cat].push(c);
-  });
+    filtered.forEach((c, i) => {
+        const card = document.createElement('div');
+        card.className = 'command-card';
+        // Animuj tylko jeśli lista się zmieniła lub to pierwsze renderowanie
+        if (animate) {
+            card.style.animation = `fadeSlideUp 0.3s ease-out ${i * 0.04}s both`;
+        }
+        card.innerHTML = `
+            <div class="cmd-info">
+                <div class="cmd-text">${escapeHtml(c.cmd)}</div>
+                <div class="cmd-desc">${escapeHtml(c.desc)}</div>
+                <span class="cmd-category">${escapeHtml(c.cat)}</span>
+            </div>
+            <button class="copy-btn" data-copy="${escapeHtml(c.cmd)}">Kopiuj</button>
+        `;
+        commandsList.appendChild(card);
+    });
 
-  // Ikony kategorii
-  const catIcons = {
-      'Ogólne': '&#128203;',
-      'Rozgrywka': '&#9975;',
-      'Cheats': '&#128640;',
-      'Grafika': '&#127912;',
-      'Audio': '&#127908;',
-      'Sieć': '&#128268;',
-      'Multiplayer': '&#128101;',
-      'Demo': '&#128394;',
-  };
-
-  const catOrder = ['Ogólne', 'Rozgrywka', 'Cheats', 'Grafika', 'Audio', 'Sieć', 'Multiplayer', 'Demo'];
-
-  // Sortuj kategorie — najpierw te z order, potem reszta alfabetycznie
-  const sortedCats = Object.keys(grouped).sort((a, b) => {
-      const aIdx = catOrder.indexOf(a);
-      const bIdx = catOrder.indexOf(b);
-      if (aIdx !== -1 && bIdx !== -1) return aIdx - bIdx;
-      if (aIdx !== -1) return -1;
-      if (bIdx !== -1) return 1;
-      return a.localeCompare(b);
-  });
-
-  sortedCats.forEach(cat => {
-      const catCommands = grouped[cat];
-        
-      // Nagłówek sekcji
-      const sectionTitle = document.createElement('div');
-      sectionTitle.className = 'section-title';
-      const icon = catIcons[cat] || '&#9881;';
-      sectionTitle.innerHTML = `<span class="icon">${icon}</span> ${escapeHtml(cat)}`;
-      commandsList.appendChild(sectionTitle);
-
-      // Komendy w sekcji
-      catCommands.forEach((c, i) => {
-          const card = document.createElement('div');
-          card.className = 'command-card';
-          if (animate) {
-              card.style.animation = `fadeSlideUp 0.3s ease-out ${(i + sortedCats.indexOf(cat) * 2) * 0.04}s both`;
-          }
-          card.innerHTML = `
-              <div class="cmd-info">
-                  <div class="cmd-text">${escapeHtml(c.cmd)}</div>
-                  <div class="cmd-desc">${escapeHtml(c.desc)}</div>
-              </div>
-              <button class="copy-btn" data-copy="${escapeHtml(c.cmd)}">Kopiuj</button>
-          `;
-          commandsList.appendChild(card);
-      });
-  });
-
-  document.querySelectorAll('.copy-btn').forEach(btn => {
-      btn.addEventListener('click', handleCopy);
-  });
+    document.querySelectorAll('.copy-btn').forEach(btn => {
+        btn.addEventListener('click', handleCopy);
+    });
 }
 
 
@@ -758,139 +831,110 @@ function handleCopy(e) {
 
 function escapeHtml(str) { const d = document.createElement('div'); d.textContent = str; return d.innerHTML; }
 
+// --- MODUŁ 5: Modal FAQ ---
 
-// --- MODUŁ 5: Inicjalizacja ---
-
-// Gradient na każdej literze h1
-const H1_TEXT = 'CS2 — Komendy do Konsoli';
-const GRADIENT_COLORS = [
-    '#ff8c42', // jasny pomarańcz
-    '#e07a35',
-    '#d46f2a',
-    '#c96320',
-    '#be5816',
-    '#b34c0c',
-    '#a84002',
-    '#9d3400',
-    '#922800',
-    '#871c00',
-    '#7c1000',
-    '#710400',
-    '#660000',
-    '#5a0000',
-    '#4e0000',
-    '#420000',
-    '#360000',
-    '#2a0000',
-    '#1e0000',
-    '#120000',
-    '#060000',
-    '#000000',
-    '#000814',
-    '#001028',
-    '#00183c',
-    '#002050',
-    '#002864',
-    '#003078',
-    '#00388c',
-    '#0040a0',
-    '#0048b4',
-    '#0050c8',
-    '#0058dc',
-    '#0060f0',
-    '#1a72ff', // ciemny niebieski
-];
-
-function gradientColor(index, total) {
-    const ratio = index / Math.max(total - 1, 1);
-    const colorIndex = Math.min(Math.floor(ratio * (GRADIENT_COLORS.length - 1)), GRADIENT_COLORS.length - 1);
-    return GRADIENT_COLORS[colorIndex];
-}
-
-function renderH1() {
-    const h1El = document.getElementById('mainTitle');
-    if (!h1El) return;
-    
-    // Usuń wszystkie znaki specjalne i spacje z gradientu
-    let charIndex = 0;
-    for (const ch of H1_TEXT) {
-        if (ch === ' ') {
-            h1El.innerHTML += '&nbsp;';
-        } else {
-            const span = document.createElement('span');
-            span.className = 'h1-letter';
-            span.textContent = ch;
-            span.style.color = gradientColor(charIndex, H1_TEXT.replace(/ /g, '').length);
-            h1El.appendChild(span);
-            charIndex++;
-        }
+async function loadFaq() {
+    const faqData = await loadJSON(FAQ_URL);
+    if (!faqData || faqData.length === 0) {
+        faqContent.innerHTML = '<p style="color: var(--text-muted);">Brak danych FAQ 😿</p>';
+        return;
     }
-}
 
-// Renderuj przyciski FAQ/Donate
-function renderTopButtons() {
-    const container = document.getElementById('topButtons');
-    if (!container) return;
-    
-    container.innerHTML = `
-        <button class="top-btn" onclick="openFaq()">❓ FAQ</button>
-        <button class="top-btn" onclick="openDonate()">💛 Donate</button>
-    `;
-}
-
-  // Renderuj FAQ z pliku JSON
-async function loadAndRenderFaq() {
-try {
-    const res = await fetch('cs/faq_pl.json');
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    const faqData = await res.json();
-        
-    const contentEl = document.getElementById('faqContent');
-    if (contentEl && faqData.length > 0) {
-        contentEl.innerHTML = faqData.map(item => `
-            <div class="faq-item">
-                <h3>${escapeHtml(item.q)}</h3>
-                <p>${escapeHtml(item.a)}</p>
+    faqContent.innerHTML = '';
+    faqData.forEach((item, i) => {
+        const el = document.createElement('div');
+        el.className = 'faq-item';
+        el.innerHTML = `
+            <div class="faq-question">
+                <span class="faq-arrow">▶</span>
+                ${escapeHtml(item.q)}
             </div>
-        `).join('');
-    }
-} catch (err) {
-    console.error('Nie udało się załadować FAQ:', err);
-}
+            <div class="faq-answer">${escapeHtml(item.a)}</div>
+        `;
+
+        // Kliknięcie na pytanie — rozwijanie/zwijanie
+        el.querySelector('.faq-question').addEventListener('click', () => {
+            el.classList.toggle('open');
+        });
+
+        faqContent.appendChild(el);
+    });
 }
 
-// Renderuj Donate z pliku JSON
-async function loadAndRenderDonate() {
-try {
-    const res = await fetch('cs/donate_pl.json');
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    const donateData = await res.json();
-        
-    const titleEl = document.getElementById('donateTitle');
-    const descEl = document.getElementById('donateDesc');
-    const methodsEl = document.getElementById('donateMethods');
-        
-    if (titleEl) titleEl.textContent = donateData.title || 'Wspieraj projekt';
-    if (descEl) descEl.innerHTML = donateData.description || '';
-    if (methodsEl && donateData.methods) {
-        methodsEl.innerHTML = donateData.methods.map(m => `
-            <a href="${m.url}" class="donate-method" target="_blank">
-                <span class="donate-icon">${m.icon}</span>
-                ${escapeHtml(m.name)}
-            </a>
-        `).join('');
+
+// --- MODUŁ 6: Modal Donate ---
+
+async function loadDonate() {
+    const donateData = await loadJSON(DONATE_URL);
+    if (!donateData) return;
+
+    if (donateData.description) {
+        donateDesc.textContent = donateData.description;
+    } else {
+        donateDesc.style.display = 'none';
     }
-} catch (err) {
-    console.error('Nie udało się załadować Donate:', err);
-}
+
+    donateMethods.innerHTML = '';
+    if (donateData.methods && donateData.methods.length > 0) {
+        donateData.methods.forEach(method => {
+            const el = document.createElement('a');
+            el.className = 'donate-item';
+            el.href = method.url;
+            el.target = '_blank';
+            el.rel = 'noopener noreferrer';
+            el.innerHTML = `
+                <span class="donate-icon">${method.icon}</span>
+                <span class="donate-name">${escapeHtml(method.name)}</span>
+            `;
+            donateMethods.appendChild(el);
+        });
+    }
 }
 
-function openFaq() { document.getElementById('faqModal').classList.add('active'); }
-function openDonate() { document.getElementById('donateModal').classList.add('active'); }
+
+// --- MODUŁ 7: Obsługa modali ---
+
+document.getElementById('faqBtn').addEventListener('click', () => {
+    faqModal.classList.add('active');
+});
+
+document.getElementById('donateBtn').addEventListener('click', () => {
+    donateModal.classList.add('active');
+});
+
+// Zamknięcie modala — przycisk X
+function closeModal(modal) {
+    modal.classList.remove('active');
+}
+
+document.getElementById('faqClose').addEventListener('click', () => closeModal(faqModal));
+document.getElementById('donateClose').addEventListener('click', () => closeModal(donateModal));
+
+// Zamknięcie modala — kliknięcie poza nim
+[faqModal, donateModal].forEach(modal => {
+    modal.addEventListener('click', (e) => {
+        if (e.target === modal) closeModal(modal);
+    });
+});
+
+// Zamknięcie modala — Escape
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+        closeModal(faqModal);
+        closeModal(donateModal);
+    }
+});
+
+
+// --- MODUŁ 8: Inicjalizacja ---
 
 searchInput.addEventListener('input', () => filterCommands(commands));
 
 let commands = [];
+
+buildGradientTitle();
+loadFaq();
+loadDonate();
 
 loadCommands().then(data => {
     commands = data;
@@ -899,12 +943,6 @@ loadCommands().then(data => {
     renderFilters(commands);
     filterCommands(commands);
 });
-
-// Inicjalizacja — gradient h1, przyciski, FAQ, Donate
-renderH1();
-renderTopButtons();
-loadAndRenderFaq();
-loadAndRenderDonate();
 
 </script>
 </body>
