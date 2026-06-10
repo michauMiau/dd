@@ -71,7 +71,7 @@
             padding: 32px 24px;
         }
 
-        /* --- Nagłówek z gradientem na każdą literę --- */
+        /* --- Nagłówek z gradientem na każdą literę (JS) --- */
         h1 {
             text-align: center;
             font-size: 2.5rem;
@@ -81,20 +81,15 @@
             line-height: 1.2;
         }
 
-        .gradient-letter {
+        .h1-letter {
             display: inline-block;
-            -webkit-background-clip: text;
-            background-clip: text;
-            -webkit-text-fill-color: transparent;
-            color: transparent;
+            transition: color 0.3s ease;
         }
 
         /* Spacja — bez gradientu */
-        .gradient-letter.space {
+        .h1-space {
             -webkit-text-fill-color: var(--text);
             color: var(--text);
-            background-clip: unset;
-            -webkit-background-clip: unset;
         }
 
         .subtitle {
@@ -518,7 +513,7 @@
 <body>
 
 <div class="container">
-    <!-- Nagłówek z gradientem na każdą literę -->
+    <!-- Nagłówek z gradientem na każdą literę (renderowane przez JS) -->
     <h1 id="title"></h1>
     <p class="subtitle">Wyszukaj, skopiuj i wklej do konsoli! Bez reklam, No BS (nieukończone)</p>
 
@@ -575,38 +570,40 @@
      ============================================ -->
 <script type="module">
 
-// --- MODUŁ 0: Gradient na każdą literę w nagłówku ---
+// --- MODUŁ 0: Gradient na każdą literę w nagłówku (PRZEZ COLOR, NIE BACKGROUND-CLIP!) ---
 
 const TITLE_TEXT = 'CS2 — Komendy Konsoli';
+// Jasny pomarańcz -> ciemny niebieski (12 kolorów gradientu)
 const GRADIENT_COLORS = ['#ffb366', '#ff8c42', '#e07030', '#d05a30', '#b04a35', '#904040', '#704050', '#504060', '#3a4070', '#2a4080', '#1a4090', '#1040a0'];
 
 function buildGradientTitle() {
     const titleEl = document.getElementById('title');
     if (!titleEl) return;
     
-    // Buduj fragment dokumentu z gradientem na każdej literze
+    // Budujemy fragment dokumentu z gradientem na każdej literze przez kolor (nie background-clip!)
     const fragment = document.createDocumentFragment();
     
+    let charIndex = 0;
     for (let i = 0; i < TITLE_TEXT.length; i++) {
         const char = TITLE_TEXT[i];
         if (char === ' ') {
             // Spacja — bez gradientu, zwykły biały kolor
             const span = document.createElement('span');
-            span.className = 'gradient-letter space';
+            span.className = 'h1-space';
             span.innerHTML = '&nbsp;';
             fragment.appendChild(span);
         } else {
-            // Gradient na każdą literę — CSS background-clip: text wymaga klasy, nie inline style
-            const colorIndex = Math.floor((i / TITLE_TEXT.length) * (GRADIENT_COLORS.length - 1));
-            const color = GRADIENT_COLORS[colorIndex];
+            // Gradient na każdą literę — ustawiamy KOLOR (color), nie background-clip!
+            const colorIndex = Math.min(charIndex, GRADIENT_COLORS.length - 1);
             
             const span = document.createElement('span');
-            span.className = 'gradient-letter';
+            span.className = 'h1-letter';
             span.textContent = char;
-            // Ustaw gradient na każdej literze PRZED dodaniem do DOM
-            span.style.background = `linear-gradient(135deg, ${GRADIENT_COLORS[colorIndex]}, ${GRADIENT_COLORS[Math.min(colorIndex + 1, GRADIENT_COLORS.length - 1)]})`;
+            // Ustaw gradient na każdej literze PRZED dodaniem do DOM — KOLORYM (color) nie background!
+            span.style.color = GRADIENT_COLORS[colorIndex];
             
             fragment.appendChild(span);
+            charIndex++;
         }
     }
     
