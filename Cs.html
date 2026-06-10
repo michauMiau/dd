@@ -520,7 +520,7 @@
     <!-- Górny pasek z przyciskami FAQ i Donate -->
     <div class="top-bar">
         <button class="top-btn" id="faqBtn">FAQ</button>
-        <a href="https://github.com/michauMiau/dd/blob/main/FUNDING.yml" target="_blank" class="top-btn" style="text-decoration:none;">Donate</a>
+        <a href="https://github.com/michauMiau/michauMiau/blob/93eb917fbb235605dc26d68128376fd0a1629652/FUNDING.md" target="_blank" class="top-btn" style="text-decoration:none;">Donate</a>
     </div>
 
     <!-- Wyszukiwarka -->
@@ -549,7 +549,7 @@
 
     <!-- Stopka z GitHub -->
     <div class="footer">
-        Projekt na <a href="https://github.com/michauMiau/dd" target="_blank">GitHubie</a> — zgłoś brakującą komendę lub błąd!
+        Projekt na <a href="https://github.com/michauMiau/dd" target="_blank">GitHub</a> — zgłoś brakującą komendę lub błąd!
     </div>
 </div>
 
@@ -798,7 +798,7 @@ function escapeHtml(str) { const d = document.createElement('div'); d.textConten
 async function loadFaq() {
     const faqData = await loadJSON(FAQ_URL);
     if (!faqData || faqData.length === 0) {
-        faqContent.innerHTML = '<p style="color: var(--text-muted);">Brak danych FAQ 😿</p>';
+        faqContent.innerHTML = '<p style="color: var(--text-muted);">Błąd ładowania FAQ 😿</p>';
         return;
     }
 
