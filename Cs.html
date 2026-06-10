@@ -16,9 +16,7 @@
 
         :root {
             --orange: #ff8c42;
-            --orange-light: #ffb366;
             --blue: #3a86ff;
-            --blue-dark: #2563eb;
             --bg: #0d1117;
             --card-bg: #161b22;
             --card-border: #30363d;
@@ -85,15 +83,16 @@
 
         .gradient-letter {
             display: inline-block;
-            background-clip: text;
             -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
             background-clip: text;
+            -webkit-text-fill-color: transparent;
+            color: transparent;
         }
 
         /* Spacja — bez gradientu */
         .gradient-letter.space {
             -webkit-text-fill-color: var(--text);
+            color: var(--text);
             background-clip: unset;
             -webkit-background-clip: unset;
         }
@@ -217,7 +216,7 @@
         }
 
         .faq-question:hover {
-            color: var(--orange-light);
+            color: #ffb366;
         }
 
         .faq-arrow {
@@ -240,39 +239,6 @@
         .faq-item.open .faq-answer {
             display: block;
             animation: fadeSlideUp 0.2s ease-out;
-        }
-
-        /* Donate items */
-        .donate-methods {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-        }
-
-        .donate-item {
-            display: flex;
-            align-items: center;
-            gap: 14px;
-            padding: 14px 18px;
-            border: 1.5px solid var(--card-border);
-            border-radius: 12px;
-            text-decoration: none;
-            color: var(--text);
-            transition: all 0.2s ease;
-        }
-
-        .donate-item:hover {
-            border-color: var(--orange);
-            transform: translateY(-1px);
-        }
-
-        .donate-icon {
-            font-size: 1.5rem;
-        }
-
-        .donate-name {
-            font-weight: 600;
-            font-size: 1rem;
         }
 
         /* --- Wyszukiwarka --- */
@@ -538,7 +504,7 @@
         }
 
         .footer a:hover {
-            color: var(--orange-light);
+            color: #ffb366;
         }
 
         @media (max-width: 500px) {
@@ -559,7 +525,7 @@
     <!-- Górny pasek z przyciskami FAQ i Donate -->
     <div class="top-bar">
         <button class="top-btn" id="faqBtn">FAQ</button>
-        <button class="top-btn" id="donateBtn">Donate</button>
+        <a href="https://github.com/michauMiau/dd/blob/main/FUNDING.yml" target="_blank" class="top-btn" style="text-decoration:none;">Donate</a>
     </div>
 
     <!-- Wyszukiwarka -->
@@ -603,18 +569,6 @@
     </div>
 </div>
 
-<!-- Modal Donate -->
-<div class="modal-overlay" id="donateModal">
-    <div class="modal-box">
-        <div class="modal-header">
-            <span class="modal-title">Wspieraj projekt</span>
-            <button class="modal-close" id="donateClose">&times;</button>
-        </div>
-        <p style="color: var(--text-muted); margin-bottom: 20px; font-size: 0.9rem;" id="donateDesc"></p>
-        <div class="donate-methods" id="donateMethods"></div>
-    </div>
-</div>
-
 
 <!-- ============================================
      JS — Modularny (moduły: data, render, filter, utils)
@@ -628,27 +582,41 @@ const GRADIENT_COLORS = ['#ffb366', '#ff8c42', '#e07030', '#d05a30', '#b04a35', 
 
 function buildGradientTitle() {
     const titleEl = document.getElementById('title');
-    let html = '';
+    if (!titleEl) return;
+    
+    // Buduj fragment dokumentu z gradientem na każdej literze
+    const fragment = document.createDocumentFragment();
+    
     for (let i = 0; i < TITLE_TEXT.length; i++) {
         const char = TITLE_TEXT[i];
         if (char === ' ') {
             // Spacja — bez gradientu, zwykły biały kolor
-            html += '<span class="gradient-letter space">&nbsp;</span>';
+            const span = document.createElement('span');
+            span.className = 'gradient-letter space';
+            span.innerHTML = '&nbsp;';
+            fragment.appendChild(span);
         } else {
-            // Gradient na każdą literę
+            // Gradient na każdą literę — CSS background-clip: text wymaga klasy, nie inline style
             const colorIndex = Math.floor((i / TITLE_TEXT.length) * (GRADIENT_COLORS.length - 1));
             const color = GRADIENT_COLORS[colorIndex];
-            html += `<span class="gradient-letter" style="background: linear-gradient(135deg, ${color}, ${color});">${char}</span>`;
+            
+            const span = document.createElement('span');
+            span.className = 'gradient-letter';
+            span.textContent = char;
+            // Ustaw gradient na każdej literze PRZED dodaniem do DOM
+            span.style.background = `linear-gradient(135deg, ${GRADIENT_COLORS[colorIndex]}, ${GRADIENT_COLORS[Math.min(colorIndex + 1, GRADIENT_COLORS.length - 1)]})`;
+            
+            fragment.appendChild(span);
         }
     }
-    titleEl.innerHTML = html;
+    
+    titleEl.appendChild(fragment);
 }
 
 // --- MODUŁ 1: Ładowanie danych z plików JSON ---
 
 const DATA_URL = 'cs/con_pl.json';
 const FAQ_URL = 'cs/faq_pl.json';
-const DONATE_URL = 'cs/donate_pl.json';
 
 async function loadJSON(url) {
     try {
@@ -673,10 +641,7 @@ const loadingEl     = document.getElementById('loading');
 
 // Modal elements
 const faqModal      = document.getElementById('faqModal');
-const donateModal   = document.getElementById('donateModal');
 const faqContent    = document.getElementById('faqContent');
-const donateDesc    = document.getElementById('donateDesc');
-const donateMethods = document.getElementById('donateMethods');
 
 let activeCategory = 'Wszystkie';
 
@@ -862,44 +827,10 @@ async function loadFaq() {
 }
 
 
-// --- MODUŁ 6: Modal Donate ---
-
-async function loadDonate() {
-    const donateData = await loadJSON(DONATE_URL);
-    if (!donateData) return;
-
-    if (donateData.description) {
-        donateDesc.textContent = donateData.description;
-    } else {
-        donateDesc.style.display = 'none';
-    }
-
-    donateMethods.innerHTML = '';
-    if (donateData.methods && donateData.methods.length > 0) {
-        donateData.methods.forEach(method => {
-            const el = document.createElement('a');
-            el.className = 'donate-item';
-            el.href = method.url;
-            el.target = '_blank';
-            el.rel = 'noopener noreferrer';
-            el.innerHTML = `
-                <span class="donate-icon">${method.icon}</span>
-                <span class="donate-name">${escapeHtml(method.name)}</span>
-            `;
-            donateMethods.appendChild(el);
-        });
-    }
-}
-
-
-// --- MODUŁ 7: Obsługa modali ---
+// --- MODUŁ 6: Obsługa modali ---
 
 document.getElementById('faqBtn').addEventListener('click', () => {
     faqModal.classList.add('active');
-});
-
-document.getElementById('donateBtn').addEventListener('click', () => {
-    donateModal.classList.add('active');
 });
 
 // Zamknięcie modala — przycisk X
@@ -908,10 +839,9 @@ function closeModal(modal) {
 }
 
 document.getElementById('faqClose').addEventListener('click', () => closeModal(faqModal));
-document.getElementById('donateClose').addEventListener('click', () => closeModal(donateModal));
 
 // Zamknięcie modala — kliknięcie poza nim
-[faqModal, donateModal].forEach(modal => {
+[faqModal].forEach(modal => {
     modal.addEventListener('click', (e) => {
         if (e.target === modal) closeModal(modal);
     });
@@ -921,12 +851,11 @@ document.getElementById('donateClose').addEventListener('click', () => closeModa
 document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') {
         closeModal(faqModal);
-        closeModal(donateModal);
     }
 });
 
 
-// --- MODUŁ 8: Inicjalizacja ---
+// --- MODUŁ 7: Inicjalizacja ---
 
 searchInput.addEventListener('input', () => filterCommands(commands));
 
@@ -934,9 +863,12 @@ let commands = [];
 
 buildGradientTitle();
 loadFaq();
-loadDonate();
 
-loadCommands().then(data => {
+loadJSON(DATA_URL).then(data => {
+    if (!data) {
+        loadingEl.textContent = 'Błąd ładowania danych 😿';
+        return;
+    }
     commands = data;
     loadingEl.style.display = 'none';
     renderQuickgames(commands);
