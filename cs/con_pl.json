@@ -250,6 +250,11 @@
         "cat": "quickgames"
     },
     {
+        "cmd": "sv_cheats 1; sv_enablebunnyhopping 1; sv_maxvelocity 9000; sv_staminamax 0; sv_staminalandcost 0; sv_staminajumpcost 0; sv_accelerate_use_weapon_speed 0; sv_staminarecoveryrate 0; sv_autobunnyhopping 1; sv_airaccelerate 9000; sv_accelerate 999; weapon_accuracy_nospread 1; weapon_air_spread_scale 0; weapon_debug_spread_gap 0; sv_cheats 0",
+        "desc": "Quake - BHOP + Brak rozrzutu ",
+        "cat": "quickgames"
+    },
+    {
         "cmd": "sv_cheats 1; host_timescale 0.6; weapon_accuracy_nospread true",
         "desc": "CS-Slow - Gra w wolnym tempie, w normalnym tempie wygląda jakbyś miał Spinbot",
         "cat": "quickgames"
