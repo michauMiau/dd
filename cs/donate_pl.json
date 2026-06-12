@@ -1,16 +1,1 @@
-{
-    "title": "Wspieraj projekt",
-    "description": "Jeśli ta strona pomaga Ci w grze, możesz wesprzeć jej rozwój. Każna wpłata to więcej komend i lepsza jakość!",
-    "methods": [
-        {
-            "name": "PayPal",
-            "url": "#",
-            "icon": "💳"
-        },
-        {
-            "name": "Blik / Przelew",
-            "url": "#",
-            "icon": "🏦"
-        }
-    ]
-}
+
