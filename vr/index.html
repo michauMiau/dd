@@ -1,6 +1,7 @@
 <html>
   <head>
     <script src="https://aframe.io/releases/1.8.0/aframe.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/aframe-blink-controls/dist/aframe-blink-controls.min.js"></script>
   </head>
   <body>
     <a-scene>
@@ -9,6 +10,19 @@
       <a-cylinder position="1 0.75 -3" radius="0.5" height="1.5" color="#FFC65D"></a-cylinder>
       <a-plane position="0 0 -4" rotation="-90 0 0" width="4" height="4" color="#7BC8A4"></a-plane>
       <a-sky color="#ECECEC"></a-sky>
+      
+      <a-entity id="playerrig">
+        <a-entity id="lefthand" hand-controls="hand: left"></a-entity>
+        <a-entity id="righthand" hand-controls="hand: right"></a-entity>
+        <a-camera></a-camera>
+      </a-entity>
+      <!-- Setup Controllers -->
+      <a-entity vive-controls="hand: left"></a-entity>
+      <a-entity vive-controls="hand: right"></a-entity>
+
+      <!-- Or Rift. -->
+      <a-entity meta-touch-controls="hand: left"></a-entity>
+      <a-entity meta-touch-controls="hand: right"></a-entity>
     </a-scene>
   </body>
 </html>
