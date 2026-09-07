@@ -507,6 +507,7 @@
             .container { padding: 20px 14px; }
             .quickgames-grid { grid-template-columns: 1fr; }
             .command-card { flex-wrap: wrap; }
+            iframe[src*="discord.com/widget"] { width: 100% !important; }
         }
     </style>
 </head>
@@ -516,6 +517,10 @@
     <!-- Nagłówek z gradientem na każdą literę (renderowane przez JS) -->
     <h1 id="title"></h1>
     <p class="subtitle">Wyszukaj, skopiuj i wklej do konsoli! Bez reklam, No BS (nieukończone)</p>
+
+    <div style="display:flex; justify-content:flex-end; margin-bottom:24px;">
+        <iframe src="https://discord.com/widget?id=1546522601994592297&theme=dark" width="350" height="500" allowtransparency="true" frameborder="0" sandbox="allow-popups allow-popups-to-escape-sandbox allow-same-origin allow-scripts"></iframe>
+    </div>
 
     <!-- Górny pasek z przyciskami FAQ i Donate -->
     <div class="top-bar">
