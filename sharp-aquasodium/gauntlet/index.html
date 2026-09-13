@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Chrome Exploit Gauntlet Launcher</title>
+    <style>
+        body { background: #000; color: #0f0; font-family: monospace; padding: 20px; }
+        .exploit { margin: 10px 0; padding: 10px; border: 1px solid #0f0; }
+        .success { background: #030; }
+        .fail { background: #300; }
+        .testing { background: #330; }
+    </style>
+</head>
+<body>
+    <h1>Chrome Exploit Gauntlet</h1>
+    <p>Testing exploits against Sharp TV (Chrome 39 ARMv7)</p>
+    <div id="results"></div>
+    
+    <script>
+        var exploits = [
+            { name: "CVE-2014-7927", file: "cve_2014_7927.html", desc: "V8 heap overflow" },
+            { name: "CVE-2014-7928", file: "cve_2014_7928.html", desc: "V8 type confusion" },
+            { name: "CVE-2015-1572", file: "cve_2015_1572.html", desc: "Heap spray" },
+            { name: "CVE-2016-5198", file: "cve_2016_5198.html", desc: "V8 JIT RCE" },
+            { name: "CVE-2015-1233", file: "cve_2015_1233.html", desc: "IPC/Gamepad API" }
+        ];
+        
+        var resultsDiv = document.getElementById('results');
+        var currentExploit = 0;
+        
+        function testExploit(index) {
+            if (index >= exploits.length) {
+                resultsDiv.innerHTML += "<p><strong>GAUNTLET COMPLETE</strong></p>";
+                return;
+            }
+            
+            var exploit = exploits[index];
+            var div = document.createElement('div');
+            div.className = 'exploit testing';
+            div.innerHTML = "<strong>" + exploit.name + "</strong> (" + exploit.desc + ") - Testing...";
+            resultsDiv.appendChild(div);
+            
+            // Load exploit in iframe
+            var iframe = document.createElement('iframe');
+            iframe.style.width = '0';
+            iframe.style.height = '0';
+            iframe.src = exploit.file;
+            document.body.appendChild(iframe);
+            
+            // Wait and check for crash
+            setTimeout(function() {
+                if (document.visibilityState === 'visible') {
+                    div.className = 'exploit fail';
+                    div.innerHTML += " - No crash detected";
+                } else {
+                    div.className = 'exploit success';
+                    div.innerHTML += " - TV crashed/rebooted!";
+                }
+                testExploit(index + 1);
+            }, 5000);
+        }
+        
+        testExploit(0);
+    </script>
+</body>
+</html>

