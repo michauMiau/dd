@@ -27,28 +27,27 @@
         ];
         
         var resultsDiv = document.getElementById('results');
+        var currentIndex = 0;
+        var testDone = false;
         
         function createMalformedMP4() {
-            // MP4 with invalid track header
             var buf = new ArrayBuffer(64);
             var view = new DataView(buf);
-            view.setUint32(0, 64); // size
-            view.setUint32(4, 0x66747970); // 'ftyp'
-            view.setUint32(8, 0x69736F6D); // 'isom'
-            view.setUint32(12, 0); // minor version
-            view.setUint32(16, 0x69736F6D); // compatible brand
-            // Invalid track header
-            view.setUint32(20, 100); // size
-            view.setUint32(24, 0x74726B68); // 'trkh'
-            view.setUint32(28, 0xFFFFFFFF); // invalid creation time
+            view.setUint32(0, 64);
+            view.setUint32(4, 0x66747970);
+            view.setUint32(8, 0x69736F6D);
+            view.setUint32(12, 0);
+            view.setUint32(16, 0x69736F6D);
+            view.setUint32(20, 100);
+            view.setUint32(24, 0x74726B68);
+            view.setUint32(28, 0xFFFFFFFF);
             return buf;
         }
         
         function createMalformedWebM() {
-            // WebM with invalid segment info
             var buf = new ArrayBuffer(64);
             var view = new DataView(buf);
-            view.setUint8(0, 0x1A); // EBML header
+            view.setUint8(0, 0x1A);
             view.setUint8(1, 0x45);
             view.setUint8(2, 0xDF);
             view.setUint8(3, 0xA3);
@@ -56,7 +55,6 @@
             view.setUint8(5, 0x42);
             view.setUint8(6, 0x82);
             view.setUint8(7, 0x01);
-            // Invalid segment
             view.setUint8(8, 0x18);
             view.setUint8(9, 0x53);
             view.setUint8(10, 0x80);
@@ -66,29 +64,27 @@
         }
         
         function createMalformedAVI() {
-            // AVI with invalid header
             var buf = new ArrayBuffer(64);
             var view = new DataView(buf);
-            view.setUint32(0, 0x41564920); // 'AVI '
-            view.setUint32(4, 0x4C495354); // 'LIST'
-            view.setUint32(8, 0xFFFFFFFF); // invalid size
-            view.setUint32(12, 0x6864726C); // 'hdrl'
+            view.setUint32(0, 0x41564920);
+            view.setUint32(4, 0x4C495354);
+            view.setUint32(8, 0xFFFFFFFF);
+            view.setUint32(12, 0x6864726C);
             return buf;
         }
         
         function createMalformedJPEG() {
-            // JPEG with invalid SOI
             var buf = new ArrayBuffer(16);
             var view = new DataView(buf);
             view.setUint8(0, 0xFF);
-            view.setUint8(1, 0xD8); // SOI
+            view.setUint8(1, 0xD8);
             view.setUint8(2, 0xFF);
-            view.setUint8(3, 0xE0); // APP0
-            view.setUint16(4, 16, true); // length
-            view.setUint8(6, 0x4A); // 'J'
-            view.setUint8(7, 0x46); // 'F'
-            view.setUint8(8, 0x49); // 'I'
-            view.setUint8(9, 0x46); // 'F'
+            view.setUint8(3, 0xE0);
+            view.setUint16(4, 16, true);
+            view.setUint8(6, 0x4A);
+            view.setUint8(7, 0x46);
+            view.setUint8(8, 0x49);
+            view.setUint8(9, 0x46);
             view.setUint8(10, 0x00);
             view.setUint8(11, 0x01);
             view.setUint8(12, 0x01);
@@ -99,10 +95,8 @@
         }
         
         function createMalformedPNG() {
-            // PNG with invalid IHDR
             var buf = new ArrayBuffer(33);
             var view = new DataView(buf);
-            // PNG signature
             view.setUint8(0, 0x89);
             view.setUint8(1, 0x50);
             view.setUint8(2, 0x4E);
@@ -111,29 +105,45 @@
             view.setUint8(5, 0x0A);
             view.setUint8(6, 0x1A);
             view.setUint8(7, 0x0A);
-            // IHDR chunk
-            view.setUint32(8, 13); // length
-            view.setUint32(12, 0x49484452); // 'IHDR'
-            view.setUint32(16, 64); // width
-            view.setUint32(20, 64); // height
-            view.setUint8(24, 8); // bit depth
-            view.setUint8(25, 2); // color type
-            view.setUint8(26, 0); // compression
-            view.setUint8(27, 0); // filter
-            view.setUint8(28, 0); // interlace
-            view.setUint32(29, 0); // CRC
+            view.setUint32(8, 13);
+            view.setUint32(12, 0x49484452);
+            view.setUint32(16, 64);
+            view.setUint32(20, 64);
+            view.setUint8(24, 8);
+            view.setUint8(25, 2);
+            view.setUint8(26, 0);
+            view.setUint8(27, 0);
+            view.setUint8(28, 0);
+            view.setUint32(29, 0);
             return buf;
         }
         
         function createMalformedMP3() {
-            // MP3 with invalid frame header
             var buf = new ArrayBuffer(16);
             var view = new DataView(buf);
             view.setUint8(0, 0xFF);
-            view.setUint8(1, 0xFB); // frame sync + version + layer
-            view.setUint8(2, 0x80); // bitrate + padding
-            view.setUint8(3, 0x00); // sample rate + private + channel
+            view.setUint8(1, 0xFB);
+            view.setUint8(2, 0x80);
+            view.setUint8(3, 0x00);
             return buf;
+        }
+        
+        function finishTest(index, status) {
+            if (testDone) return;
+            testDone = true;
+            
+            var div = resultsDiv.children[index];
+            if (div) {
+                div.className = 'test fail';
+                div.innerHTML += " - " + status;
+            }
+            
+            currentIndex++;
+            if (currentIndex < tests.length) {
+                testMedia(currentIndex);
+            } else {
+                resultsDiv.innerHTML += "<p><strong>ALL TESTS COMPLETE</strong></p>";
+            }
         }
         
         function testMedia(index) {
@@ -142,55 +152,49 @@
                 return;
             }
             
+            testDone = false;
             var test = tests[index];
             var div = document.createElement('div');
             div.className = 'test testing';
             div.innerHTML = "<strong>" + test.name + "</strong> - Testing...";
             resultsDiv.appendChild(div);
             
-            // Create blob URL and try to play
             var blob = new Blob([test.data], { type: test.type });
             var url = URL.createObjectURL(blob);
+            
+            // Timeout: if no crash after 10s, move on
+            setTimeout(function() {
+                finishTest(index, 'Timeout (no crash)');
+            }, 10000);
             
             if (test.type.startsWith('video/')) {
                 var video = document.createElement('video');
                 video.src = url;
-                video.play().catch(function(e) {
-                    div.className = 'test fail';
-                    div.innerHTML += " - Play failed: " + e.message;
-                    testMedia(index + 1);
-                });
+                video.oncanplay = function() {
+                    finishTest(index, 'Loaded (no crash)');
+                };
+                video.onerror = function() {
+                    finishTest(index, 'Error (no crash)');
+                };
             } else if (test.type.startsWith('image/')) {
                 var img = document.createElement('img');
                 img.src = url;
                 img.onload = function() {
-                    div.className = 'test fail';
-                    div.innerHTML += " - Image loaded (no crash)";
-                    testMedia(index + 1);
+                    finishTest(index, 'Loaded (no crash)');
                 };
                 img.onerror = function() {
-                    div.className = 'test fail';
-                    div.innerHTML += " - Image error (no crash)";
-                    testMedia(index + 1);
+                    finishTest(index, 'Error (no crash)');
                 };
             } else if (test.type.startsWith('audio/')) {
                 var audio = document.createElement('audio');
                 audio.src = url;
-                audio.play().catch(function(e) {
-                    div.className = 'test fail';
-                    div.innerHTML += " - Play failed: " + e.message;
-                    testMedia(index + 1);
-                });
+                audio.oncanplay = function() {
+                    finishTest(index, 'Loaded (no crash)');
+                };
+                audio.onerror = function() {
+                    finishTest(index, 'Error (no crash)');
+                };
             }
-            
-            // Timeout check
-            setTimeout(function() {
-                if (div.className === 'test testing') {
-                    div.className = 'test fail';
-                    div.innerHTML += " - Timeout (no crash)";
-                    testMedia(index + 1);
-                }
-            }, 5000);
         }
         
         testMedia(0);
