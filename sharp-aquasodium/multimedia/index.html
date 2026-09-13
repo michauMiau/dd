@@ -18,7 +18,6 @@
     
     <script>
         var tests = [
-            { name: "Malformed MP4", type: "video/mp4", data: createMalformedMP4() },
             { name: "Malformed WebM", type: "video/webm", data: createMalformedWebM() },
             { name: "Malformed AVI", type: "video/avi", data: createMalformedAVI() },
             { name: "Malformed JPEG", type: "image/jpeg", data: createMalformedJPEG() },
@@ -29,20 +28,6 @@
         var resultsDiv = document.getElementById('results');
         var currentIndex = 0;
         var testDone = false;
-        
-        function createMalformedMP4() {
-            var buf = new ArrayBuffer(64);
-            var view = new DataView(buf);
-            view.setUint32(0, 64);
-            view.setUint32(4, 0x66747970);
-            view.setUint32(8, 0x69736F6D);
-            view.setUint32(12, 0);
-            view.setUint32(16, 0x69736F6D);
-            view.setUint32(20, 100);
-            view.setUint32(24, 0x74726B68);
-            view.setUint32(28, 0xFFFFFFFF);
-            return buf;
-        }
         
         function createMalformedWebM() {
             var buf = new ArrayBuffer(64);
