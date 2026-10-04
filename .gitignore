@@ -1,0 +1,6 @@
+.DS_Store
+
+# lint tooling deps — node_modules is never committed, but the lockfile is
+# (it is what makes `npm ci` deterministic in CI)
+node_modules/
+npm-debug.log*

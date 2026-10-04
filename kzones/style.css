@@ -10,7 +10,9 @@
   --danger: #da4453;
   --ok: #3daee9;
   --radius: 5px;
+  /* stylelint-disable value-keyword-case -- these are font proper nouns; lowering them breaks font matching on macOS/Windows */
   --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  /* stylelint-enable value-keyword-case */
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -117,7 +119,7 @@ a:hover { color: #6ecbff; }
 .grid4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 12px; }
 .cell { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
 .cell label.tiny { font-size: 10px; text-transform: none; letter-spacing: 0; }
-.cell input[type=number] { text-align: center; }
+.cell input[type="number"] { text-align: center; }
 
 input, select, textarea {
   background: var(--bg2);
@@ -135,7 +137,7 @@ input:focus, select:focus, textarea:focus {
   box-shadow: 0 0 0 3px var(--accent-soft);
 }
 textarea { font-family: var(--mono); font-size: 12.5px; resize: vertical; }
-input[type=color] { padding: 3px; height: 36px; cursor: pointer; }
+input[type="color"] { padding: 3px; height: 36px; cursor: pointer; }
 select { cursor: pointer; }
 
 .color-row { display: grid; grid-template-columns: 42px 1fr auto; gap: 6px; align-items: center; }

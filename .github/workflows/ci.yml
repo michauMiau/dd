@@ -1,0 +1,112 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  lint:
+    name: Lint (HTML/CSS/JS)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+
+      # npm ci (not npx) so the committed lockfile is what gets installed and
+      # every config dependency — `globals`, `stylelint-config-standard` — is
+      # actually present. `npx eslint@9` alone fails with ERR_MODULE_NOT_FOUND.
+      - name: Install lint tooling
+        run: npm ci
+
+      - name: ESLint (kzones/app.js)
+        run: npx eslint kzones/app.js
+
+      - name: Stylelint (kzones/style.css)
+        run: npx stylelint kzones/style.css
+
+      - name: html-validate (kzones/index.html)
+        run: npx html-validate kzones/index.html
+
+  check-doc:
+    name: HTML consistency
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      # Every $('#id') in app.js must exist in index.html. A renamed element
+      # is the failure mode that actually happens, and it fails at runtime
+      # with a null dereference rather than a useful message.
+      - name: Check that every id app.js uses exists in index.html
+        run: node scripts/check-ids.mjs
+
+      # A broken relative link from the landing page would 404 in production
+      - name: Check that the landing page links resolve
+        run: node scripts/check-links.mjs
+
+  test:
+    name: Tests (Playwright)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Cache Playwright browsers
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ hashFiles('kzones/test_app.py') }}
+
+      - name: Install Playwright
+        run: |
+          python -m pip install --upgrade pip
+          pip install playwright
+          python -m playwright install --with-deps chromium
+
+      - name: Serve the site
+        run: |
+          cd kzones
+          python -m http.server 8099 --bind 127.0.0.1 &
+          for i in $(seq 1 20); do
+            curl -sf -o /dev/null http://127.0.0.1:8099/index.html && break
+            sleep 1
+          done
+          curl -sf -o /dev/null http://127.0.0.1:8099/index.html
+
+      - name: Run test_app.py
+        run: python kzones/test_app.py
+
+      - name: Run test_handles.py
+        run: python kzones/test_handles.py
+
+      - name: Upload failure screenshots
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-screenshots
+          path: /tmp/kzones-*.png
+          if-no-files-found: ignore
+          retention-days: 7

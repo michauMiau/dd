@@ -9,9 +9,8 @@ const IND_POSITIONS = [
    edges — które krawędzie kryją tryb: 'l' lewa, 'r' prawa, 't' góra, 'b' dół.
    Uchwyty krawędziowe są przesunięte o połowę w głąb strefy, żeby nie nachodziły
    na siebie z narożnikami i żeby były łatwe do trafienia myszą. */
-const OFF = -4;          // uchwyt wystaje o 4 px poza strefę
-const IN = '50%';        // uchwyt krawędziowy: środek na krawędzi strefy
-const HALF = 'calc(50% - 6.5px)';
+const OFF = -4;                 // uchwyt wystaje o 4 px poza strefę
+const HALF = 'calc(50% - 6.5px)'; // uchwyt krawędziowy: środek na krawędzi strefy
 const HANDLES = [
   { id: 'nw', edges: 'lt', style: { left: `${OFF}px`, top: `${OFF}px`, cursor: 'nwse-resize' } },
   { id: 'n',  edges: 't',  style: { left: HALF, top: `${OFF}px`, cursor: 'ns-resize' } },

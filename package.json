@@ -1,0 +1,22 @@
+{
+  "name": "kzones-lint",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Lint config for the KZones layout builder. Scoped to kzones/ on purpose — the rest of this repo is older hand-written HTML that is not ours to reformat.",
+  "type": "module",
+  "scripts": {
+    "lint": "eslint kzones/app.js",
+    "lint:css": "stylelint kzones/style.css",
+    "lint:html": "html-validate kzones/index.html",
+    "check:ids": "node scripts/check-ids.mjs",
+    "check:links": "node scripts/check-links.mjs",
+    "test": "python3 kzones/test_app.py && python3 kzones/test_handles.py"
+  },
+  "devDependencies": {
+    "eslint": "^9.15.0",
+    "globals": "^15.12.0",
+    "stylelint": "^16.10.0",
+    "stylelint-config-standard": "^36.0.1",
+    "html-validate": "^8.24.0"
+  }
+}
