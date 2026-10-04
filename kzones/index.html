@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>KZones Layout Builder</title>
+  <meta name="description" content="Wizualny generator konfiguracji KZones (KWin Script) — layouty i strefy snappingu.">
+  <link rel="icon" type="image/x-icon" href="../favicon.png">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header class="top">
+  <div class="top-in">
+    <div class="brand">
+      <span class="logo">▚</span>
+      <div>
+        <h1>KZones Layout Builder</h1>
+        <p>Wizualny generator layoutów i stref dla <a href="https://github.com/gerritdevriese/kzones" target="_blank" rel="noopener">KZones</a> (KWin Script)</p>
+      </div>
+    </div>
+    <div class="top-actions">
+      <button id="btn-import" class="btn" type="button">Import</button>
+      <button id="btn-copy" class="btn btn-primary" type="button">Kopiuj JSON</button>
+      <button id="btn-download" class="btn" type="button">Pobierz</button>
+    </div>
+  </div>
+</header>
+
+<main class="wrap">
+
+  <section class="bar">
+    <div class="bar-grp">
+      <label for="preset">Preset</label>
+      <select id="preset">
+        <option value="">— wybierz —</option>
+      </select>
+      <input type="number" id="preset-n" min="1" max="8" value="3" title="Liczba kolumn/wierszy dla presetów siatki" hidden>
+    </div>
+
+    <div class="bar-grp">
+      <label for="aspect">Proporcje ekranu</label>
+      <select id="aspect">
+        <option value="1.7778">16:9</option>
+        <option value="1.6">16:10</option>
+        <option value="2.3333" selected>21:9 ultrawide</option>
+        <option value="3.5556">32:9 superultrawide</option>
+      </select>
+    </div>
+
+    <div class="bar-grp">
+      <label for="snap">Siatka</label>
+      <select id="snap">
+        <option value="0">wolna</option>
+        <option value="1" selected>1%</option>
+        <option value="5">5%</option>
+        <option value="10">10%</option>
+      </select>
+    </div>
+
+    <div class="bar-grp">
+      <label for="lay-w">Szer. ekranu (px)</label>
+      <input type="number" id="lay-w" min="640" max="20000" step="10" value="3440" title="Używana do podglądu paddingu, który KZones liczy w pikselach">
+    </div>
+
+    <div class="bar-grp bar-grow">
+      <span class="hint">Przeciągnij po pustym polu, żeby narysować strefę · przeciągnij strefę, żeby ją przesunąć · uchwyty na rogach zmieniają rozmiar · <kbd>Del</kbd> usuwa · strzałki przesuwają</span>
+    </div>
+  </section>
+
+  <div class="grid">
+
+    <div class="col-main">
+      <div class="tabs" id="tabs"></div>
+      <div class="canvas-box">
+        <div class="canvas" id="canvas"></div>
+      </div>
+      <div class="stats" id="stats"></div>
+    </div>
+
+    <aside class="col-side">
+
+      <div class="card" id="layout-card">
+        <h2>Layout</h2>
+        <div class="row">
+          <label for="lay-name">Nazwa</label>
+          <input type="text" id="lay-name" placeholder="np. Ultrawide 3">
+        </div>
+        <div class="row">
+          <label for="lay-padding">Padding (px)</label>
+          <input type="number" id="lay-padding" min="0" max="200" step="1">
+        </div>
+        <div class="row row-btns">
+          <button id="btn-add-zone" class="btn btn-sm" type="button">+ Strefa</button>
+          <button id="btn-dup-layout" class="btn btn-sm" type="button">Duplikuj</button>
+          <button id="btn-del-layout" class="btn btn-sm btn-danger" type="button">Usuń layout</button>
+        </div>
+      </div>
+
+      <div class="card" id="zone-card">
+        <h2>Strefa <span class="tag" id="zone-tag">—</span></h2>
+
+        <div class="grid4">
+          <div class="cell">
+            <label for="z-x">x %</label>
+            <input type="number" id="z-x" min="0" max="100" step="0.5">
+          </div>
+          <div class="cell">
+            <label for="z-y">y %</label>
+            <input type="number" id="z-y" min="0" max="100" step="0.5">
+          </div>
+          <div class="cell">
+            <label for="z-w">szer. %</label>
+            <input type="number" id="z-w" min="0.5" max="100" step="0.5">
+          </div>
+          <div class="cell">
+            <label for="z-h">wys. %</label>
+            <input type="number" id="z-h" min="0.5" max="100" step="0.5">
+          </div>
+        </div>
+
+        <div class="row">
+          <label for="z-apps">Aplikacje <span class="sub">klasa okna, po jednej w linii</span></label>
+          <textarea id="z-apps" rows="3" spellcheck="false" placeholder="firefox&#10;firefox-esr"></textarea>
+        </div>
+
+        <div class="row">
+          <label for="z-color">Kolor strefy</label>
+          <div class="color-row">
+            <input type="color" id="z-color-picker" value="#3daee9">
+            <input type="text" id="z-color" placeholder="pusty = akcent z motywu" spellcheck="false">
+            <button id="z-color-clear" class="btn btn-sm" type="button" title="Wyczyść">✕</button>
+          </div>
+          <span class="sub"> nazwa koloru QML (<code>red</code>) albo hex (<code>#ff5555</code>) — oba działają</span>
+        </div>
+
+        <div class="row">
+          <label>Wskaźnik <span class="sub">pokazuje podgląd strefy przy dragowaniu</span></label>
+          <div class="grid4">
+            <div class="cell">
+              <label for="z-ind-pos" class="tiny">pozycja</label>
+              <select id="z-ind-pos">
+                <option>center</option>
+                <option>top-left</option>
+                <option>top-center</option>
+                <option>top-right</option>
+                <option>right-center</option>
+                <option>bottom-right</option>
+                <option>bottom-center</option>
+                <option>bottom-left</option>
+                <option>left-center</option>
+              </select>
+            </div>
+            <div class="cell">
+              <label for="z-ind-t" class="tiny">margin top</label>
+              <input type="number" id="z-ind-t" min="0" step="1">
+            </div>
+            <div class="cell">
+              <label for="z-ind-r" class="tiny">margin right</label>
+              <input type="number" id="z-ind-r" min="0" step="1">
+            </div>
+            <div class="cell">
+              <label for="z-ind-b" class="tiny">margin bottom</label>
+              <input type="number" id="z-ind-b" min="0" step="1">
+            </div>
+            <div class="cell">
+              <label for="z-ind-l" class="tiny">margin left</label>
+              <input type="number" id="z-ind-l" min="0" step="1">
+            </div>
+          </div>
+        </div>
+
+        <p class="none" id="zone-none">Kliknij strefę na podglądzie, żeby ją edytować.</p>
+      </div>
+
+      <div class="card">
+        <h2>Walidacja</h2>
+        <div id="validation" class="validation"></div>
+      </div>
+
+    </aside>
+  </div>
+
+  <section class="card json-card">
+    <h2>JSON <span class="sub">wklej w System Settings / Window Management / KWin Scripts / KZones / ⚙️ → zakładka <b>Layouts</b></span></h2>
+    <textarea id="json" rows="18" spellcheck="false"></textarea>
+  </section>
+
+  <footer>
+    <p>Edytuj <code>name</code> i <code>padding</code> tutaj — wszystko inne generuje się z podglądu. Wygenerowany JSON zawsze odpowiada formatowi z
+      <a href="https://github.com/gerritdevriese/kzones#explanation" target="_blank" rel="noopener">dokumentacji KZones</a>.</p>
+  </footer>
+
+</main>
+
+<dialog id="dlg-import">
+  <h2>Import konfiguracji</h2>
+  <p class="sub">Wklej JSON z KZones albo wczytaj plik <code>.json</code>.</p>
+  <textarea id="import-text" rows="12" spellcheck="false" placeholder='[ { "name": "...", "padding": 0, "zones": [ ... ] } ]'></textarea>
+  <div class="dlg-btns">
+    <button id="btn-import-file" class="btn" type="button">Wczytaj plik</button>
+    <input type="file" id="file-input" accept=".json,application/json" hidden>
+    <span class="grow"></span>
+    <button id="btn-import-cancel" class="btn" type="button">Anuluj</button>
+    <button id="btn-import-ok" class="btn btn-primary" type="button">Importuj</button>
+  </div>
+</dialog>
+
+<div id="toast" class="toast"></div>
+
+<script src="app.js"></script>
+</body>
+</html>
