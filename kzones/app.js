@@ -5,6 +5,24 @@ const IND_POSITIONS = [
   'bottom-right', 'bottom-center', 'bottom-left', 'left-center',
 ];
 
+/* 8 uchwytów resize: 4 narożniki + 4 krawędzie.
+   edges — które krawędzie kryją tryb: 'l' lewa, 'r' prawa, 't' góra, 'b' dół.
+   Uchwyty krawędziowe są przesunięte o połowę w głąb strefy, żeby nie nachodziły
+   na siebie z narożnikami i żeby były łatwe do trafienia myszą. */
+const OFF = -4;          // uchwyt wystaje o 4 px poza strefę
+const IN = '50%';        // uchwyt krawędziowy: środek na krawędzi strefy
+const HALF = 'calc(50% - 6.5px)';
+const HANDLES = [
+  { id: 'nw', edges: 'lt', style: { left: `${OFF}px`, top: `${OFF}px`, cursor: 'nwse-resize' } },
+  { id: 'n',  edges: 't',  style: { left: HALF, top: `${OFF}px`, cursor: 'ns-resize' } },
+  { id: 'ne', edges: 'rt', style: { right: `${OFF}px`, top: `${OFF}px`, cursor: 'nesw-resize' } },
+  { id: 'e',  edges: 'r',  style: { right: `${OFF}px`, top: HALF, cursor: 'ew-resize' } },
+  { id: 'se', edges: 'rb', style: { right: `${OFF}px`, bottom: `${OFF}px`, cursor: 'nwse-resize' } },
+  { id: 's',  edges: 'b',  style: { left: HALF, bottom: `${OFF}px`, cursor: 'ns-resize' } },
+  { id: 'sw', edges: 'lb', style: { left: `${OFF}px`, bottom: `${OFF}px`, cursor: 'nesw-resize' } },
+  { id: 'w',  edges: 'l',  style: { left: `${OFF}px`, top: HALF, cursor: 'ew-resize' } },
+];
+
 const $ = (id) => document.getElementById(id);
 
 const el = {
@@ -239,18 +257,19 @@ function renderCanvas() {
       const ipct = clamp((padPx / screenW) * 100, 0, 24);
       inset.style.cssText =
         `position:absolute;inset:${ipct}%;border:1px dashed rgba(255,255,255,.45);` +
-        `border-radius:4px;pointer-events:none;`;
+        `border-radius:0;pointer-events:none;`;
       d.insertBefore(inset, lab);
     }
 
     if (i === state.zi) {
-      // dwa uchwyty na dolnym rogu: prawy zmienia szerokość, lewy — lewą krawędź
-      for (const [h, side] of [['se', 'right'], ['sw', 'left']]) {
+      // pełne 8 uchwytów: 4 narożniki + 4 krawędzie. Każdy uchwyt ma własny
+      // tryb resize (patrz HANDLES), więc da się rozciągać w obu osiach —
+      // wcześniej były tylko dwa dolne, przez co wysokość była niezmienna.
+      for (const h of HANDLES) {
         const hd = document.createElement('div');
-        hd.className = 'handle ' + h;
-        hd.dataset.h = h;
-        hd.style[side] = '-7px';
-        hd.style.bottom = '-7px';
+        hd.className = 'handle ' + h.id;
+        hd.dataset.h = h.id;
+        for (const [prop, val] of Object.entries(h.style)) hd.style[prop] = val;
         d.appendChild(hd);
       }
     }
@@ -472,7 +491,9 @@ el.canvas.addEventListener('pointerdown', (ev) => {
   const zi = zoneAt(p);
 
   if (handle && zi >= 0 && zi === state.zi) {
-    state.drag = { mode: handle.dataset.h === 'sw' ? 'resize-l' : 'resize-r', zi, p0: p, z0: { ...cur().zones[zi] } };
+    const h = HANDLES.find((x) => x.id === handle.dataset.h);
+    if (h) state.drag = { mode: `resize-${h.edges}`, zi, p0: p, z0: { ...cur().zones[zi] } };
+    else state.drag = { mode: 'move', zi, p0: p, z0: { ...cur().zones[zi] } };
   } else if (zi >= 0) {
     state.zi = zi;
     state.drag = { mode: 'move', zi, p0: p, z0: { ...cur().zones[zi] } };
@@ -508,14 +529,36 @@ el.canvas.addEventListener('pointermove', (ev) => {
       if (Math.abs(z0.y + z0.height + dy - ny) < s / 2) z.y = 100 - z0.height;
     }
   } else if (d.mode === 'resize-se') {
+    // rysowanie nowej strefy: przeciągnięcie wyznacza prawy-dolny róg.
+    // Pozycje, nie rozmiary — stąd clamp do 100, nie do 100 - z0.x.
     z.width = clamp(snapVal(Math.max(p.x, z0.x + 0.5)), 0.5, 100 - z0.x);
     z.height = clamp(snapVal(Math.max(p.y, z0.y + 0.5)), 0.5, 100 - z0.y);
-  } else if (d.mode === 'resize-r') {
-    const right = clamp(snapVal(Math.max(p.x, z0.x + 0.5)), 0.5, 100 - z0.x);
-    z.x = z0.x; z.width = right - z0.x;
-  } else if (d.mode === 'resize-l') {
-    const left = clamp(snapVal(Math.min(p.x, z0.x + z0.width - 0.5)), 0, z0.x + z0.width - 0.5);
-    z.x = left; z.width = z0.x + z0.width - left;
+  } else if (d.mode.startsWith('resize-')) {
+    // dowolna kombinacja krawędzi: 'l' 'r' 't' 'b' (np. 'rb' = prawy + dolny).
+    // Lewa/górra zmienia pozycję i rozmiar naraz; prawa/dolna tylko rozmiar.
+    // Obie gałęzie liczą od niezmiennych z0, więc narożnik (np. 'rt') trzyma
+    // przeciwległą parę krawędzi na miejscu zamiast skakać o 2× delta.
+    const e = d.mode.slice(7);
+    const MIN = 0.5;
+    const left = e.includes('l')
+      ? clamp(snapVal(Math.min(p.x, z0.x + z0.width - MIN)), 0, z0.x + z0.width - MIN)
+      : z0.x;
+    const top = e.includes('t')
+      ? clamp(snapVal(Math.min(p.y, z0.y + z0.height - MIN)), 0, z0.y + z0.height - MIN)
+      : z0.y;
+    // prawa/dolna to POZYCJE na ekranie (0..100), nie rozmiary — clamp do 100,
+    // inaczej strefa nie mogła rosnąć w prawo/dół (górna granica 100 - z0.x
+    // to maksymalna SZEROKOŚĆ, a nie maksymalna pozycja prawej krawędzi)
+    const right = e.includes('r')
+      ? clamp(snapVal(Math.max(p.x, z0.x + MIN)), MIN, 100)
+      : z0.x + z0.width;
+    const bottom = e.includes('b')
+      ? clamp(snapVal(Math.max(p.y, z0.y + MIN)), MIN, 100)
+      : z0.y + z0.height;
+    z.x = left;
+    z.y = top;
+    z.width = right - left;
+    z.height = bottom - top;
   }
   normalize(cur());
   renderCanvas();

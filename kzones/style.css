@@ -9,7 +9,7 @@
   --accent-soft: rgba(61, 174, 233, .16);
   --danger: #da4453;
   --ok: #3daee9;
-  --radius: 10px;
+  --radius: 5px;
   --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
 }
 
@@ -164,8 +164,8 @@ select { cursor: pointer; }
 .tab {
   background: var(--card);
   border: 1px solid var(--line);
-  border-radius: 8px;
-  padding: 7px 8px 7px 13px;
+  border-radius: 4px;
+  padding: 8px 8px 8px 13px;
   display: flex;
   align-items: center;
   gap: 8px;
@@ -190,7 +190,7 @@ select { cursor: pointer; }
   background: transparent;
   border: 1px dashed var(--line);
   color: var(--dim);
-  border-radius: 8px;
+  border-radius: 4px;
   padding: 7px 13px;
   cursor: pointer;
   font: inherit;
@@ -220,11 +220,12 @@ select { cursor: pointer; }
   cursor: crosshair;
 }
 
+/* mniej zaokrągleń — strefy są prostokątami, nie bąbelkami */
 .zone {
   position: absolute;
   border: 2px solid var(--accent);
   background: var(--accent-soft);
-  border-radius: 7px;
+  border-radius: 2px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -254,11 +255,17 @@ select { cursor: pointer; }
   height: 13px;
   background: #fff;
   border: 2px solid var(--accent);
-  border-radius: 3px;
+  border-radius: 2px;
   z-index: 4;
 }
+.handle.nw { cursor: nwse-resize; }
+.handle.n  { cursor: ns-resize; }
+.handle.ne { cursor: nesw-resize; }
+.handle.e  { cursor: ew-resize; }
 .handle.se { cursor: nwse-resize; }
+.handle.s  { cursor: ns-resize; }
 .handle.sw { cursor: nesw-resize; }
+.handle.w  { cursor: ew-resize; }
 
 .zone-hint {
   position: absolute;
