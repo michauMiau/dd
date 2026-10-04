@@ -74,11 +74,15 @@ jobs:
         with:
           python-version: '3.12'
 
+      # Key on the playwright *version* too, not just the OS: a cache saved by
+      # an older playwright has a different browser revision on disk and
+      # `playwright install` would silently reuse it. Both test files are in
+      # the key so adding a suite does not reuse a stale browser dir either.
       - name: Cache Playwright browsers
         uses: actions/cache@v4
         with:
           path: ~/.cache/ms-playwright
-          key: playwright-${{ runner.os }}-${{ hashFiles('kzones/test_app.py') }}
+          key: playwright-${{ runner.os }}-${{ hashFiles('kzones/test_app.py', 'kzones/test_handles.py') }}-${{ hashFiles('package-lock.json') }}
 
       - name: Install Playwright
         run: |
