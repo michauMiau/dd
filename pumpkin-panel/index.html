@@ -1,0 +1,1091 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Pumpkin Panel</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Silkscreen:wght@400;700&display=swap">
+<style>
+/* Hallmark · macrostructure: Workbench · theme: custom · vibe: "minecraft ui, crisp pixels, zero radius"
+ * paper: oklch(17% 0.014 145) · accent: oklch(80% 0.16 90)
+ * display: Press Start 2P · body: Silkscreen · axes: dark / mono-pixel / warm
+ * pre-emit critique: P5 H4 E4 S5 R5 V5 · contrast: pass (17/17) · studied: no
+ */
+:root {
+  --color-paper:      oklch(17% 0.014 145);
+  --color-paper-2:    oklch(21% 0.016 145);
+  --color-paper-3:    oklch(25% 0.018 145);
+  --color-rule:       oklch(38% 0.020 145);
+  --color-rule-2:     oklch(56% 0.024 145);
+  --color-ink:        oklch(93% 0.012 145);
+  --color-muted:      oklch(72% 0.014 145);
+  --color-neutral:    oklch(66% 0.018 145);
+  --color-accent:     oklch(80% 0.16 90);
+  --color-accent-ink: oklch(19% 0.020 145);
+  --color-ok:         oklch(78% 0.18 150);
+  --color-err:        oklch(68% 0.19 25);
+  --color-focus:      oklch(85% 0.18 90);
+
+  --font-display: "Press Start 2P", ui-monospace, monospace;
+  --font-body: "Silkscreen", ui-monospace, monospace;
+
+  --space-3xs: 4px;
+  --space-2xs: 8px;
+  --space-xs: 12px;
+  --space-sm: 16px;
+  --space-md: 24px;
+  --space-lg: 32px;
+  --space-xl: 48px;
+
+  --text-xs: 10px;
+  --text-sm: 12px;
+  --text-base: 14px;
+  --text-md: 18px;
+  --text-lg: 24px;
+
+  --dur-instant: 0ms;
+  --dur-step: 90ms;
+  --ease-step: steps(2, end);
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+
+  --rule: 2px;
+  --rule-thick: 3px;
+}
+
+* { box-sizing: border-box; border-radius: 0 !important; }
+
+html, body {
+  overflow-x: clip;
+  max-width: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--color-paper);
+  color: var(--color-ink);
+  font-family: var(--font-body);
+  font-size: var(--text-base);
+  line-height: 1.6;
+  -webkit-font-smoothing: none;
+  font-smooth: never;
+}
+
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 1;
+  background: repeating-linear-gradient(
+    to bottom,
+    transparent 0 2px,
+    var(--color-paper) 2px 4px
+  );
+  opacity: 0.35;
+}
+
+h1, h2, h3 { font-family: var(--font-display); font-style: normal; font-weight: 400; }
+
+:focus-visible {
+  outline: var(--rule-thick) solid var(--color-focus);
+  outline-offset: 0;
+}
+
+/* ---- connect bar ---- */
+.masthead {
+  position: sticky;
+  top: 0;
+  z-index: 300;
+  background: var(--color-paper-2);
+  border-bottom: var(--rule-thick) solid var(--color-rule);
+  padding: var(--space-sm);
+}
+
+.masthead__row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+  flex-wrap: wrap;
+}
+
+.masthead__brand {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2xs);
+  min-width: 0;
+}
+
+.wordmark {
+  font-family: var(--font-display);
+  font-size: var(--text-sm);
+  color: var(--color-accent);
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.lamp {
+  width: 14px;
+  height: 14px;
+  flex: 0 0 14px;
+  background: var(--color-rule);
+  border: var(--rule) solid var(--color-paper);
+}
+
+.lamp--live { background: var(--color-ok); }
+.lamp--dead { background: var(--color-err); }
+.lamp--wait { background: var(--color-accent); animation: blink 1s steps(2, end) infinite; }
+
+@keyframes blink { 0%, 50% { opacity: 1; } 50.01%, 100% { opacity: 0.25; } }
+
+.link-state {
+  font-size: var(--text-xs);
+  color: var(--color-muted);
+  text-transform: uppercase;
+  line-height: 1;
+}
+
+main {
+  max-width: 1320px;
+  margin: 0 auto;
+  padding: var(--space-md) var(--space-sm) var(--space-xl);
+  position: relative;
+  z-index: 2;
+}
+
+/* ---- fields ---- */
+label, .lbl {
+  display: block;
+  font-size: var(--text-xs);
+  text-transform: uppercase;
+  color: var(--color-muted);
+  line-height: 1;
+}
+
+input, select, button, textarea {
+  font-family: var(--font-body);
+  font-size: var(--text-sm);
+  color: var(--color-ink);
+  background: var(--color-paper-3);
+  border: var(--rule) solid var(--color-rule);
+  padding: var(--space-2xs) var(--space-xs);
+  min-height: 36px;
+}
+
+input::placeholder { color: var(--color-neutral); opacity: 1; }
+
+input:hover, select:hover, textarea:hover { border-color: var(--color-rule-2); }
+
+input:focus-visible, select:focus-visible, textarea:focus-visible {
+  outline: var(--rule-thick) solid var(--color-focus);
+  outline-offset: 0;
+}
+
+input:disabled, select:disabled, button:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+button {
+  cursor: pointer;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  transition: background-color var(--dur-step) var(--ease-step);
+}
+
+button:hover:not(:disabled) { background: var(--color-rule); color: var(--color-ink); }
+button:active:not(:disabled) { background: var(--color-paper); }
+
+button.primary {
+  background: var(--color-accent);
+  color: var(--color-accent-ink);
+  border-color: var(--color-accent);
+}
+button.primary:hover:not(:disabled) { background: var(--color-ink); color: var(--color-accent-ink); }
+
+button.danger { color: var(--color-err); border-color: var(--color-err); }
+button.danger:hover:not(:disabled) { background: var(--color-err); color: var(--color-paper); }
+
+input[type="checkbox"] {
+  width: 20px;
+  height: 20px;
+  min-height: 20px;
+  padding: 0;
+  appearance: none;
+  background: var(--color-paper);
+  border: var(--rule) solid var(--color-rule);
+  position: relative;
+  cursor: pointer;
+  vertical-align: middle;
+}
+
+input[type="checkbox"]:checked { border-color: var(--color-accent); background: var(--color-paper-3); }
+
+input[type="checkbox"]:checked::after {
+  content: "";
+  position: absolute;
+  inset: 3px;
+  background: var(--color-accent);
+}
+
+/* ---- layout ---- */
+.deck { display: grid; gap: var(--space-md); grid-template-columns: minmax(0, 1fr); }
+
+@media (min-width: 900px) {
+  .deck { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+  .deck__wide { grid-column: 1 / -1; }
+}
+
+.panel {
+  background: var(--color-paper-2);
+  border: var(--rule) solid var(--color-rule);
+}
+
+.panel__head {
+  padding: var(--space-xs) var(--space-sm);
+  border-bottom: var(--rule) solid var(--color-rule);
+  background: var(--color-paper-3);
+}
+
+.panel__title {
+  margin: 0;
+  font-size: var(--text-xs);
+  color: var(--color-ink);
+  line-height: 1;
+}
+
+.panel__body { padding: var(--space-sm); }
+
+.panel__note {
+  font-size: var(--text-xs);
+  color: var(--color-muted);
+  margin: var(--space-2xs) 0 0;
+  line-height: 1.7;
+}
+
+.stack { display: flex; flex-direction: column; gap: var(--space-xs); }
+.row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2xs);
+  flex-wrap: wrap;
+  line-height: 1;
+}
+
+.row__push { margin-left: auto; }
+
+.grow { flex: 1 1 140px; min-width: 0; }
+
+.field { display: flex; flex-direction: column; gap: var(--space-3xs); min-width: 0; }
+.field > input, .field > select { width: 100%; }
+
+/* ---- readouts ---- */
+.readout { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: var(--space-2xs) var(--space-sm); }
+
+.readout__key {
+  font-size: var(--text-xs);
+  text-transform: uppercase;
+  color: var(--color-muted);
+  line-height: 2.4;
+}
+
+.readout__val {
+  font-family: var(--font-body);
+  font-size: var(--text-sm);
+  color: var(--color-ink);
+  line-height: 2.4;
+  text-align: right;
+  word-break: break-word;
+}
+
+.readout__val--live { color: var(--color-ok); }
+.readout__val--dead { color: var(--color-err); }
+
+/* ---- tables ---- */
+table { width: 100%; border-collapse: collapse; table-layout: fixed; }
+
+th {
+  text-align: left;
+  font-family: var(--font-display);
+  font-size: 9px;
+  color: var(--color-muted);
+  text-transform: uppercase;
+  padding: var(--space-2xs);
+  border-bottom: var(--rule) solid var(--color-rule);
+  overflow-wrap: anywhere;
+}
+
+td {
+  padding: var(--space-2xs);
+  border-bottom: var(--rule) solid var(--color-rule-2);
+  font-size: var(--text-sm);
+  overflow-wrap: anywhere;
+}
+
+tbody tr:last-child td { border-bottom: 0; }
+
+td:last-child, th:last-child { width: 84px; text-align: right; }
+
+td.empty { color: var(--color-neutral); text-align: left; }
+
+.cell-id { color: var(--color-muted); font-size: var(--text-xs); }
+
+.cell-num { font-variant-numeric: tabular-nums; }
+
+/* ---- event log ---- */
+.log {
+  height: 260px;
+  overflow-y: auto;
+  background: var(--color-paper);
+  border: var(--rule) solid var(--color-rule);
+  padding: var(--space-xs);
+  font-family: var(--font-body);
+  font-size: var(--text-xs);
+  line-height: 1.9;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.log__row { display: block; }
+.log__row--err { color: var(--color-err); }
+.log__row--ok { color: var(--color-ok); }
+.log__time { color: var(--color-rule-2); }
+
+/* ---- setup sheet ---- */
+.setup { margin: 0 0 var(--space-md); }
+
+.setup__grid { display: grid; gap: var(--space-sm); grid-template-columns: minmax(0, 1fr); }
+@media (min-width: 780px) { .setup__grid { grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr); } }
+
+.sheet__title {
+  font-family: var(--font-display);
+  font-size: var(--text-sm);
+  color: var(--color-accent);
+  margin: 0 0 var(--space-2xs);
+  line-height: 1.5;
+}
+
+.steps { margin: 0; padding: 0; list-style: none; counter-reset: step; }
+
+.steps li {
+  counter-increment: step;
+  display: grid;
+  grid-template-columns: 28px minmax(0, 1fr);
+  gap: var(--space-xs);
+  padding: var(--space-2xs) 0;
+  border-bottom: var(--rule) solid var(--color-rule-2);
+  font-size: var(--text-sm);
+  line-height: 1.7;
+}
+
+.steps li:last-child { border-bottom: 0; }
+
+.steps li::before {
+  content: counter(step);
+  font-family: var(--font-display);
+  font-size: 10px;
+  color: var(--color-accent);
+  line-height: 2.2;
+}
+
+.steps code, .inline-code {
+  display: inline-block;
+  background: var(--color-paper-3);
+  border: var(--rule) solid var(--color-rule);
+  padding: 0 var(--space-3xs);
+  color: var(--color-ok);
+  font-family: var(--font-body);
+  font-size: var(--text-xs);
+  white-space: nowrap;
+}
+
+.code-sheet {
+  background: var(--color-paper-3);
+  border: var(--rule) solid var(--color-rule);
+  padding: var(--space-xs);
+  font-family: var(--font-body);
+  font-size: var(--text-xs);
+  line-height: 1.9;
+  white-space: pre;
+  overflow-x: auto;
+  color: var(--color-ink);
+}
+
+.note {
+  font-size: var(--text-xs);
+  color: var(--color-muted);
+  line-height: 1.8;
+}
+
+.note--warn { color: var(--color-accent); }
+
+details.fold { margin-top: var(--space-2xs); }
+
+details.fold > summary {
+  cursor: pointer;
+  font-size: var(--text-xs);
+  text-transform: uppercase;
+  color: var(--color-accent);
+  padding: var(--space-2xs) 0;
+  list-style: none;
+}
+
+details.fold > summary::-webkit-details-marker { display: none; }
+details.fold > summary::before { content: "[+] "; }
+details.fold[open] > summary::before { content: "[-] "; }
+details.fold > summary:focus-visible { outline: var(--rule-thick) solid var(--color-focus); }
+
+.warn-bar {
+  background: var(--color-paper-3);
+  border-left: var(--rule-thick) solid var(--color-accent);
+  padding: var(--space-2xs) var(--space-xs);
+  font-size: var(--text-xs);
+  line-height: 1.8;
+  color: var(--color-muted);
+}
+
+.warn-bar strong { color: var(--color-accent); font-weight: 400; }
+
+.hide { display: none !important; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+</style>
+</head>
+<body>
+
+<header class="masthead">
+  <div class="masthead__row">
+    <div class="masthead__brand">
+      <span class="lamp" id="lamp" aria-hidden="true"></span>
+      <h1 class="wordmark">PUMPKIN</h1>
+    </div>
+    <span class="link-state" id="link-state">NOT LINKED</span>
+    <span class="row__push"></span>
+    <input id="secret" type="password" placeholder="SECRET" autocomplete="off" size="18" aria-label="management secret">
+    <input id="host" value="192.168.1.165" size="14" aria-label="server address" title="server address">
+    <input id="port" value="25585" size="5" aria-label="port" title="port">
+    <button class="primary" onclick="connect()">LINK</button>
+    <button onclick="disconnect()">CUT</button>
+  </div>
+</header>
+
+<main>
+
+  <section class="panel setup" id="setup">
+    <div class="panel__body setup__grid">
+      <div>
+        <h2 class="sheet__title">FIRST LINK</h2>
+        <ol class="steps">
+          <li><span>Open <code>pumpkin.toml</code> in the mc-server folder and set the management block to:</span></li>
+          <li><span>Publish the port in the Custom App compose so the browser can reach it: <span class="inline-code">25585:25585/tcp</span></span></li>
+          <li><span>Choose a long random secret and paste it in the field at the top of this page, then press <strong>LINK</strong>.</span></li>
+        </ol>
+        <div class="code-sheet" id="toml">enabled = true
+address = "0.0.0.0:25585"
+secret = "PASTE-YOUR-SECRET"
+allowed_origins = ["*"]</div>
+        <p class="warn-bar" style="margin-top:var(--space-2xs)">
+          <strong>*</strong> in allowed_origins lets any page open this socket. The secret is the only thing
+          standing between a stranger and your server stop button. Never reuse this secret anywhere else.
+        </p>
+      </div>
+      <div>
+        <p class="note">The panel talks to Pumpkin over a plain WebSocket using JSON-RPC 2.0. Nothing is
+        stored. The secret lives in this tab only and is gone when you close the page.</p>
+        <details class="fold">
+          <summary>REMOTE ACCESS</summary>
+          <p class="note">If you expose this through playit, point the tunnel at the Pumpkin container
+          address and port <span class="inline-code">25585</span>. Leave Proxy Protocol off. Anyone holding the
+          secret can shut the server down, so treat it like a password.</p>
+        </details>
+        <details class="fold">
+          <summary>WHY PIXEL TYPE</summary>
+          <p class="note">Press Start 2P for headings, Silkscreen for everything else. Square corners,
+          hard 2px rules, no gradients. It should look like it belongs next to the game.</p>
+        </details>
+      </div>
+    </div>
+  </section>
+
+  <div class="deck">
+
+    <section class="panel">
+      <div class="panel__head"><h2 class="panel__title">SERVER</h2></div>
+      <div class="panel__body stack">
+        <div class="readout">
+          <span class="readout__key">State</span><span class="readout__val" id="r-started">—</span>
+          <span class="readout__key">Version</span><span class="readout__val" id="r-ver">—</span>
+          <span class="readout__key">Protocol</span><span class="readout__val" id="r-proto">—</span>
+          <span class="readout__key">Players online</span><span class="readout__val cell-num" id="r-count">—</span>
+        </div>
+        <div class="row">
+          <button onclick="saveWorld()">SAVE WORLD</button>
+          <button onclick="broadcast()">MESSAGE ALL</button>
+          <button class="danger" onclick="stopServer()">STOP SERVER</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="panel">
+      <div class="panel__head"><h2 class="panel__title">PLAYERS ONLINE</h2></div>
+      <div class="panel__body">
+        <table>
+          <thead><tr><th>Name</th><th>ID</th><th></th></tr></thead>
+          <tbody id="t-players"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="panel deck__wide">
+      <div class="panel__head"><h2 class="panel__title">SETTINGS</h2></div>
+      <div class="panel__body stack">
+
+        <div class="row" style="align-items:flex-end">
+          <div class="field grow">
+            <label for="s_motd">MOTD</label>
+            <input id="s_motd">
+          </div>
+          <button onclick="setStr('motd','message')">SAVE</button>
+        </div>
+
+        <div class="row" style="align-items:flex-end">
+          <div class="field">
+            <label for="s_difficulty">Difficulty</label>
+            <select id="s_difficulty" onchange="setEnum('difficulty','difficulty')">
+              <option value="peaceful">peaceful</option>
+              <option value="easy">easy</option>
+              <option value="normal">normal</option>
+              <option value="hard">hard</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="s_gamemode">Game mode</label>
+            <select id="s_gamemode" onchange="setEnum('game_mode','mode')">
+              <option value="survival">survival</option>
+              <option value="creative">creative</option>
+              <option value="adventure">adventure</option>
+              <option value="spectator">spectator</option>
+            </select>
+          </div>
+          <div class="field" style="flex:0 0 110px">
+            <label for="s_max">Max players</label>
+            <input id="s_max" type="number" min="1">
+          </div>
+        </div>
+
+        <div class="row" style="align-items:flex-end">
+          <div class="field" style="flex:0 0 110px">
+            <label for="s_view">View distance</label>
+            <input id="s_view" type="number" min="2" max="32">
+          </div>
+          <div class="field" style="flex:0 0 110px">
+            <label for="s_sim">Simulation</label>
+            <input id="s_sim" type="number" min="2" max="32">
+          </div>
+          <div class="field" style="flex:0 0 110px">
+            <label for="s_autosave">Autosave</label>
+            <input type="checkbox" id="s_autosave" onchange="setBool('autosave','enable')">
+          </div>
+          <button onclick="pushNums()">SAVE 3</button>
+          <button onclick="setBool('autosave','enable')">SAVE AUTO</button>
+        </div>
+
+        <div class="row" style="align-items:flex-end">
+          <div class="field" style="flex:0 0 110px">
+            <label for="s_pause">Pause when empty</label>
+            <input id="s_pause" type="number" min="0">
+          </div>
+          <div class="field" style="flex:0 0 110px">
+            <label for="s_idle">Idle timeout</label>
+            <input id="s_idle" type="number" min="0">
+          </div>
+          <div class="field" style="flex:0 0 110px">
+            <label for="s_idle2">Spawn protection</label>
+            <input id="s_idle2" type="number" min="0">
+          </div>
+          <div class="field" style="flex:0 0 130px">
+            <label for="s_force">Force gamemode</label>
+            <input type="checkbox" id="s_force" onchange="setBool('force_game_mode','force')">
+          </div>
+          <button onclick="setInt('pause_when_empty_seconds','seconds')">SAVE PAUSE</button>
+          <button onclick="setInt('player_idle_timeout','seconds')">SAVE IDLE</button>
+          <button onclick="setInt('spawn_protection_radius','radius')">SAVE SPAWN</button>
+        </div>
+
+        <div class="row" style="align-items:flex-end">
+          <div class="field" style="flex:0 0 130px">
+            <label for="s_useal">Allowlist on</label>
+            <input type="checkbox" id="s_useal" onchange="setBool('use_allowlist','use')">
+          </div>
+          <div class="field" style="flex:0 0 130px">
+            <label for="s_enforce">Enforce</label>
+            <input type="checkbox" id="s_enforce" onchange="setBool('enforce_allowlist','enforce')">
+          </div>
+          <div class="field" style="flex:0 0 130px">
+            <label for="s_flight">Allow flight</label>
+            <input type="checkbox" id="s_flight" onchange="setBool('allow_flight','allow')">
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <section class="panel">
+      <div class="panel__head"><h2 class="panel__title">ALLOWLIST</h2></div>
+      <div class="panel__body stack">
+        <div class="row">
+          <input id="al_name" class="grow" placeholder="player name">
+          <button onclick="listAdd('allowlist','add',{name:val('#al_name')})">ADD</button>
+        </div>
+        <table>
+          <thead><tr><th>Name</th><th>ID</th><th></th></tr></thead>
+          <tbody id="t-allowlist"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="panel">
+      <div class="panel__head"><h2 class="panel__title">OPERATORS</h2></div>
+      <div class="panel__body stack">
+        <div class="row">
+          <input id="op_name" class="grow" placeholder="player name">
+          <input id="op_lvl" type="number" min="0" max="4" value="4" style="flex:0 0 56px" aria-label="permission level">
+          <button onclick="opAdd()">ADD</button>
+        </div>
+        <table>
+          <thead><tr><th>Name</th><th>Level</th><th></th></tr></thead>
+          <tbody id="t-operators"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="panel">
+      <div class="panel__head"><h2 class="panel__title">BANS</h2></div>
+      <div class="panel__body stack">
+        <div class="row">
+          <input id="ban_name" class="grow" placeholder="player name">
+          <input id="ban_reason" class="grow" placeholder="reason">
+          <button onclick="banAdd()">BAN</button>
+        </div>
+        <table>
+          <thead><tr><th>Player</th><th>Reason</th><th></th></tr></thead>
+          <tbody id="t-bans"></tbody>
+        </table>
+        <div class="row" style="border-top:var(--rule) solid var(--color-rule);padding-top:var(--space-xs)">
+          <input id="ipban_ip" class="grow" placeholder="IP or prefix">
+          <button onclick="ipbanAdd()">BAN IP</button>
+        </div>
+        <table>
+          <thead><tr><th>IP</th><th>Reason</th><th></th></tr></thead>
+          <tbody id="t-ipbans"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="panel">
+      <div class="panel__head"><h2 class="panel__title">GAMERULES</h2></div>
+      <div class="panel__body stack">
+        <div class="row">
+          <input id="gr_key" class="grow" placeholder="key">
+          <input id="gr_val" style="flex:0 0 110px" placeholder="value">
+          <button onclick="grUpdate()">SET</button>
+        </div>
+        <table>
+          <thead><tr><th>Key</th><th>Type</th><th>Value</th></tr></thead>
+          <tbody id="t-gamerules"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="panel deck__wide">
+      <div class="panel__head"><h2 class="panel__title">LIVE EVENTS</h2></div>
+      <div class="panel__body">
+        <div class="log" id="log" role="log" aria-live="polite" aria-label="live server events"></div>
+      </div>
+    </section>
+
+  </div>
+</main>
+
+<script>
+"use strict";
+
+let ws = null, idc = 0;
+const pending = new Map();
+
+const $ = (s) => document.querySelector(s);
+const val = (s) => $(s).value.trim();
+
+function el(tag, cls, text) {
+  const n = document.createElement(tag);
+  if (cls) n.className = cls;
+  if (text !== undefined) n.textContent = text;
+  return n;
+}
+
+function log(txt, kind) {
+  const box = $("#log");
+  const row = el("span", "log__row" + (kind ? " log__row--" + kind : ""));
+  row.appendChild(el("span", "log__time", new Date().toLocaleTimeString() + " "));
+  row.appendChild(document.createTextNode(txt));
+  box.appendChild(row);
+  while (box.children.length > 300) box.removeChild(box.firstChild);
+  box.scrollTop = box.scrollHeight;
+}
+
+function setLink(state, text) {
+  const lamp = $("#lamp");
+  lamp.className = "lamp " + (state === "live" ? "lamp--live" : state === "wait" ? "lamp--wait" : "lamp--dead");
+  $("#link-state").textContent = text;
+}
+
+function connect() {
+  const host = val("#host");
+  if (!host) { log("NO ADDRESS", "err"); return; }
+  disconnect();
+  const url = "ws://" + host + ":" + val("#port") + "/";
+  setLink("wait", "LINKING");
+  ws = new WebSocket(url, ["minecraft-v1", $("#secret").value]);
+
+  ws.onopen = () => { setLink("live", "LINKED"); log("SOCKET OPEN"); $("#setup").classList.add("hide"); refreshAll(); };
+  ws.onclose = (e) => { setLink("dead", "CUT (" + e.code + ")"); log("CLOSED: " + e.reason, "err"); };
+  ws.onerror = () => { setLink("dead", "REFUSED"); log("SOCKET REFUSED — check secret, address and port", "err"); };
+  ws.onmessage = (e) => handle(e.data);
+}
+
+function disconnect() {
+  if (ws) { try { ws.close(); } catch (e) {} ws = null; }
+  setLink("dead", "NOT LINKED");
+}
+
+function send(obj) {
+  if (!ws || ws.readyState !== 1) { log("NO LINK", "err"); return false; }
+  ws.send(JSON.stringify(obj));
+  return true;
+}
+
+function handle(raw) {
+  let d;
+  try { d = JSON.parse(raw); } catch (e) { return; }
+  if (!d.id && d.method) {
+    log("<" + d.method.replace("minecraft:notification/", "") + "> " + JSON.stringify(d.params || {}));
+    react(d.method.replace("minecraft:notification/", ""), d.params || {});
+    return;
+  }
+  if (Array.isArray(d)) { d.forEach(handle); return; }
+  const cb = pending.get(d.id);
+  if (cb) {
+    pending.delete(d.id);
+    if (d.error) cb.reject(new Error(d.error.message + (d.error.data ? " — " + d.error.data : "")));
+    else cb.resolve(d.result);
+  }
+}
+
+function react(short, p) {
+  if (short === "players/joined" || short === "players/left") refresh("players", renderPlayers);
+  if (short === "allowlist/added" || short === "allowlist/removed") refresh("allowlist", renderSimpleList);
+  if (short === "operators/added" || short === "operators/removed") refresh("operators", renderOps);
+  if (short === "bans/added" || short === "bans/removed") refresh("bans", renderBans);
+  if (short === "server/stopping") log("SERVER IS STOPPING", "err");
+}
+
+function call(method, params) {
+  return new Promise((resolve, reject) => {
+    const id = ++idc;
+    pending.set(id, { resolve, reject });
+    const msg = { jsonrpc: "2.0", id: id, method: method.indexOf("minecraft:") === 0 ? method : "minecraft:" + method };
+    if (params !== undefined && params !== null) msg.params = params;
+    if (!send(msg)) { pending.delete(id); reject(new Error("no link")); }
+    setTimeout(() => {
+      if (pending.has(id)) { pending.delete(id); reject(new Error("timeout")); }
+    }, 8000);
+  });
+}
+
+function rpc(method, params) {
+  return call(method, params).then(
+    (r) => { log("OK " + method, "ok"); return r; },
+    (e) => { log("FAIL " + method + " — " + e.message, "err"); return null; }
+  );
+}
+
+function refreshAll() {
+  refresh("server/status", renderStatus);
+  refresh("players", renderPlayers);
+  refresh("allowlist", renderSimpleList);
+  refresh("operators", renderOps);
+  refresh("bans", renderBans);
+  refresh("ip_bans", renderIpBans);
+  refresh("gamerules", renderRules);
+  loadSettings();
+}
+
+function refresh(method, render) {
+  return call(method).then(render).catch(() => {});
+}
+
+function renderStatus(s) {
+  if (!s) return;
+  $("#r-started").textContent = s.started ? "RUNNING" : "STOPPED";
+  $("#r-started").className = "readout__val " + (s.started ? "readout__val--live" : "readout__val--dead");
+  const v = s.version || {};
+  $("#r-ver").textContent = v.name || "—";
+  $("#r-proto").textContent = (v.protocol !== undefined && v.protocol !== null) ? v.protocol : "—";
+  $("#r-count").textContent = (s.players || []).length;
+}
+
+function renderPlayers(list) {
+  const tb = $("#t-players"); tb.innerHTML = "";
+  if (!list || !list.length) { tb.appendChild(row3("NOBODY ONLINE", "", null)); return; }
+  list.forEach(p => {
+    const tr = el("tr");
+    tr.appendChild(el("td", "", p.name || "?"));
+    tr.appendChild(el("td", "cell-id", (p.id || "").slice(0, 18)));
+    tr.appendChild(actionCell("KICK", "danger", () => kick(p.name || p.id)));
+    tb.appendChild(tr);
+  });
+}
+
+function actionCell(label, cls, fn) {
+  const td = el("td");
+  const b = el("button", cls, label);
+  b.onclick = fn;
+  td.appendChild(b);
+  return td;
+}
+
+function row3(a, b, label) {
+  const tr = el("tr");
+  tr.appendChild(el("td", "", a));
+  tr.appendChild(el("td", b === "" ? "cell-id" : "", b));
+  const td = el("td");
+  if (label) { const btn = el("button", "", label); td.appendChild(btn); }
+  tr.appendChild(td);
+  return tr;
+}
+
+function renderSimpleList(list) {
+  const tb = $("#t-allowlist"); tb.innerHTML = "";
+  if (!list || !list.length) { tb.appendChild(row3("LIST EMPTY", "", null)); return; }
+  list.forEach(p => {
+    const tr = el("tr");
+    tr.appendChild(el("td", "", p.name || "?"));
+    tr.appendChild(el("td", "cell-id", (p.id || "").slice(0, 18)));
+    tr.appendChild(actionCell("DROP", "", () => listDel("allowlist", p)));
+    tb.appendChild(tr);
+  });
+}
+
+function renderOps(list) {
+  const tb = $("#t-operators"); tb.innerHTML = "";
+  if (!list || !list.length) { tb.appendChild(row3("NO OPERATORS", "", null)); return; }
+  list.forEach(o => {
+    const p = o.player || {};
+    const tr = el("tr");
+    tr.appendChild(el("td", "", p.name || "?"));
+    tr.appendChild(el("td", "cell-num", String(o.permissionLevel !== undefined ? o.permissionLevel : "—")));
+    tr.appendChild(actionCell("DROP", "", () => listDel("operators", p)));
+    tb.appendChild(tr);
+  });
+}
+
+function renderBans(list) {
+  const tb = $("#t-bans"); tb.innerHTML = "";
+  if (!list || !list.length) { tb.appendChild(row3("NOBODY BANNED", "", null)); return; }
+  list.forEach(bn => {
+    const p = bn.player || {};
+    const tr = el("tr");
+    tr.appendChild(el("td", "", p.name || "?"));
+    tr.appendChild(el("td", "", bn.reason || "—"));
+    tr.appendChild(actionCell("LIFT", "", () => listDel("bans", p)));
+    tb.appendChild(tr);
+  });
+}
+
+function renderIpBans(list) {
+  const tb = $("#t-ipbans"); tb.innerHTML = "";
+  if (!list || !list.length) { tb.appendChild(row3("NO IP BANS", "", null)); return; }
+  list.forEach(bn => {
+    const tr = el("tr");
+    tr.appendChild(el("td", "cell-id", bn.ip || "?"));
+    tr.appendChild(el("td", "", bn.reason || "—"));
+    tr.appendChild(actionCell("LIFT", "", () => listDel("ip_bans", bn)));
+    tb.appendChild(tr);
+  });
+}
+
+function renderRules(list) {
+  const tb = $("#t-gamerules"); tb.innerHTML = "";
+  if (!list || !list.length) { tb.appendChild(row3("—", "—", "—")); return; }
+  list.forEach(g => {
+    const tr = el("tr");
+    tr.appendChild(el("td", "cell-id", g.key));
+    tr.appendChild(el("td", "", g.type || "—"));
+    tr.appendChild(el("td", "cell-num", String(g.value)));
+    tb.appendChild(tr);
+  });
+}
+
+// jedno mapowanie: nazwa ustawienia -> selektor w DOM. Panel uderza w pola
+// przez nazwe w setStr/setEnum/setInt/setBool, wiec zle mapowanie cicho
+// wysylalo pusty string zamiast bledzic.
+const SELECTORS = {
+  motd: "#s_motd",
+  max_players: "#s_max",
+  view_distance: "#s_view",
+  simulation_distance: "#s_sim",
+  pause_when_empty_seconds: "#s_pause",
+  player_idle_timeout: "#s_idle",
+  spawn_protection_radius: "#s_idle2",
+  difficulty: "#s_difficulty",
+  game_mode: "#s_gamemode",
+  use_allowlist: "#s_useal",
+  enforce_allowlist: "#s_enforce",
+  allow_flight: "#s_flight",
+  force_game_mode: "#s_force",
+  autosave: "#s_autosave"
+};
+
+function loadSettings() {
+  Object.keys(SELECTORS).forEach(m => {
+    call("serversettings/" + m).then(v => {
+      const n = $(SELECTORS[m]);
+      if (v === null || v === undefined) return;
+      if (n.type === "checkbox") n.checked = !!v;
+      else n.value = (typeof v === "object") ? JSON.stringify(v) : v;
+    }).catch(() => {});
+  });
+}
+
+function saveWorld() {
+  rpc("server/save", { flush: false });
+}
+
+function kick(name) {
+  rpc("players/kick", { kick: [{ player: { name: name }, message: { literal: "Removed from panel" } }] })
+    .then(() => refresh("players", renderPlayers));
+}
+
+function broadcast() {
+  const m = prompt("Message for everyone:");
+  if (!m) return;
+  rpc("server/system_message", { message: { message: { literal: m }, overlay: false } });
+}
+
+function stopServer() {
+  if (!confirm("Stop the server? Everyone gets kicked.")) return;
+  rpc("server/stop");
+}
+
+function setStr(setting, param) {
+  const o = {}; o[param] = val(SELECTORS[setting]);
+  rpc("serversettings/" + setting + "/set", o);
+}
+
+function setEnum(setting, param) {
+  const o = {}; o[param] = val(SELECTORS[setting]);
+  rpc("serversettings/" + setting + "/set", o);
+}
+
+function setBool(setting, param) {
+  const sel = SELECTORS[setting];
+  if (!sel) { log("NO MAPPING FOR " + setting, "err"); return; }
+  const o = {};
+  o[param] = $(sel).checked;
+  rpc("serversettings/" + setting + "/set", o);
+}
+
+function setInt(setting, param) {
+  const sel = SELECTORS[setting];
+  if (!sel) { log("NO MAPPING FOR " + setting, "err"); return; }
+  const o = {}; o[param] = parseInt(val(sel), 10);
+  if (isNaN(o[param])) { log("NOT A NUMBER", "err"); return; }
+  rpc("serversettings/" + setting + "/set", o);
+}
+
+function pushNums() {
+  rpc("serversettings/max_players/set", { max: +val("#s_max") });
+  rpc("serversettings/view_distance/set", { distance: +val("#s_view") });
+  rpc("serversettings/simulation_distance/set", { distance: +val("#s_sim") });
+}
+
+function listAdd(base, op, obj) {
+  if (!obj.name && !obj.ip) { log("FILL THE FIELD", "err"); return; }
+  const o = {};
+  o[op] = [obj];
+  rpc(base + "/" + op, o).then(() => refresh(base, rendererFor(base)));
+}
+
+// the schema wants an array for add and remove; ip_bans/remove takes plain strings
+function listDel(base, obj) {
+  const o = {};
+  o[base === "ip_bans" ? "ip" : "remove"] = base === "ip_bans" ? [obj.ip] : [obj];
+  rpc(base + "/remove", o).then(() => refresh(base, rendererFor(base)));
+}
+
+function rendererFor(base) {
+  if (base === "operators") return renderOps;
+  if (base === "bans") return renderBans;
+  if (base === "ip_bans") return renderIpBans;
+  return renderSimpleList;
+}
+
+function opAdd() {
+  const n = val("#op_name"); if (!n) { log("FILL THE NAME", "err"); return; }
+  rpc("operators/add", { add: [{ player: { name: n }, permissionLevel: +val("#op_lvl") || 4 }] })
+    .then(() => { $("#op_name").value = ""; refresh("operators", renderOps); });
+}
+
+function banAdd() {
+  const n = val("#ban_name"); if (!n) { log("FILL THE NAME", "err"); return; }
+  const b = { player: { name: n } };
+  if (val("#ban_reason")) b.reason = val("#ban_reason");
+  rpc("bans/add", { add: [b] })
+    .then(() => { $("#ban_name").value = ""; $("#ban_reason").value = ""; refresh("bans", renderBans); });
+}
+
+function ipbanAdd() {
+  const ip = val("#ipban_ip"); if (!ip) { log("FILL THE IP", "err"); return; }
+  rpc("ip_bans/add", { add: [{ ip: ip }] })
+    .then(() => { $("#ipban_ip").value = ""; refresh("ip_bans", renderIpBans); });
+}
+
+function grUpdate() {
+  const k = val("#gr_key"); if (!k) { log("FILL THE KEY", "err"); return; }
+  const raw = val("#gr_val");
+  let v = raw;
+  if (raw === "true") v = true;
+  else if (raw === "false") v = false;
+  else if (/^-?\d+$/.test(raw)) v = parseInt(raw, 10);
+  else { log("VALUE MUST BE true/false OR A NUMBER", "err"); return; }
+  rpc("gamerules/update", { gamerule: { key: k, value: v } }).then(() => refresh("gamerules", renderRules));
+}
+
+window.connect = connect;
+window.disconnect = disconnect;
+window.kick = kick;
+window.broadcast = broadcast;
+window.stopServer = stopServer;
+window.saveWorld = saveWorld;
+window.setStr = setStr;
+window.setEnum = setEnum;
+window.setBool = setBool;
+window.setInt = setInt;
+window.pushNums = pushNums;
+window.listAdd = listAdd;
+window.listDel = listDel;
+window.opAdd = opAdd;
+window.banAdd = banAdd;
+window.ipbanAdd = ipbanAdd;
+window.grUpdate = grUpdate;
+window.val = val;
+</script>
+</body>
+</html>
