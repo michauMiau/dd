@@ -52,6 +52,9 @@
 
   --rule: 2px;
   --rule-thick: 3px;
+  /* Minecraft-owy przycisk ma gruby, ciemny obrys. 4px na 36px wysokosci
+     to ten sam proporcjonalny cień co w GUI gry. */
+  --rule-btn: 4px;
 }
 
 * { box-sizing: border-box; border-radius: 0 !important; }
@@ -191,6 +194,8 @@ button {
   cursor: pointer;
   text-transform: uppercase;
   letter-spacing: 0.02em;
+  border-width: var(--rule-btn);
+  padding: var(--space-2xs) calc(var(--space-xs) + 2px);
   transition: background-color var(--dur-step) var(--ease-step);
 }
 
@@ -468,7 +473,9 @@ details.fold > summary:focus-visible { outline: var(--rule-thick) solid var(--co
     </div>
     <span class="link-state" id="link-state">NOT LINKED</span>
     <span class="row__push"></span>
-    <input id="secret" type="password" placeholder="SECRET" autocomplete="off" size="18" aria-label="management secret">
+    <input id="secret" type="password" placeholder="SECRET" autocomplete="off" size="18" aria-label="management secret" oninput="syncToml()">
+    <button onclick="genSecret()" title="generate a random secret">GEN</button>
+    <button onclick="toggleSecret()" id="secret-toggle" title="show or hide the secret">SHOW</button>
     <input id="host" value="192.168.1.165" size="14" aria-label="server address" title="server address">
     <input id="port" value="25585" size="5" aria-label="port" title="port">
     <button class="primary" onclick="connect()">LINK</button>
@@ -483,11 +490,22 @@ details.fold > summary:focus-visible { outline: var(--rule-thick) solid var(--co
       <div>
         <h2 class="sheet__title">FIRST LINK</h2>
         <ol class="steps">
-          <li><span>Open <code>pumpkin.toml</code> in the mc-server folder and set the management block to:</span></li>
-          <li><span>Publish the port in the Custom App compose so the browser can reach it: <span class="inline-code">25585:25585/tcp</span></span></li>
-          <li><span>Choose a long random secret and paste it in the field at the top of this page, then press <strong>LINK</strong>.</span></li>
+          <li><span>Press <span class="inline-code">GEN</span> to roll a 48-character secret. Press
+          <span class="inline-code">COPY TOML</span> to put the whole block on your clipboard.</span></li>
+          <li><span>Paste it into <code>pumpkin.toml</code> in the mc-server folder, replacing the
+          <span class="inline-code">PASTE-YOUR-SECRET</span> placeholder. Then restart the app so
+          Pumpkin re-reads the file.</span></li>
+          <li><span>Publish the port in the Custom App compose so the browser can reach it:
+          <span class="inline-code">25585:25585/tcp</span></span></li>
+          <li><span>Press <span class="inline-code">SHOW</span> on the secret field to confirm it
+          matches the file, then press <span class="inline-code">LINK</span>.</span></li>
         </ol>
-        <div class="code-sheet" id="toml">enabled = true
+        <div class="row" style="margin-top:var(--space-2xs)">
+          <button onclick="copyToml()">COPY TOML</button>
+          <button onclick="genSecret()">ROLL NEW SECRET</button>
+        </div>
+        <div class="code-sheet" id="toml">[networking.management]
+enabled = true
 address = "0.0.0.0:25585"
 secret = "PASTE-YOUR-SECRET"
 allowed_origins = ["*"]</div>
@@ -504,11 +522,6 @@ allowed_origins = ["*"]</div>
           <p class="note">If you expose this through playit, point the tunnel at the Pumpkin container
           address and port <span class="inline-code">25585</span>. Leave Proxy Protocol off. Anyone holding the
           secret can shut the server down, so treat it like a password.</p>
-        </details>
-        <details class="fold">
-          <summary>WHY PIXEL TYPE</summary>
-          <p class="note">Press Start 2P for headings, Silkscreen for everything else. Square corners,
-          hard 2px rules, no gradients. It should look like it belongs next to the game.</p>
         </details>
       </div>
     </div>
@@ -1068,6 +1081,66 @@ function grUpdate() {
   rpc("gamerules/update", { gamerule: { key: k, value: v } }).then(() => refresh("gamerules", renderRules));
 }
 
+// 48 znakow z crypto.getRandomValues — nigdy Math.random. Alfabetyczny zestaw
+// bez znakow mylacych przy przepisywaniu (0/O, 1/l/I). Sekret musi wejsc
+// do pumpkin.toml, wiec bez cudzyslowow, spacji i backslashe.
+function genSecret() {
+  const ALPHABET = "23456789abcdefghjkmnpqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ";
+  const bytes = new Uint8Array(48);
+  crypto.getRandomValues(bytes);
+  let out = "";
+  for (let i = 0; i < bytes.length; i++) out += ALPHABET[bytes[i] % ALPHABET.length];
+
+  const field = $("#secret");
+  field.value = out;
+  field.type = "text";
+  $("#secret-toggle").textContent = "HIDE";
+
+  syncToml();
+  log("NEW SECRET ROLLED — copy the TOML block, paste it in pumpkin.toml, restart");
+}
+
+// blok TOML musi pokazywac biezacy sekret, inaczej uzytkownik kopiuje
+// placeholder zamiast tego co wygenerowal
+function syncToml() {
+  const sheet = $("#toml");
+  if (sheet) sheet.textContent = tomlBlock();
+}
+
+function tomlBlock() {
+  const s = $("#secret").value || "PASTE-YOUR-SECRET";
+  return '[networking.management]\nenabled = true\naddress = "0.0.0.0:25585"\nsecret = "' + s + '"\nallowed_origins = ["*"]';
+}
+
+async function copyToml() {
+  syncToml();
+  const text = tomlBlock();
+  try {
+    await navigator.clipboard.writeText(text);
+    log("TOML BLOCK COPIED — paste it into pumpkin.toml", "ok");
+  } catch (e) {
+    // clipboard API wymaga bezpiecznego kontekstu; po http nie zadziala
+    const r = document.createRange();
+    r.selectNodeContents($("#toml"));
+    const sel = window.getSelection();
+    sel.removeAllRanges();
+    sel.addRange(r);
+    log("CLIPBOARD BLOCKED — the block is selected, press Ctrl+C", "err");
+  }
+}
+
+// hide pokazuje go z powrotem jako haslo; tresc zostaje w polu
+function toggleSecret() {
+  const field = $("#secret");
+  const shown = field.type === "text";
+  field.type = shown ? "password" : "text";
+  $("#secret-toggle").textContent = shown ? "SHOW" : "HIDE";
+}
+
+window.genSecret = genSecret;
+window.syncToml = syncToml;
+window.copyToml = copyToml;
+window.toggleSecret = toggleSecret;
 window.connect = connect;
 window.disconnect = disconnect;
 window.kick = kick;
