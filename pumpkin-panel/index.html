@@ -476,7 +476,7 @@ details.fold > summary:focus-visible { outline: var(--rule-thick) solid var(--co
     <input id="secret" type="password" placeholder="SECRET" autocomplete="off" size="18" aria-label="management secret" oninput="syncToml()">
     <button onclick="genSecret()" title="generate a random secret">GEN</button>
     <button onclick="toggleSecret()" id="secret-toggle" title="show or hide the secret">SHOW</button>
-    <input id="host" value="192.168.1.165" size="14" aria-label="server address" title="server address">
+    <input id="host" value="192.168.1." type="username" size="14" aria-label="server address" title="server address">
     <input id="port" value="25585" size="5" aria-label="port" title="port">
     <button class="primary" onclick="connect()">LINK</button>
     <button onclick="disconnect()">CUT</button>
