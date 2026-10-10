@@ -18,6 +18,8 @@
   --color-paper-2:    oklch(21% 0.016 145);
   --color-paper-3:    oklch(25% 0.018 145);
   --color-rule:       oklch(38% 0.020 145);
+  --color-rule-strong: oklch(52% 0.024 145);
+  --color-scrim:      oklch(12% 0.012 145 / 0.82);
   --color-rule-2:     oklch(56% 0.024 145);
   --color-ink:        oklch(93% 0.012 145);
   --color-muted:      oklch(72% 0.014 145);
@@ -31,6 +33,10 @@
   --font-display: "Press Start 2P", ui-monospace, monospace;
   --font-body: "Silkscreen", ui-monospace, monospace;
 
+  /* 1-2px na luzowanie wewnetrznych siatek i linii. Nie sa odstepem
+     miedzy sekcjami, tylko szwem miedzy komorkami. */
+  --hair-1: 1px;
+  --hair-2: 2px;
   --space-3xs: 4px;
   --space-2xs: 8px;
   --space-xs: 12px;
@@ -39,11 +45,14 @@
   --space-lg: 32px;
   --space-xl: 48px;
 
-  --text-xs: 10px;
-  --text-sm: 12px;
-  --text-base: 14px;
-  --text-md: 18px;
-  --text-lg: 24px;
+  /* Skala tekstu. Delikatnie wieksza niz poprzednia wersja (10/12/14/18/24),
+     ale proporcje zostaja te same, wiec hierarchia naglowkow sie nie rozjezdza.
+     xs 11, sm 13, base 15, md 19, lg 26. */
+  --text-xs: 11px;
+  --text-sm: 13px;
+  --text-base: 15px;
+  --text-md: 19px;
+  --text-lg: 26px;
 
   --dur-instant: 0ms;
   --dur-step: 90ms;
@@ -313,7 +322,7 @@ table { width: 100%; border-collapse: collapse; table-layout: fixed; }
 th {
   text-align: left;
   font-family: var(--font-display);
-  font-size: 9px;
+  font-size: var(--text-xs);
   color: var(--color-muted);
   text-transform: uppercase;
   padding: var(--space-2xs);
@@ -337,6 +346,147 @@ td.empty { color: var(--color-neutral); text-align: left; }
 .cell-id { color: var(--color-muted); font-size: var(--text-xs); }
 
 .cell-num { font-variant-numeric: tabular-nums; }
+
+/* Zwijane sekcje. Whitelist, bany i reguły są domyślnie zamknięte,
+   bo to najdłuższe listy, a po otwarciu serwera rzadko się ich grzebie. */
+.panel__head--fold {
+  cursor: pointer;
+  list-style: none;
+  display: flex;
+  align-items: center;
+  gap: var(--space-2xs);
+}
+
+.panel__head--fold::-webkit-details-marker { display: none; }
+
+.fold-caret {
+  flex: 0 0 auto;
+  color: var(--color-accent);
+}
+
+details.panel > summary.panel__head--fold:hover { background: var(--color-paper-2); }
+
+details.panel > .panel__body { border-top: var(--rule) solid var(--color-rule); }
+
+/* Reguły mają własny scroll — jest ich 59 i przy pełnej szerokości
+   rozciągały panel na kilkaset linii. */
+.rule-scroll {
+  max-height: 260px;
+  overflow-y: auto;
+  border: var(--rule) solid var(--color-rule);
+}
+
+/* GAME RULES: siatka przełączników zamiast tabeli k=v */
+.rule-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: var(--hair-2);
+  background: var(--color-rule);
+  border: var(--rule) solid var(--color-rule);
+}
+
+.rule {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2xs);
+  padding: var(--space-3xs) var(--space-2xs);
+  background: var(--color-paper);
+  cursor: pointer;
+  font-size: var(--text-xs);
+}
+
+.rule:hover { background: var(--color-paper-2); }
+
+.rule__name {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  text-transform: lowercase;
+  letter-spacing: 0.02em;
+}
+
+.rule__state {
+  flex: 0 0 26px;
+  text-align: right;
+  color: var(--color-muted);
+}
+
+.rule:has(input:checked) .rule__state { color: var(--color-accent); }
+
+.rule__num {
+  flex: 0 0 78px;
+  width: 78px;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---- COMMAND DESK: terminal odpowiedzi ---- */
+.reply {
+  height: 240px;
+  overflow-y: auto;
+  background: var(--color-paper);
+  border: var(--rule) solid var(--color-rule);
+  padding: var(--space-2xs);
+  font-size: var(--text-xs);
+  line-height: 2;
+}
+
+.reply__row {
+  display: flex;
+  gap: var(--space-2xs);
+  border-bottom: var(--hair-1) solid var(--color-rule);
+  padding: var(--hair-1) 0;
+}
+
+.reply__time { color: var(--color-muted); flex: 0 0 auto; }
+.reply__tag { color: var(--color-accent); flex: 0 0 96px; }
+.reply__text { flex: 1; min-width: 0; overflow-wrap: anywhere; }
+.reply__row--err .reply__text { color: var(--color-err); }
+.reply__row--ok .reply__tag { color: var(--color-ok); }
+
+.cmd-chips { display: flex; flex-wrap: wrap; gap: var(--space-3xs); }
+
+.cmd-chip {
+  font-size: var(--text-xs);
+  padding: var(--hair-1) var(--space-3xs);
+  border: var(--rule) solid var(--color-rule);
+  background: var(--color-paper-2);
+  cursor: pointer;
+  color: var(--color-muted);
+}
+
+.cmd-chip:hover { border-color: var(--color-accent); color: var(--color-accent); }
+
+/* ---- okienko w stronie (zamiast alertow przegladarki) ---- */
+.ask {
+  position: fixed;
+  inset: 0;
+  background: var(--color-scrim);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 40;
+}
+
+.ask__box {
+  background: var(--color-paper-2);
+  border: var(--rule-btn) solid var(--color-rule-strong);
+  box-shadow: var(--rule-thick) solid var(--color-rule-strong);
+  max-width: 520px;
+  width: calc(100% - var(--space-l) * 2);
+  padding: var(--space-s);
+}
+
+.ask__title { margin-bottom: var(--space-3xs); }
+
+.ask__hint {
+  font-size: var(--text-xs);
+  color: var(--color-muted);
+  line-height: 1.8;
+  margin-bottom: var(--space-2xs);
+}
 
 /* ---- event log ---- */
 .log {
@@ -389,7 +539,7 @@ td.empty { color: var(--color-neutral); text-align: left; }
 .steps li::before {
   content: counter(step);
   font-family: var(--font-display);
-  font-size: 10px;
+  font-size: var(--text-xs);
   color: var(--color-accent);
   line-height: 2.2;
 }
@@ -452,6 +602,21 @@ details.fold > summary:focus-visible { outline: var(--rule-thick) solid var(--co
 
 .warn-bar strong { color: var(--color-accent); font-weight: 400; }
 
+/* Pasek pobierania. Widoczny tylko na https (GitHub Pages). Panel sam
+   odpowiada, czy jest odsluzywany, bo https -> ws:// jest mixed content
+   i przegladarka zablokuje polaczenie zanim panel zdazy cokolwiek zrobic. */
+.fetch-bar {
+  background: var(--color-paper-3);
+  border-left: var(--rule-thick) solid var(--color-rule-strong);
+  padding: var(--space-2xs) var(--space-xs);
+  margin: 0 0 var(--space-xs);
+  font-size: var(--text-xs);
+  line-height: 1.8;
+  color: var(--color-muted);
+}
+.fetch-bar strong { color: var(--color-accent); font-weight: 400; }
+.fetch-bar[hidden] { display: none; }
+
 .hide { display: none !important; }
 
 @media (prefers-reduced-motion: reduce) {
@@ -465,6 +630,14 @@ details.fold > summary:focus-visible { outline: var(--rule-thick) solid var(--co
 </head>
 <body>
 
+<div class="fetch-bar" id="fetch-bar" hidden>
+  <strong>THIS PAGE IS THE DOWNLOAD, NOT THE PANEL.</strong>
+  It is served over <strong>https</strong>, so your browser refuses to open the plain
+  <strong>ws://</strong> socket to the server. Press <strong>SAVE AS FILE</strong> and open
+  <strong>pumpkin-panel.html</strong> from your disk. The copy on disk is not served over
+  https, so it connects fine.
+</div>
+
 <header class="masthead">
   <div class="masthead__row">
     <div class="masthead__brand">
@@ -473,13 +646,20 @@ details.fold > summary:focus-visible { outline: var(--rule-thick) solid var(--co
     </div>
     <span class="link-state" id="link-state">NOT LINKED</span>
     <span class="row__push"></span>
-    <input id="secret" type="password" placeholder="SECRET" autocomplete="off" size="18" aria-label="management secret" oninput="syncToml()">
+    <input id="secret" type="password" placeholder="SECRET" autocomplete="off" size="18"
+           aria-label="management secret" oninput="syncToml()"
+           name="pumpkin-secret" data-credential-fields="secret">
     <button onclick="genSecret()" title="generate a random secret">GEN</button>
     <button onclick="toggleSecret()" id="secret-toggle" title="show or hide the secret">SHOW</button>
-    <input id="host" value="192.168.1." type="username" size="14" aria-label="server address" title="server address">
+    <input id="host" value="192.168.1.165" size="14" aria-label="server address" title="server address"
+           name="username" data-credential-fields="username">
     <input id="port" value="25585" size="5" aria-label="port" title="port">
     <button class="primary" onclick="connect()">LINK</button>
     <button onclick="disconnect()">CUT</button>
+    <button onclick="saveCredentials()" title="let the browser password manager keep the secret">SAVE IN BROWSER</button>
+    <button onclick="saveLink()" title="keep it in this browser's local storage instead">SAVE LOCALLY</button>
+    <button onclick="forgetLink()" title="delete what this page stored">FORGET</button>
+    <button onclick="downloadHtml()" title="download this panel as a single file">SAVE AS FILE</button>
   </div>
 </header>
 
@@ -488,21 +668,18 @@ details.fold > summary:focus-visible { outline: var(--rule-thick) solid var(--co
   <section class="panel setup" id="setup">
     <div class="panel__body setup__grid">
       <div>
-        <h2 class="sheet__title">FIRST LINK</h2>
+        <h2 class="sheet__title">GET CONNECTED</h2>
         <ol class="steps">
-          <li><span>Press <span class="inline-code">GEN</span> to roll a 48-character secret. Press
-          <span class="inline-code">COPY TOML</span> to put the whole block on your clipboard.</span></li>
-          <li><span>Paste it into <code>pumpkin.toml</code> in the mc-server folder, replacing the
-          <span class="inline-code">PASTE-YOUR-SECRET</span> placeholder. Then restart the app so
-          Pumpkin re-reads the file.</span></li>
-          <li><span>Publish the port in the Custom App compose so the browser can reach it:
+          <li><span>Hit <span class="inline-code">NEW SECRET</span> for a fresh 48-character secret.</span></li>
+          <li><span>Read it with <span class="inline-code">SHOW</span> and write it into
+          <code>pumpkin.toml</code> yourself, on the <span class="inline-code">PASTE-YOUR-SECRET</span> line.</span></li>
+          <li><span>Restart the app afterwards so Pumpkin reads the new file.</span></li>
+          <li><span>Publish the port in the Custom App so your browser can reach it:
           <span class="inline-code">25585:25585/tcp</span></span></li>
-          <li><span>Press <span class="inline-code">SHOW</span> on the secret field to confirm it
-          matches the file, then press <span class="inline-code">LINK</span>.</span></li>
+          <li><span>Press <span class="inline-code">LINK</span>.</span></li>
         </ol>
         <div class="row" style="margin-top:var(--space-2xs)">
-          <button onclick="copyToml()">COPY TOML</button>
-          <button onclick="genSecret()">ROLL NEW SECRET</button>
+          <button onclick="genSecret()">NEW SECRET</button>
         </div>
         <div class="code-sheet" id="toml">[networking.management]
 enabled = true
@@ -510,18 +687,18 @@ address = "0.0.0.0:25585"
 secret = "PASTE-YOUR-SECRET"
 allowed_origins = ["*"]</div>
         <p class="warn-bar" style="margin-top:var(--space-2xs)">
-          <strong>*</strong> in allowed_origins lets any page open this socket. The secret is the only thing
-          standing between a stranger and your server stop button. Never reuse this secret anywhere else.
+          A <strong>*</strong> in allowed_origins lets any website open this socket. Your secret is the only
+          thing between a stranger and your stop button. Do not reuse it anywhere else.
         </p>
       </div>
       <div>
-        <p class="note">The panel talks to Pumpkin over a plain WebSocket using JSON-RPC 2.0. Nothing is
-        stored. The secret lives in this tab only and is gone when you close the page.</p>
+        <p class="note">This page talks to Pumpkin over a plain WebSocket, JSON-RPC 2.0. Nothing gets stored.
+        Your secret stays in this tab and disappears when you close the page.</p>
         <details class="fold">
-          <summary>REMOTE ACCESS</summary>
-          <p class="note">If you expose this through playit, point the tunnel at the Pumpkin container
-          address and port <span class="inline-code">25585</span>. Leave Proxy Protocol off. Anyone holding the
-          secret can shut the server down, so treat it like a password.</p>
+          <summary>CONNECTING FROM ELSEWHERE</summary>
+          <p class="note">To reach it through playit, point the tunnel at the Pumpkin container on port
+          <span class="inline-code">25585</span> and leave Proxy Protocol off. Anyone with the secret can stop
+          your server, so treat it like a password.</p>
         </details>
       </div>
     </div>
@@ -533,7 +710,7 @@ allowed_origins = ["*"]</div>
       <div class="panel__head"><h2 class="panel__title">SERVER</h2></div>
       <div class="panel__body stack">
         <div class="readout">
-          <span class="readout__key">State</span><span class="readout__val" id="r-started">—</span>
+          <span class="readout__key">Status</span><span class="readout__val" id="r-started">—</span>
           <span class="readout__key">Version</span><span class="readout__val" id="r-ver">—</span>
           <span class="readout__key">Protocol</span><span class="readout__val" id="r-proto">—</span>
           <span class="readout__key">Players online</span><span class="readout__val cell-num" id="r-count">—</span>
@@ -555,6 +732,40 @@ allowed_origins = ["*"]</div>
         </table>
       </div>
     </section>
+
+    <section class="panel deck__wide">
+      <div class="panel__head"><h2 class="panel__title">COMMAND DESK</h2></div>
+      <div class="panel__body stack">
+        <p class="note">Type a chat command with or without the leading slash. This panel cannot run
+        server commands, because the management API has no method for that. What it can do is send
+        the text to everyone in chat, and read the answers the server sends back while you play.</p>
+        <div class="row" style="align-items:flex-end">
+          <div class="field grow">
+            <label for="cmd_line">Command</label>
+            <input id="cmd_line" placeholder="/say hello" autocomplete="off"
+                   onkeydown="if (event.key === 'Enter') sendCommand()">
+          </div>
+          <div class="field" style="flex:0 0 150px">
+            <label for="cmd_style">Send as</label>
+            <select id="cmd_style">
+              <option value="chat">chat message</option>
+              <option value="actionbar">action bar</option>
+            </select>
+          </div>
+          <button class="primary" onclick="sendCommand()">SEND</button>
+        </div>
+        <div class="cmd-chips" id="cmd_chips"></div>
+      </div>
+    </section>
+
+    <details class="panel deck__wide">
+      <summary class="panel__head panel__head--fold"><span class="fold-caret">[+]</span><span class="panel__title">SERVER REPLIES</span></summary>
+      <div class="panel__body stack">
+        <p class="note">Everything the server sends back: system messages, player joins and leaves,
+        saves, and results of anything you sent from here. Nothing leaves your browser as an alert.</p>
+        <div class="reply" id="replies"></div>
+      </div>
+    </details>
 
     <section class="panel deck__wide">
       <div class="panel__head"><h2 class="panel__title">SETTINGS</h2></div>
@@ -634,11 +845,11 @@ allowed_origins = ["*"]</div>
 
         <div class="row" style="align-items:flex-end">
           <div class="field" style="flex:0 0 130px">
-            <label for="s_useal">Allowlist on</label>
+            <label for="s_useal">Whitelist on</label>
             <input type="checkbox" id="s_useal" onchange="setBool('use_allowlist','use')">
           </div>
           <div class="field" style="flex:0 0 130px">
-            <label for="s_enforce">Enforce</label>
+            <label for="s_enforce">Enforce whitelist</label>
             <input type="checkbox" id="s_enforce" onchange="setBool('enforce_allowlist','enforce')">
           </div>
           <div class="field" style="flex:0 0 130px">
@@ -650,8 +861,8 @@ allowed_origins = ["*"]</div>
       </div>
     </section>
 
-    <section class="panel">
-      <div class="panel__head"><h2 class="panel__title">ALLOWLIST</h2></div>
+    <details class="panel">
+      <summary class="panel__head panel__head--fold"><span class="fold-caret">[+]</span><span class="panel__title">WHITELIST</span></summary>
       <div class="panel__body stack">
         <div class="row">
           <input id="al_name" class="grow" placeholder="player name">
@@ -662,7 +873,7 @@ allowed_origins = ["*"]</div>
           <tbody id="t-allowlist"></tbody>
         </table>
       </div>
-    </section>
+    </details>
 
     <section class="panel">
       <div class="panel__head"><h2 class="panel__title">OPERATORS</h2></div>
@@ -679,8 +890,8 @@ allowed_origins = ["*"]</div>
       </div>
     </section>
 
-    <section class="panel">
-      <div class="panel__head"><h2 class="panel__title">BANS</h2></div>
+    <details class="panel">
+      <summary class="panel__head panel__head--fold"><span class="fold-caret">[+]</span><span class="panel__title">BANS</span></summary>
       <div class="panel__body stack">
         <div class="row">
           <input id="ban_name" class="grow" placeholder="player name">
@@ -692,7 +903,7 @@ allowed_origins = ["*"]</div>
           <tbody id="t-bans"></tbody>
         </table>
         <div class="row" style="border-top:var(--rule) solid var(--color-rule);padding-top:var(--space-xs)">
-          <input id="ipban_ip" class="grow" placeholder="IP or prefix">
+          <input id="ipban_ip" class="grow" placeholder="IP or prefix, e.g. 10.0.0.0/8">
           <button onclick="ipbanAdd()">BAN IP</button>
         </div>
         <table>
@@ -700,22 +911,21 @@ allowed_origins = ["*"]</div>
           <tbody id="t-ipbans"></tbody>
         </table>
       </div>
-    </section>
+    </details>
 
-    <section class="panel">
-      <div class="panel__head"><h2 class="panel__title">GAMERULES</h2></div>
+    <details class="panel deck__wide" id="rules-fold">
+      <summary class="panel__head panel__head--fold"><span class="fold-caret">[+]</span><span class="panel__title">GAME RULES</span></summary>
       <div class="panel__body stack">
+        <p class="note">Every rule below is a real switch or number on the server. Flip one and it
+        saves straight away. No typing keys by hand.</p>
         <div class="row">
-          <input id="gr_key" class="grow" placeholder="key">
-          <input id="gr_val" style="flex:0 0 110px" placeholder="value">
-          <button onclick="grUpdate()">SET</button>
+          <input id="gr_filter" class="grow" placeholder="filter rules by name" oninput="renderRules()">
+          <label for="gr_filter" class="inline-code">ON</label>
+          <input type="checkbox" id="gr_on" onchange="renderRules()">
         </div>
-        <table>
-          <thead><tr><th>Key</th><th>Type</th><th>Value</th></tr></thead>
-          <tbody id="t-gamerules"></tbody>
-        </table>
+        <div class="rule-scroll"><div class="rule-grid" id="t-gamerules"></div></div>
       </div>
-    </section>
+    </details>
 
     <section class="panel deck__wide">
       <div class="panel__head"><h2 class="panel__title">LIVE EVENTS</h2></div>
@@ -761,15 +971,15 @@ function setLink(state, text) {
 
 function connect() {
   const host = val("#host");
-  if (!host) { log("NO ADDRESS", "err"); return; }
+  if (!host) { log("ENTER A SERVER ADDRESS FIRST", "err"); return; }
   disconnect();
   const url = "ws://" + host + ":" + val("#port") + "/";
   setLink("wait", "LINKING");
   ws = new WebSocket(url, ["minecraft-v1", $("#secret").value]);
 
-  ws.onopen = () => { setLink("live", "LINKED"); log("SOCKET OPEN"); $("#setup").classList.add("hide"); refreshAll(); };
-  ws.onclose = (e) => { setLink("dead", "CUT (" + e.code + ")"); log("CLOSED: " + e.reason, "err"); };
-  ws.onerror = () => { setLink("dead", "REFUSED"); log("SOCKET REFUSED — check secret, address and port", "err"); };
+  ws.onopen = () => { setLink("live", "LINKED"); log("CONNECTED"); $("#setup").classList.add("hide"); refreshAll(); };
+  ws.onclose = (e) => { setLink("dead", "CUT (" + e.code + ")"); log("DISCONNECTED: " + e.reason, "err"); };
+  ws.onerror = () => { setLink("dead", "REFUSED"); log("CANNOT REACH THE SERVER — check the address, port and that the port is published", "err"); };
   ws.onmessage = (e) => handle(e.data);
 }
 
@@ -779,7 +989,7 @@ function disconnect() {
 }
 
 function send(obj) {
-  if (!ws || ws.readyState !== 1) { log("NO LINK", "err"); return false; }
+  if (!ws || ws.readyState !== 1) { log("NOT CONNECTED", "err"); return false; }
   ws.send(JSON.stringify(obj));
   return true;
 }
@@ -801,12 +1011,35 @@ function handle(raw) {
   }
 }
 
+// Kazde zdarzenie z serwera trafia do widocznego terminala, nie do alertu
+// przegladarki. Wczesniej panel logowal surowy JSON, ktorego nie dawalo sie
+// przeczytac; teraz jest czytelna linia z tagiem.
+function reply(tag, text, kind) {
+  const box = $("#replies");
+  if (!box) return;
+  const row = el("div", "reply__row" + (kind ? " reply__row--" + kind : ""));
+  row.appendChild(el("span", "reply__time", new Date().toLocaleTimeString()));
+  row.appendChild(el("span", "reply__tag", tag));
+  row.appendChild(el("span", "reply__text", text));
+  box.appendChild(row);
+  while (box.children.length > 400) box.removeChild(box.firstChild);
+  box.scrollTop = box.scrollHeight;
+}
+
 function react(short, p) {
-  if (short === "players/joined" || short === "players/left") refresh("players", renderPlayers);
+  reply(short, JSON.stringify(p || {}));
+  if (short === "players/joined" || short === "players/left") {
+    refresh("players", renderPlayers);
+    const who = (p && (p.player || p)) && (p.player || p).name;
+    reply("player", who ? who + " " + short.split("/")[1] : "someone", short === "players/joined" ? "ok" : "");
+  }
   if (short === "allowlist/added" || short === "allowlist/removed") refresh("allowlist", renderSimpleList);
   if (short === "operators/added" || short === "operators/removed") refresh("operators", renderOps);
   if (short === "bans/added" || short === "bans/removed") refresh("bans", renderBans);
-  if (short === "server/stopping") log("SERVER IS STOPPING", "err");
+  if (short === "gamerules/updated") refresh("gamerules", (list) => { RULES = list || []; renderRules(); });
+  if (short === "server/stopping") { reply("server", "SERVER IS STOPPING", "err"); log("SERVER IS STOPPING", "err"); }
+  if (short === "server/saved") reply("server", "world saved", "ok");
+  if (short === "server/saving") reply("server", "saving world");
 }
 
 function call(method, params) {
@@ -824,8 +1057,8 @@ function call(method, params) {
 
 function rpc(method, params) {
   return call(method, params).then(
-    (r) => { log("OK " + method, "ok"); return r; },
-    (e) => { log("FAIL " + method + " — " + e.message, "err"); return null; }
+    (r) => { log(method + " OK", "ok"); return r; },
+    (e) => { log("FAILED " + method + " — " + e.message, "err"); return null; }
   );
 }
 
@@ -836,7 +1069,7 @@ function refreshAll() {
   refresh("operators", renderOps);
   refresh("bans", renderBans);
   refresh("ip_bans", renderIpBans);
-  refresh("gamerules", renderRules);
+  refresh("gamerules", (list) => { RULES = list || []; renderRules(); });
   loadSettings();
 }
 
@@ -891,7 +1124,7 @@ function renderSimpleList(list) {
     const tr = el("tr");
     tr.appendChild(el("td", "", p.name || "?"));
     tr.appendChild(el("td", "cell-id", (p.id || "").slice(0, 18)));
-    tr.appendChild(actionCell("DROP", "", () => listDel("allowlist", p)));
+    tr.appendChild(actionCell("REMOVE", "", () => listDel("allowlist", p)));
     tb.appendChild(tr);
   });
 }
@@ -904,7 +1137,7 @@ function renderOps(list) {
     const tr = el("tr");
     tr.appendChild(el("td", "", p.name || "?"));
     tr.appendChild(el("td", "cell-num", String(o.permissionLevel !== undefined ? o.permissionLevel : "—")));
-    tr.appendChild(actionCell("DROP", "", () => listDel("operators", p)));
+    tr.appendChild(actionCell("REMOVE", "", () => listDel("operators", p)));
     tb.appendChild(tr);
   });
 }
@@ -934,15 +1167,70 @@ function renderIpBans(list) {
   });
 }
 
-function renderRules(list) {
-  const tb = $("#t-gamerules"); tb.innerHTML = "";
-  if (!list || !list.length) { tb.appendChild(row3("—", "—", "—")); return; }
-  list.forEach(g => {
-    const tr = el("tr");
-    tr.appendChild(el("td", "cell-id", g.key));
-    tr.appendChild(el("td", "", g.type || "—"));
-    tr.appendChild(el("td", "cell-num", String(g.value)));
-    tb.appendChild(tr);
+// Pumpkinschemat (assets/json-rpc-api-schema.json) ma tylko DWA typy
+// regul: boolean i integer. Zero tekstu, wiec kazda regula dostaje switch
+// (boolean) albo liczbe (integer) i nie ma sensu robic "k = v" recznie.
+// Cache jest potrzebny, bo filtr i przełącznik "ON" przeliczaja widok
+// bez pytania serwera o dane od nowa.
+let RULES = [];
+
+function ruleLabel(key) {
+  return key.replace(/_/g, " ");
+}
+
+function renderRules() {
+  const box = $("#t-gamerules");
+  if (!box) return;
+  box.innerHTML = "";
+
+  const needle = val("#gr_filter").trim().toLowerCase();
+  const onlyOn = $("#gr_on") && $("#gr_on").checked;
+  const list = RULES.filter(r =>
+    (!needle || ruleLabel(r.key).toLowerCase().includes(needle)) &&
+    (!onlyOn || r.value === true));
+
+  if (!list.length) {
+    box.appendChild(el("p", "note", "nothing matches that filter"));
+    return;
+  }
+
+  list.forEach(r => {
+    const row = el("label", "rule");
+    const name = el("span", "rule__name", ruleLabel(r.key));
+    row.appendChild(name);
+
+    if (r.type === "boolean") {
+      const sw = el("input", "switch");
+      sw.type = "checkbox";
+      sw.checked = r.value === true;
+      sw.onchange = () => grSet(r.key, sw.checked, sw);
+      row.appendChild(sw);
+      const state = el("span", "rule__state", sw.checked ? "ON" : "OFF");
+      sw.addEventListener("change", () => { state.textContent = sw.checked ? "ON" : "OFF"; });
+      row.appendChild(state);
+    } else {
+      const num = el("input", "rule__num");
+      num.type = "number";
+      num.value = String(r.value);
+      num.onchange = () => grSet(r.key, Number(num.value), num);
+      row.appendChild(num);
+    }
+
+    box.appendChild(row);
+  });
+}
+
+function grSet(key, value, node) {
+  rpc("gamerules/update", { gamerule: { key: key, value: value } }).then((r) => {
+    if (!r) return;
+    const hit = RULES.find(x => x.key === key);
+    if (hit) hit.value = value;
+    if (value === true || value === false) log("RULE " + key + " -> " + value, "ok");
+    else log("RULE " + key + " -> " + value, "ok");
+  }).catch(() => {
+    log("RULE " + key + " REJECTED — value not accepted", "err");
+    node.checked = !node.checked;
+    renderRules();
   });
 }
 
@@ -986,15 +1274,56 @@ function kick(name) {
     .then(() => refresh("players", renderPlayers));
 }
 
+// prompt() i confirm() robily alerty przegladarki, ktore przegladnie
+// potrafia zablokowac. Panel ma wlasne okienka w stronie, wiec wszystko
+// zostaje na stronie i nie wyskakuje nic nad panel.
 function broadcast() {
-  const m = prompt("Message for everyone:");
-  if (!m) return;
-  rpc("server/system_message", { message: { message: { literal: m }, overlay: false } });
+  askText("MESSAGE EVERYONE", "Shown to every player online as a chat line.", "", (m) => {
+    if (!m) return;
+    rpc("server/system_message", { message: { message: { literal: m }, overlay: false } });
+  });
 }
 
 function stopServer() {
-  if (!confirm("Stop the server? Everyone gets kicked.")) return;
-  rpc("server/stop");
+  askYes("STOP THE SERVER", "Everyone online gets kicked. This is the whole stop button.", () => {
+    rpc("server/stop");
+  });
+}
+
+// --- okienko tekstowe w stronie ---
+let askCb = null;
+function askText(title, hint, initial, cb) {
+  const dlg = $("#ask");
+  $("#ask-title").textContent = title;
+  $("#ask-hint").textContent = hint;
+  $("#ask-input").value = initial || "";
+  askCb = cb;
+  dlg.classList.remove("hide");
+  const f = $("#ask-input");
+  f.focus();
+  f.select();
+}
+
+function askYes(title, hint, cb) {
+  const dlg = $("#ask");
+  $("#ask-title").textContent = title;
+  $("#ask-hint").textContent = hint;
+  $("#ask-input").classList.add("hide");
+  $("#ask-ok").textContent = "YES, DO IT";
+  askCb = cb;
+  dlg.classList.remove("hide");
+  $("#ask-yes").focus();
+}
+
+function askNo() { closeAsk(); }
+
+function closeAsk() { askCb = null; $("#ask").classList.add("hide"); }
+
+function askOk() {
+  const cb = askCb;
+  const text = $("#ask-input").classList.contains("hide") ? "" : $("#ask-input").value.trim();
+  closeAsk();
+  if (cb) cb(text);
 }
 
 function setStr(setting, param) {
@@ -1070,20 +1399,118 @@ function ipbanAdd() {
     .then(() => { $("#ipban_ip").value = ""; refresh("ip_bans", renderIpBans); });
 }
 
-function grUpdate() {
-  const k = val("#gr_key"); if (!k) { log("FILL THE KEY", "err"); return; }
-  const raw = val("#gr_val");
-  let v = raw;
-  if (raw === "true") v = true;
-  else if (raw === "false") v = false;
-  else if (/^-?\d+$/.test(raw)) v = parseInt(raw, 10);
-  else { log("VALUE MUST BE true/false OR A NUMBER", "err"); return; }
-  rpc("gamerules/update", { gamerule: { key: k, value: v } }).then(() => refresh("gamerules", renderRules));
+// --- COMMAND DESK ---
+// Pumpkin nie ma metody wykonujacej komendy serwerowe, wiec panel nie udaje
+// ze jest konsola. Robi to co realnie da: wysyla tekst do czatu przez
+// server/system_message i pokazuje wszystko co serwer odpowie.
+const CMD_HINTS = [
+  "/say ", "/tell ", "/me ", "/seed", "/time set day", "/time set night",
+  "/weather clear", "/difficulty ", "/gamemode ", "/gamerule ", "/tp ",
+  "/kill ", "/heal", "/list"
+];
+
+function sendCommand() {
+  let text = val("#cmd_line").trim();
+  if (!text) { log("TYPE SOMETHING FIRST", "err"); return; }
+
+  // ukośnik jest opcjonalny — user pisze "say hi" albo "/say hi"
+  const shown = text.startsWith("/") ? text : "/" + text;
+  reply("you", shown, "ok");
+
+  rpc("server/system_message", {
+    message: {
+      message: { literal: shown },
+      overlay: val("#cmd_style") === "actionbar"
+    }
+  }).then((r) => {
+    if (!r) { reply("desk", "the server refused that one", "err"); return; }
+    $("#cmd_line").value = "";
+  });
 }
 
-// 48 znakow z crypto.getRandomValues — nigdy Math.random. Alfabetyczny zestaw
-// bez znakow mylacych przy przepisywaniu (0/O, 1/l/I). Sekret musi wejsc
-// do pumpkin.toml, wiec bez cudzyslowow, spacji i backslashe.
+function renderChips() {
+  const box = $("#cmd_chips");
+  if (!box) return;
+  box.innerHTML = "";
+  CMD_HINTS.forEach(h => {
+    const c = el("button", "cmd-chip", h.trim());
+    c.onclick = () => { $("#cmd_line").value = h; $("#cmd_line").focus(); };
+    box.appendChild(c);
+  });
+}
+
+// --- trzymanie sekretu ---
+// Kolejnosc jest zamierzona. Credential Management API to pierwszy wybor,
+// bo to ten sam magazyn co haslo w przegladarce: zapisuje sie w managerze
+// hasel, szyfruje i nie da sie go odczytac z JS. localStorage jest tylko
+// zastepczy, bo na file:// bywa wyłączony albo współdzielony między
+// wszystkie pliki lokalne w katalogu. Sesja HTTP trzyma sekret w pamieci
+// i nic nie zapisuje.
+const CREDS_ID = "pumpkin-panel";
+const STORE_KEY = "pumpkin-panel-link";
+
+// hasCredApi musi sprawdzac OBA globalne. Samo navigator.credentials.store
+// nie wystarczy: `new Credential(...)` to osobny globalny i w srodowisku,
+// gdzie jest tylko polyfill credentials API, konstruktor nie istnieje.
+// Sprawdzone: brak `typeof Credential` === ReferenceError przy zapisie,
+// czyli panel pada w miejscu, ktore uzytkownik wciska "SAVE IN BROWSER".
+const hasCredApi = () =>
+  typeof navigator !== "undefined" &&
+  navigator.credentials &&
+  typeof navigator.credentials.store === "function" &&
+  typeof Credential !== "undefined";
+
+const credApiWorksHere = () =>
+  window.isSecureContext === true && window.location.protocol !== "file:";
+
+// --- pobieranie pliku i ostrzezenie o https ---
+// Panel jest jednym plikiem HTML. Wersja z https (GitHub Pages) NIE DZIALA
+// jako panel: przegladarka blokuje https -> ws:// jako mixed content, zanim
+// panel zdazy polaczyc sie z serwerem. Dlatego wersja https jest wylacznie
+// dystrybutorem pliku, a panel po pobraniu na dysk dziala w przegladarce.
+//
+// Wykrywam protocol zamiast zgadywac z domeny, bo plik moze byc wgrany
+// takze na http:// albo z innego protokolu.
+function servedOverHttps() {
+  try {
+    return location.protocol === "https:";
+  } catch (e) {
+    return false;
+  }
+}
+
+function showFetchBar() {
+  const bar = document.getElementById("fetch-bar");
+  if (!bar) return;
+  // nad http:// i file:// pasek znika, bo tam panel dziala normalnie
+  if (servedOverHttps()) {
+    bar.hidden = false;
+    log("THIS PAGE IS HTTPS — it can only hand you the file. Press SAVE AS FILE, then open pumpkin-panel.html from your disk.", "err");
+  } else {
+    bar.hidden = true;
+  }
+}
+
+function downloadHtml() {
+  // zapisuje AKTUALNA zawartosc dokumentu, wiec pobrana kopia jest tym,
+  // co wlasnie widzisz, a nie tym co bylo w repo przy ostatnim commicie
+  const doc = "<!DOCTYPE html>\n" + document.documentElement.outerHTML;
+  const blob = new Blob([doc], { type: "text/html" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "pumpkin-panel.html";
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  // nie zostawiamy blobu w pamieci na czas sesji
+  setTimeout(() => URL.revokeObjectURL(url), 10000);
+  log("FILE SAVED as pumpkin-panel.html — open it from your disk, not over https", "ok");
+}
+
+// --- generator sekretu i blok TOML ---
+// 48 znakow z crypto.getRandomValues, nigdy Math.random. Alfabet bez
+// 0/O/1/l/I, bo sekret trzeba odczytac z ekranu i wkleic do pumpkin.toml.
 function genSecret() {
   const ALPHABET = "23456789abcdefghjkmnpqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ";
   const bytes = new Uint8Array(48);
@@ -1091,13 +1518,11 @@ function genSecret() {
   let out = "";
   for (let i = 0; i < bytes.length; i++) out += ALPHABET[bytes[i] % ALPHABET.length];
 
-  const field = $("#secret");
-  field.value = out;
-  field.type = "text";
+  $("#secret").value = out;
+  $("#secret").type = "text";
   $("#secret-toggle").textContent = "HIDE";
-
   syncToml();
-  log("NEW SECRET ROLLED — copy the TOML block, paste it in pumpkin.toml, restart");
+  log("NEW SECRET ROLLED — copy the TOML block, paste it in pumpkin.toml, restart", "ok");
 }
 
 // blok TOML musi pokazywac biezacy sekret, inaczej uzytkownik kopiuje
@@ -1109,27 +1534,10 @@ function syncToml() {
 
 function tomlBlock() {
   const s = $("#secret").value || "PASTE-YOUR-SECRET";
-  return '[networking.management]\nenabled = true\naddress = "0.0.0.0:25585"\nsecret = "' + s + '"\nallowed_origins = ["*"]';
+  return '[networking.management]\nenabled = true\naddress = "0.0.0.0:25585"\nsecret = "' + s +
+    '"\nallowed_origins = ["*"]';
 }
 
-async function copyToml() {
-  syncToml();
-  const text = tomlBlock();
-  try {
-    await navigator.clipboard.writeText(text);
-    log("TOML BLOCK COPIED — paste it into pumpkin.toml", "ok");
-  } catch (e) {
-    // clipboard API wymaga bezpiecznego kontekstu; po http nie zadziala
-    const r = document.createRange();
-    r.selectNodeContents($("#toml"));
-    const sel = window.getSelection();
-    sel.removeAllRanges();
-    sel.addRange(r);
-    log("CLIPBOARD BLOCKED — the block is selected, press Ctrl+C", "err");
-  }
-}
-
-// hide pokazuje go z powrotem jako haslo; tresc zostaje w polu
 function toggleSecret() {
   const field = $("#secret");
   const shown = field.type === "text";
@@ -1137,28 +1545,172 @@ function toggleSecret() {
   $("#secret-toggle").textContent = shown ? "SHOW" : "HIDE";
 }
 
-window.genSecret = genSecret;
-window.syncToml = syncToml;
-window.copyToml = copyToml;
-window.toggleSecret = toggleSecret;
+function storeCred() {
+  return navigator.credentials.store(new Credential({
+    id: CREDS_ID,
+    name: "Pumpkin panel",
+    type: "password",
+    username: val("#host"),
+    password: val("#secret"),
+    protocol: "web",
+  }));
+}
+
+function saveCredentials() {
+  if (!val("#secret")) { log("GENERATE OR TYPE A SECRET FIRST", "err"); return; }
+
+  if (hasCredApi() && credApiWorksHere()) {
+    storeCred().then(() => {
+      log("SAVED IN YOUR BROWSER PASSWORD MANAGER", "ok");
+    }).catch((e) => {
+      log("BROWSER REFUSED: " + e.name + " — trying local storage instead", "err");
+      saveLink();
+    });
+    return;
+  }
+
+  log("NO CREDENTIAL API HERE (file:// or insecure) — using local storage");
+  saveLink();
+}
+
+function readCredential() {
+  if (!hasCredApi()) return Promise.resolve(null);
+  return navigator.credentials.get({ password: true, mediation: "optional" })
+    .then(c => c || null)
+    .catch(() => null);
+}
+
+// sekret z managera wsadzamy do pola; uzytkownik i tak musi nacisnac LINK
+function prefillSecret() {
+  return readCredential().then(c => {
+    if (!c || !c.password) return false;
+    $("#secret").value = c.password;
+    if (c.username) $("#host").value = c.username;
+    syncToml();
+    log("FOUND A SAVED SECRET — press LINK to connect", "ok");
+    return true;
+  });
+}
+
+function forgetCredential() {
+  if (hasCredApi()) {
+    readCredential().then(c => {
+      if (c) return navigator.credentials.preventSilentAccess();
+    }).catch(() => {}).then(() => {
+      log("CLEARED FROM THE BROWSER");
+    });
+  }
+}
+
+function saveLink() {
+  try {
+    localStorage.setItem(STORE_KEY, JSON.stringify({
+      host: val("#host"), port: val("#port"), secret: val("#secret"), at: Date.now(),
+    }));
+    log("SAVED IN THIS BROWSER", "ok");
+  } catch (e) {
+    log("BROWSER REFUSED TO STORE IT", "err");
+  }
+}
+
+function loadLink() {
+  try {
+    const raw = localStorage.getItem(STORE_KEY);
+    if (!raw) return false;
+    const o = JSON.parse(raw);
+    if (o.host) $("#host").value = o.host;
+    if (o.port) $("#port").value = o.port;
+    if (o.secret) { $("#secret").value = o.secret; syncToml(); }
+    log("LOADED A SAVED LINK — press LINK to connect", "ok");
+    return true;
+  } catch (e) {
+    return false;
+  }
+}
+
+function forgetLink() {
+  try { localStorage.removeItem(STORE_KEY); } catch (e) {}
+  $("#secret").value = "";
+  syncToml();
+  forgetCredential();
+  log("FORGOTT — nothing is stored in this browser any more");
+}
+
+// --- pobieranie panelu jako pliku ---
+// panel ma byc jednym plikiem, wiec zapisujemy dokladnie to co jest
+// w tym dokumencie, bez zadnych zmian
+// wlaczane raz na starcie strony
+renderChips();
+loadLink();
+prefillSecret();
+showFetchBar();
+
+window.sendCommand = sendCommand;
+window.renderChips = renderChips;
+window.saveLink = saveLink;
+window.loadLink = loadLink;
+window.forgetLink = forgetLink;
+window.saveCredentials = saveCredentials;
+window.prefillSecret = prefillSecret;
+window.reply = reply;
+window.grSet = grSet;
+window.askText = askText;
+window.askYes = askYes;
+window.askOk = askOk;
+window.askNo = askNo;
+window.closeAsk = closeAsk;
+window.renderRules = renderRules;
 window.connect = connect;
 window.disconnect = disconnect;
-window.kick = kick;
+window.saveWorld = saveWorld;
 window.broadcast = broadcast;
 window.stopServer = stopServer;
-window.saveWorld = saveWorld;
 window.setStr = setStr;
-window.setEnum = setEnum;
-window.setBool = setBool;
 window.setInt = setInt;
+window.setBool = setBool;
+window.setEnum = setEnum;
 window.pushNums = pushNums;
 window.listAdd = listAdd;
 window.listDel = listDel;
 window.opAdd = opAdd;
 window.banAdd = banAdd;
 window.ipbanAdd = ipbanAdd;
-window.grUpdate = grUpdate;
+window.kick = kick;
+window.loadSettings = loadSettings;
+window.downloadHtml = downloadHtml;
+window.showFetchBar = showFetchBar;
+window.servedOverHttps = servedOverHttps;
+window.genSecret = genSecret;
+window.syncToml = syncToml;
+window.tomlBlock = tomlBlock;
+window.toggleSecret = toggleSecret;
+window.sendCommand = sendCommand;
+window.renderChips = renderChips;
+window.saveLink = saveLink;
+window.loadLink = loadLink;
+window.forgetLink = forgetLink;
+window.saveCredentials = saveCredentials;
+window.prefillSecret = prefillSecret;
+window.reply = reply;
+window.grSet = grSet;
+window.askText = askText;
+window.askYes = askYes;
+window.askOk = askOk;
+window.askNo = askNo;
+window.closeAsk = closeAsk;
+window.renderRules = renderRules;
 window.val = val;
 </script>
+<div class="ask hide" id="ask" role="dialog" aria-modal="true" aria-labelledby="ask-title">
+  <div class="ask__box">
+    <h2 class="sheet__title ask__title" id="ask-title">TITLE</h2>
+    <p class="ask__hint" id="ask-hint"></p>
+    <input id="ask-input" autocomplete="off">
+    <div class="row" style="margin-top:var(--space-2xs)">
+      <button class="primary" onclick="askOk()" id="ask-yes">YES</button>
+      <button onclick="askNo()">CANCEL</button>
+    </div>
+  </div>
+</div>
 </body>
 </html>
