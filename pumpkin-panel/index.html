@@ -44,6 +44,9 @@
   --space-md: 24px;
   --space-lg: 32px;
   --space-xl: 48px;
+  /* 64px — uzywane przez calc() w szerokosci okienka .ask. Bez tego
+     tokenu cala deklaracja width byla odrzucana jako niewazna. */
+  --space-2xl: 64px;
 
   /* Skala tekstu. Delikatnie wieksza niz poprzednia wersja (10/12/14/18/24),
      ale proporcje zostaja te same, wiec hierarchia naglowkow sie nie rozjezdza.
@@ -117,8 +120,8 @@ h1, h2, h3 { font-family: var(--font-display); font-style: normal; font-weight: 
 
 .masthead__row {
   display: flex;
-  align-items: center;
-  gap: var(--space-xs);
+  align-items: flex-start;
+  gap: var(--space-sm);
   flex-wrap: wrap;
 }
 
@@ -127,6 +130,135 @@ h1, h2, h3 { font-family: var(--font-display); font-style: normal; font-weight: 
   align-items: center;
   gap: var(--space-2xs);
   min-width: 0;
+}
+
+/* Formularz laczenia. Pola maja etykiety, bo sama ikona oka nie mowi
+   czego dotyczy, a trzy przyciski "SAVE ..." wygladaly jak jeden zapis. */
+.link-form {
+  display: flex;
+  align-items: flex-end;
+  gap: var(--space-xs);
+  flex-wrap: wrap;
+  flex: 1 1 520px;
+}
+
+.field--inline { gap: var(--space-3xs); }
+.field--inline .field__label {
+  font-family: var(--font-display);
+  font-size: var(--text-xs);
+  color: var(--color-muted);
+  line-height: 1;
+}
+.field--secret { flex: 1 1 200px; max-width: 420px; }
+
+/* Pole sekretu z ikona oka w srodku. Ikona jest jedynym elementem
+   w polu, bo osobny przycisk SHOW obok wygladal jak osobna akcja. */
+.secret-input {
+  display: flex;
+  align-items: stretch;
+  gap: 0;
+}
+/* size="18" daje przegladarkom ~620px szerokosci i rozpycha pole na
+   caly ekran. flex:1 na rodzicu musi wywracic to, inaczej pole sekretu
+   jest dwa razy szersze niz pole adresu. */
+.secret-input input {
+  flex: 1 1 auto;
+  width: 100%;
+  min-width: 0;
+}
+
+.icon-btn {
+  display: inline-grid;
+  place-items: center;
+  width: 34px;
+  flex: 0 0 34px;
+  padding: 0;
+  background: var(--color-paper-3);
+  border: var(--rule) solid var(--color-rule);
+  border-left-width: 0;
+  cursor: pointer;
+}
+.icon-btn:hover { background: var(--color-paper); border-color: var(--color-rule-strong); }
+.icon-btn:active { transform: translate(1px, 1px); }
+
+/* Oko z pixel-grid, nie z fontu ikony: zero zaleznosci wstepnie. W srodku
+   zlota zrenica, a kreska w poprzek pojawia sie, kiedy sekret jest widoczny. */
+.icon-eye {
+  position: relative;
+  display: block;
+  width: 18px;
+  height: 11px;
+}
+/* gora i dol powieki. Uzywam --color-ink, bo --color-text NIE istnieje
+   w tym bloku :root — wpisanie go dalo through-color i oko renderowalo
+   sie jako jeden zolty kwadrat. */
+.icon-eye::before,
+.icon-eye::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  width: 18px;
+  height: 3px;
+  background: var(--color-ink);
+}
+.icon-eye::before { top: 0; }
+.icon-eye::after { bottom: 0; }
+/* zrenica */
+.icon-eye::marker { content: none; }
+.icon-btn .pupil {
+  position: absolute;
+  left: 5px;
+  top: 2px;
+  width: 8px;
+  height: 7px;
+  background: var(--color-accent);
+  pointer-events: none;
+}
+/* kreska przez oko — stan w widzeniu, nie osobny element */
+.icon-btn[aria-pressed="true"] .slash {
+  position: absolute;
+  left: 1px;
+  top: 4px;
+  width: 16px;
+  height: 3px;
+  background: var(--color-err);
+  pointer-events: none;
+}
+
+/* Jeden przycisk SAVE, trzy cele w menu. */
+.save-menu { position: relative; margin-left: auto; }
+.save-menu > summary {
+  list-style: none;
+  cursor: pointer;
+  user-select: none;
+}
+.save-menu > summary::-webkit-details-marker { display: none; }
+.save-menu > summary::after {
+  content: "▾";
+  margin-left: var(--space-3xs);
+  color: var(--color-muted);
+}
+.save-menu[open] > summary::after { content: "▴"; }
+
+.save-menu__body {
+  position: absolute;
+  right: 0;
+  top: calc(100% + var(--space-3xs));
+  z-index: 400;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3xs);
+  width: 268px;
+  padding: var(--space-xs);
+  background: var(--color-paper);
+  border: var(--rule-thick) solid var(--color-rule-strong);
+}
+.save-menu__body button { width: 100%; text-align: left; }
+.save-menu__note {
+  margin: var(--space-3xs) 0 0;
+  font-size: var(--text-xs);
+  line-height: 1.7;
+  color: var(--color-muted);
 }
 
 .wordmark {
@@ -423,28 +555,97 @@ details.panel > .panel__body { border-top: var(--rule) solid var(--color-rule); 
 }
 
 /* ---- COMMAND DESK: terminal odpowiedzi ---- */
-.reply {
-  height: 240px;
-  overflow-y: auto;
+/* Terminal. Wyjscie i wejscie w jednym bloku, bo to jeden strumien:
+   to, co wysylasz, i to, co serwer odpowiada. Wczesniej to byly dwa
+   osobne panele i nie wygladalo to jak terminal. */
+.term-panel__hint {
+  font-size: var(--text-xs);
+  color: var(--color-muted);
+  margin-left: auto;
+}
+
+.term {
   background: var(--color-paper);
-  border: var(--rule) solid var(--color-rule);
+  border: var(--rule-thick) solid var(--color-rule-strong);
+}
+
+.term__out {
+  height: 260px;
+  overflow-y: auto;
   padding: var(--space-2xs);
+  /* linie terminala, jak w konsoli, nie jak w karcie */
+  background-image: repeating-linear-gradient(
+    to bottom,
+    transparent 0,
+    transparent calc(var(--text-xs) * 2 - 1px),
+    var(--hair-1) calc(var(--text-xs) * 2 - 1px),
+    var(--hair-1) calc(var(--text-xs) * 2)
+  );
+  border-bottom: var(--rule) solid var(--color-rule);
   font-size: var(--text-xs);
   line-height: 2;
 }
 
+.term__line {
+  display: flex;
+  align-items: stretch;
+  gap: 0;
+}
+
+.term__prompt {
+  display: grid;
+  place-items: center;
+  padding: 0 var(--space-3xs);
+  color: var(--color-accent);
+  font-family: var(--font-display);
+  font-size: var(--text-xs);
+  background: var(--color-paper-2);
+  border-right: var(--rule) solid var(--color-rule);
+}
+
+.term__input {
+  flex: 1 1 auto;
+  min-width: 0;
+  border: 0;
+  background: transparent;
+}
+.term__input:focus { outline: none; border-color: transparent; }
+
+.term__style {
+  flex: 0 0 auto;
+  border-left: var(--rule) solid var(--color-rule);
+}
+.term__send { flex: 0 0 auto; border-left: var(--rule) solid var(--color-rule); }
+
+/* Linia w terminalu: czas, zrodlo, tresc. Bez tabeli, bo to strumien. */
 .reply__row {
   display: flex;
   gap: var(--space-2xs);
-  border-bottom: var(--hair-1) solid var(--color-rule);
-  padding: var(--hair-1) 0;
+  min-width: 0;
 }
-
 .reply__time { color: var(--color-muted); flex: 0 0 auto; }
-.reply__tag { color: var(--color-accent); flex: 0 0 96px; }
-.reply__text { flex: 1; min-width: 0; overflow-wrap: anywhere; }
+.reply__tag { color: var(--color-accent); flex: 0 0 auto; min-width: 96px; }
+.reply__text { flex: 1 1 auto; min-width: 0; overflow-wrap: anywhere; }
 .reply__row--err .reply__text { color: var(--color-err); }
 .reply__row--ok .reply__tag { color: var(--color-ok); }
+
+/* Linia, ktora sama wyszla z panelu — jaśniejsza, jak prompt w terminalu. */
+.reply__row--self .reply__tag { color: var(--color-ok); }
+
+.term-help__summary {
+  cursor: pointer;
+  font-size: var(--text-xs);
+  color: var(--color-muted);
+  user-select: none;
+}
+.term-help__body {
+  margin-top: var(--space-2xs);
+  font-size: var(--text-xs);
+  line-height: 1.9;
+  color: var(--color-muted);
+  max-width: 70ch;
+}
+.term-help__body p { margin: 0 0 var(--space-2xs); }
 
 .cmd-chips { display: flex; flex-wrap: wrap; gap: var(--space-3xs); }
 
@@ -475,8 +676,11 @@ details.panel > .panel__body { border-top: var(--rule) solid var(--color-rule); 
   border: var(--rule-btn) solid var(--color-rule-strong);
   box-shadow: var(--rule-thick) solid var(--color-rule-strong);
   max-width: 520px;
-  width: calc(100% - var(--space-l) * 2);
-  padding: var(--space-s);
+  /* Uzywam tokenow skali. Wczesniej bylo tu calc(100% - var(--space-l)*2)
+     z --space-l, ktorego nie ma w :root, wiec calc() byl niewazny i
+     przegladarka odrzucala cala deklaracje width. */
+  width: calc(100% - var(--space-2xl));
+  padding: var(--space-md);
 }
 
 .ask__title { margin-bottom: var(--space-3xs); }
@@ -602,20 +806,49 @@ details.fold > summary:focus-visible { outline: var(--rule-thick) solid var(--co
 
 .warn-bar strong { color: var(--color-accent); font-weight: 400; }
 
-/* Pasek pobierania. Widoczny tylko na https (GitHub Pages). Panel sam
-   odpowiada, czy jest odsluzywany, bo https -> ws:// jest mixed content
-   i przegladarka zablokuje polaczenie zanim panel zdazy cokolwiek zrobic. */
-.fetch-bar {
-  background: var(--color-paper-3);
-  border-left: var(--rule-thick) solid var(--color-rule-strong);
-  padding: var(--space-2xs) var(--space-xs);
-  margin: 0 0 var(--space-xs);
-  font-size: var(--text-xs);
-  line-height: 1.8;
-  color: var(--color-muted);
+/* Popup ostrzezenia o https. Ekran przyciemniony, okienko na srodku
+   i dwa przyciski na dole — jeden robi co trzeba (pobiera plik),
+   drugi zamyka. Pasek na górze byl zly pomyslem: zaslanial caly panel
+   i nie mial jakiegos "zamknij". */
+.notice-scrim {
+  position: fixed;
+  inset: 0;
+  z-index: 900;
+  display: grid;
+  place-items: center;
+  padding: var(--space-md);
+  background: var(--color-scrim);
 }
-.fetch-bar strong { color: var(--color-accent); font-weight: 400; }
-.fetch-bar[hidden] { display: none; }
+.notice-scrim[hidden] { display: none; }
+
+.notice {
+  width: 100%;
+  max-width: 560px;
+  background: var(--color-paper-2);
+  border: var(--rule-thick) solid var(--color-rule-strong);
+  box-shadow: var(--rule-btn) solid var(--color-accent);
+  padding: var(--space-md);
+}
+
+.notice__title {
+  font-family: var(--font-display);
+  font-size: var(--text-md);
+  color: var(--color-accent);
+  margin: 0 0 var(--space-xs);
+  line-height: 1.4;
+}
+
+.notice__body { font-size: var(--text-sm); line-height: 1.9; }
+.notice__body p { margin: 0 0 var(--space-xs); }
+.notice__body p:last-child { margin-bottom: 0; }
+.notice__body strong { color: var(--color-ink); font-weight: 400; }
+
+.notice__actions {
+  display: flex;
+  gap: var(--space-2xs);
+  margin-top: var(--space-sm);
+  flex-wrap: wrap;
+}
 
 .hide { display: none !important; }
 
@@ -630,12 +863,26 @@ details.fold > summary:focus-visible { outline: var(--rule-thick) solid var(--co
 </head>
 <body>
 
-<div class="fetch-bar" id="fetch-bar" hidden>
-  <strong>THIS PAGE IS THE DOWNLOAD, NOT THE PANEL.</strong>
-  It is served over <strong>https</strong>, so your browser refuses to open the plain
-  <strong>ws://</strong> socket to the server. Press <strong>SAVE AS FILE</strong> and open
-  <strong>pumpkin-panel.html</strong> from your disk. The copy on disk is not served over
-  https, so it connects fine.
+<!-- Popup z ostrzezeniem. Pokazuje sie tylko na https i ma przycisk
+     zamykajacy — pasek na górze zaslanial caly panel i nie dawalo sie
+     go odczyscic inaczej niz pobraniem pliku. -->
+<div class="notice-scrim" id="notice-scrim" hidden>
+  <div class="notice" role="dialog" aria-modal="true"
+       aria-labelledby="notice-title" aria-describedby="notice-body">
+    <h2 class="notice__title" id="notice-title">DOWNLOAD THIS PANEL</h2>
+    <div class="notice__body" id="notice-body">
+      <p>You opened the copy served over <strong>https</strong>. Your browser will not let it
+      open the plain <strong>ws://</strong> socket to the server, so this page cannot connect
+      and never will.</p>
+      <p>What works: press <strong>DOWNLOAD PANEL</strong>, then open
+      <strong>pumpkin-panel.html</strong> from your disk. That copy is not served over https, so
+      it connects fine.</p>
+    </div>
+    <div class="notice__actions">
+      <button class="primary" onclick="downloadHtml()">DOWNLOAD PANEL</button>
+      <button onclick="closeNotice()">I KNOW, CLOSE IT</button>
+    </div>
+  </div>
 </div>
 
 <header class="masthead">
@@ -643,23 +890,64 @@ details.fold > summary:focus-visible { outline: var(--rule-thick) solid var(--co
     <div class="masthead__brand">
       <span class="lamp" id="lamp" aria-hidden="true"></span>
       <h1 class="wordmark">PUMPKIN</h1>
+      <span class="link-state" id="link-state">NOT LINKED</span>
     </div>
-    <span class="link-state" id="link-state">NOT LINKED</span>
-    <span class="row__push"></span>
-    <input id="secret" type="password" placeholder="SECRET" autocomplete="off" size="18"
-           aria-label="management secret" oninput="syncToml()"
-           name="pumpkin-secret" data-credential-fields="secret">
-    <button onclick="genSecret()" title="generate a random secret">GEN</button>
-    <button onclick="toggleSecret()" id="secret-toggle" title="show or hide the secret">SHOW</button>
-    <input id="host" value="192.168.1.165" size="14" aria-label="server address" title="server address"
-           name="username" data-credential-fields="username">
-    <input id="port" value="25585" size="5" aria-label="port" title="port">
-    <button class="primary" onclick="connect()">LINK</button>
-    <button onclick="disconnect()">CUT</button>
-    <button onclick="saveCredentials()" title="let the browser password manager keep the secret">SAVE IN BROWSER</button>
-    <button onclick="saveLink()" title="keep it in this browser's local storage instead">SAVE LOCALLY</button>
-    <button onclick="forgetLink()" title="delete what this page stored">FORGET</button>
-    <button onclick="downloadHtml()" title="download this panel as a single file">SAVE AS FILE</button>
+
+    <div class="link-form">
+      <label class="field field--inline">
+        <span class="field__label">ADDRESS</span>
+        <input id="host" value="192.168.1.165" size="14" aria-label="server address" title="server address"
+               name="username" data-credential-fields="username">
+      </label>
+      <label class="field field--inline">
+        <span class="field__label">PORT</span>
+        <input id="port" value="25585" size="5" aria-label="port" title="port">
+      </label>
+      <label class="field field--inline field--secret">
+        <span class="field__label">SECRET</span>
+        <!-- ikona zamiast osobnego przycisku SHOW: przycisk obok pola
+             wygladal jak osobna akcja i nie wiadomo, czego dotyczy. -->
+        <span class="secret-input">
+          <input id="secret" type="password" placeholder="paste the secret" autocomplete="off" size="18"
+                 aria-label="management secret" oninput="syncToml()"
+                 name="pumpkin-secret" data-credential-fields="secret">
+          <button type="button" class="icon-btn" onclick="toggleSecret()"
+                  id="secret-toggle" title="show the secret"
+                  aria-label="show the secret" aria-pressed="false">
+            <span class="icon-eye" aria-hidden="true"><i class="pupil"></i></span>
+            <span class="slash" aria-hidden="true" hidden></span>
+          </button>
+        </span>
+      </label>
+      <button class="primary" onclick="connect()">LINK</button>
+      <button onclick="disconnect()">CUT</button>
+    </div>
+
+    <!-- Zapis ma jeden przycisk, a trzy cele opisuje menu. Trzy osobne
+         przyciski "SAVE ..." wygladaly jak trzy rozne ustawienia. -->
+    <details class="save-menu">
+      <summary class="btn" title="save, restore and export">SAVE</summary>
+      <div class="save-menu__body">
+        <button onclick="saveLink()" title="keep host, port and secret in this browser, ready on next open">
+          REMEMBER HERE
+        </button>
+        <button onclick="saveCredentials()" title="let the browser password manager keep it, works on every origin">
+          SAVE TO PASSWORDS
+        </button>
+        <button onclick="downloadHtml()" title="download this panel as one html file">
+          DOWNLOAD PANEL
+        </button>
+        <button onclick="forgetLink()" title="delete what this page stored in local storage">
+          FORGET
+        </button>
+        <p class="save-menu__note">
+          REMEMBER HERE keeps the secret in this browser's local storage.
+          SAVE TO PASSWORDS hands it to the browser's password manager, which
+          is the better place for it. DOWNLOAD PANEL saves the panel itself,
+          not the secret.
+        </p>
+      </div>
+    </details>
   </div>
 </header>
 
@@ -718,7 +1006,13 @@ allowed_origins = ["*"]</div>
         <div class="row">
           <button onclick="saveWorld()">SAVE WORLD</button>
           <button onclick="broadcast()">MESSAGE ALL</button>
-          <button class="danger" onclick="stopServer()">STOP SERVER</button>
+          <button class="danger" onclick="stopServer()">WHY DID IT STOP?</button>
+          <p class="note" id="stop-note" hidden>
+            The management protocol has no stop method. It only subscribes to
+            <strong>server/stopping</strong>, which the server sends when it is already going down.
+            To stop the server, stop the Pumpkin app in TrueNAS. This button exists so nobody
+            loses ten minutes looking for a stop that the API cannot do.
+          </p>
         </div>
       </div>
     </section>
@@ -733,39 +1027,46 @@ allowed_origins = ["*"]</div>
       </div>
     </section>
 
-    <section class="panel deck__wide">
-      <div class="panel__head"><h2 class="panel__title">COMMAND DESK</h2></div>
+    <!-- Jedna sekcja, bo wejscie i wyjscie sa jednym strumieniem. Wczesniej
+     wysylanie bylo w COMMAND DESK, a odpowiedzi w osobnym SERVER REPLIES,
+     przez co panel wygladal jak dwie rozne rzeczy zamiast terminala. -->
+    <section class="panel deck__wide term-panel">
+      <div class="panel__head">
+        <h2 class="panel__title">COMMAND DESK</h2>
+        <span class="term-panel__hint">what you send, and what the server sends back</span>
+      </div>
       <div class="panel__body stack">
-        <p class="note">Type a chat command with or without the leading slash. This panel cannot run
-        server commands, because the management API has no method for that. What it can do is send
-        the text to everyone in chat, and read the answers the server sends back while you play.</p>
-        <div class="row" style="align-items:flex-end">
-          <div class="field grow">
-            <label for="cmd_line">Command</label>
-            <input id="cmd_line" placeholder="/say hello" autocomplete="off"
+
+        <div class="term">
+          <div class="term__out" id="replies" role="log" aria-live="polite" aria-label="server replies"></div>
+          <div class="term__line">
+            <span class="term__prompt" aria-hidden="true">&gt;</span>
+            <input id="cmd_line" class="term__input" placeholder="/say hello" autocomplete="off"
+                   aria-label="command to send to chat"
                    onkeydown="if (event.key === 'Enter') sendCommand()">
-          </div>
-          <div class="field" style="flex:0 0 150px">
-            <label for="cmd_style">Send as</label>
-            <select id="cmd_style">
-              <option value="chat">chat message</option>
+            <select id="cmd_style" class="term__style" aria-label="send as">
+              <option value="chat">chat</option>
               <option value="actionbar">action bar</option>
             </select>
+            <button class="primary term__send" onclick="sendCommand()">SEND</button>
           </div>
-          <button class="primary" onclick="sendCommand()">SEND</button>
         </div>
+
+        <details class="term-help">
+          <summary class="term-help__summary">[+] what this can and cannot do</summary>
+          <div class="term-help__body">
+            <p>This panel cannot run server commands, because the management API has no method
+            for that, in Pumpkin and in vanilla Minecraft alike. What it does is send your text
+            to everyone in chat or on the action bar, and show the messages the server pushes
+            back while you play.</p>
+            <p>A command like <span class="inline-code">/tp NAME X Y Z</span> still has to be
+            typed in the game by a player with the right permission. Everything the server
+            sends back, including chat replies, lands in the log above.</p>
+          </div>
+        </details>
         <div class="cmd-chips" id="cmd_chips"></div>
       </div>
     </section>
-
-    <details class="panel deck__wide">
-      <summary class="panel__head panel__head--fold"><span class="fold-caret">[+]</span><span class="panel__title">SERVER REPLIES</span></summary>
-      <div class="panel__body stack">
-        <p class="note">Everything the server sends back: system messages, player joins and leaves,
-        saves, and results of anything you sent from here. Nothing leaves your browser as an alert.</p>
-        <div class="reply" id="replies"></div>
-      </div>
-    </details>
 
     <section class="panel deck__wide">
       <div class="panel__head"><h2 class="panel__title">SETTINGS</h2></div>
@@ -1026,20 +1327,79 @@ function reply(tag, text, kind) {
   box.scrollTop = box.scrollHeight;
 }
 
-function react(short, p) {
-  reply(short, JSON.stringify(p || {}));
-  if (short === "players/joined" || short === "players/left") {
-    refresh("players", renderPlayers);
-    const who = (p && (p.player || p)) && (p.player || p).name;
-    reply("player", who ? who + " " + short.split("/")[1] : "someone", short === "players/joined" ? "ok" : "");
+// Opis zdarzenia w jednym zdaniu. Wczesniej panel logowal surowy JSON
+// przez JSON.stringify(p), przez co terminal wygladal jak wyjatki.
+// Zdarzenia z serwera sa proste i czytelne bez parsowania.
+function describe(notif, params) {
+  const p = params || {};
+  const who = (p.player && (p.player.name || p.player)) || p.name;
+  switch (notif) {
+    case "players/joined":
+      return [who || "someone", "JOINED"];
+    case "players/left":
+      return [who || "someone", "LEFT"];
+    case "server/saved":
+      return ["WORLD SAVED"];
+    case "server/saving":
+      return ["SAVING…"];
+    case "server/started":
+      return ["SERVER STARTED"];
+    case "server/stopping":
+      return ["SERVER STOPPING"];
+    case "server/status":
+      return ["STATUS UPDATE"];
+    case "server/activity":
+      return ["ACTIVITY"];
+    case "allowlist/added":
+    case "allowlist/removed": {
+      const n = (p.added || p.removed || p.player || []).length;
+      return ["WHITELIST " + notif.split("/")[1].toUpperCase(),
+              n ? n + " PLAYER(S)" : ""];
+    }
+    case "operators/added":
+    case "operators/removed":
+      return ["OPERATORS " + notif.split("/")[1].toUpperCase()];
+    case "bans/added":
+    case "bans/removed": {
+      const list = p.added || p.removed || p.player || [];
+      const names = list.map((b) => (b && (b.name || b.player)) || b)
+                     .filter(Boolean).join(", ");
+      return ["BANS " + notif.split("/")[1].toUpperCase(), names];
+    }
+    case "ip_bans/added":
+    case "ip_bans/removed": {
+      const list = p.added || p.removed || p.ip || [];
+      const ips = list.map((b) => (b && (b.ip || b.address)) || b)
+                    .filter(Boolean).join(", ");
+      return ["IP BANS " + notif.split("/")[1].toUpperCase(), ips];
+    }
+    case "gamerules/updated":
+      return ["GAMERULE", (p.gamerule || "") + " = " + JSON.stringify(p.value)];
+    case "world/upgrade_started":
+      return ["WORLD UPGRADE STARTED"];
+    case "world/upgrade_progress":
+      return ["WORLD UPGRADE", (p.progress !== undefined ? p.progress + "%" : "")];
+    case "world/upgrade_finished":
+      return ["WORLD UPGRADE FINISHED"];
+    case "world/upgrade_failed":
+      return ["WORLD UPGRADE FAILED", JSON.stringify(p.error || p)];
+    default:
+      return [notif, JSON.stringify(p)];
   }
+}
+  // Reakcja na zdarzenie serwera: najpierw czytelna linia w terminalu,
+// potem odświeżenie tego, czego zdarzenie dotyczy. Kolejność ma znaczenie —
+// linia musi powstać przed refresh, bo refresh potrafi dołożyć kolejne wiersze.
+function react(short, p) {
+  const [tag, text] = describe(short, p);
+  reply(tag, text);
+
+  if (short === "players/joined" || short === "players/left") refresh("players", renderPlayers);
   if (short === "allowlist/added" || short === "allowlist/removed") refresh("allowlist", renderSimpleList);
   if (short === "operators/added" || short === "operators/removed") refresh("operators", renderOps);
   if (short === "bans/added" || short === "bans/removed") refresh("bans", renderBans);
   if (short === "gamerules/updated") refresh("gamerules", (list) => { RULES = list || []; renderRules(); });
-  if (short === "server/stopping") { reply("server", "SERVER IS STOPPING", "err"); log("SERVER IS STOPPING", "err"); }
-  if (short === "server/saved") reply("server", "world saved", "ok");
-  if (short === "server/saving") reply("server", "saving world");
+  if (short === "server/stopping") log("SERVER IS STOPPING", "err");
 }
 
 function call(method, params) {
@@ -1280,14 +1640,23 @@ function kick(name) {
 function broadcast() {
   askText("MESSAGE EVERYONE", "Shown to every player online as a chat line.", "", (m) => {
     if (!m) return;
-    rpc("server/system_message", { message: { message: { literal: m }, overlay: false } });
+    // Kształt zgodny ze schematem: {message: <message>, overlay: <bool>}.
+    // Wcześniej było tu {message: {message: {literal}, overlay}}, czyli
+    // jeden poziom za dużo — mock to odrzucał, a prawdziwy serwer
+    // odpowiedzialby błędem walidacji. Schemat ma `message` typu message,
+    // a message ma `literal` albo `translatable`.
+    rpc("server/system_message", { message: { literal: m }, overlay: false });
   });
 }
 
+// Przycisk nie zatrzymuje serwera — w protokole nie ma takiej metody.
+// Jest tylko subskrypcja notification/server/stopping, czyli serwer SAM
+// informuje, że się zatrzymuje. Ten przycisk mowi wprost, czego nie da się
+// zrobić, zamiast udawać akcję i nic nie robić. Wyłączasz i włączasz
+// aplikację w TrueNAS.
 function stopServer() {
-  askYes("STOP THE SERVER", "Everyone online gets kicked. This is the whole stop button.", () => {
-    rpc("server/stop");
-  });
+  const panel = $("#stop-note");
+  if (panel) panel.hidden = !panel.hidden;
 }
 
 // --- okienko tekstowe w stronie ---
@@ -1453,7 +1822,7 @@ const STORE_KEY = "pumpkin-panel-link";
 // nie wystarczy: `new Credential(...)` to osobny globalny i w srodowisku,
 // gdzie jest tylko polyfill credentials API, konstruktor nie istnieje.
 // Sprawdzone: brak `typeof Credential` === ReferenceError przy zapisie,
-// czyli panel pada w miejscu, ktore uzytkownik wciska "SAVE IN BROWSER".
+// czyli panel pada w miejscu, ktore uzytkownik wciska "SAVE TO PASSWORDS".
 const hasCredApi = () =>
   typeof navigator !== "undefined" &&
   navigator.credentials &&
@@ -1479,16 +1848,25 @@ function servedOverHttps() {
   }
 }
 
-function showFetchBar() {
-  const bar = document.getElementById("fetch-bar");
-  if (!bar) return;
-  // nad http:// i file:// pasek znika, bo tam panel dziala normalnie
+// Popup, nie pasek. Pasek zaslanial caly panel i nie mial zamkniecia,
+// wiec kazdy odwiedzajacy musial zgadywac, co z nim zrobic.
+function showNotice() {
+  const scrim = $("#notice-scrim");
+  if (!scrim) return;
+  // nad http:// i file:// popup znika, bo tam panel dziala normalnie
   if (servedOverHttps()) {
-    bar.hidden = false;
-    log("THIS PAGE IS HTTPS — it can only hand you the file. Press SAVE AS FILE, then open pumpkin-panel.html from your disk.", "err");
+    scrim.hidden = false;
+    const btn = document.querySelector(".notice__actions button.primary");
+    if (btn && btn.focus) btn.focus();
+    log("THIS PAGE IS HTTPS — it can only hand you the file. Download it, then open pumpkin-panel.html from your disk.", "err");
   } else {
-    bar.hidden = true;
+    scrim.hidden = true;
   }
+}
+
+function closeNotice() {
+  const scrim = $("#notice-scrim");
+  if (scrim) scrim.hidden = true;
 }
 
 function downloadHtml() {
@@ -1519,10 +1897,27 @@ function genSecret() {
   for (let i = 0; i < bytes.length; i++) out += ALPHABET[bytes[i] % ALPHABET.length];
 
   $("#secret").value = out;
+  // Po wygenerowaniu sekret ma byc widoczny, bo uzytkownik musi go
+  // odczytac i wpisac do pumpkin.toml. Ustawiam typ przez ten sam
+  // helper co ikona, inaczej przycisk zostalby w stanie "ukryty"
+  // mimo ze pole pokazuje tekst.
   $("#secret").type = "text";
-  $("#secret-toggle").textContent = "HIDE";
+  markEye(true);
   syncToml();
-  log("NEW SECRET ROLLED — copy the TOML block, paste it in pumpkin.toml, restart", "ok");
+  log("NEW SECRET ROLLED — write it into the secret line of pumpkin.toml, then restart", "ok");
+}
+
+// Ustawia stan ikony oka. Wyciagniete, bo dwa miejsca zmieniaja widocznosc
+// (klikniecie ikony i wygenerowanie nowego sekretu) i kazde musi ustawic
+// aria-pressed oraz kreske razem.
+function markEye(shown) {
+  const btn = $("#secret-toggle");
+  if (!btn) return;
+  btn.setAttribute("aria-pressed", shown ? "true" : "false");
+  btn.setAttribute("aria-label", shown ? "hide the secret" : "show the secret");
+  btn.setAttribute("title", shown ? "hide the secret" : "show the secret");
+  const slash = btn.querySelector(".slash");
+  if (slash) slash.hidden = !shown;
 }
 
 // blok TOML musi pokazywac biezacy sekret, inaczej uzytkownik kopiuje
@@ -1538,11 +1933,14 @@ function tomlBlock() {
     '"\nallowed_origins = ["*"]';
 }
 
+// Przelacza widocznosc sekretu. Przycisk jest ikona, wiec NIE wolno
+// podmieniac jego textContent — to kasuje zawartosc ikony. Stan zamiast tego
+// lezy w aria-pressed, a kreska przez oko pojawia sie razem z nim.
 function toggleSecret() {
   const field = $("#secret");
-  const shown = field.type === "text";
-  field.type = shown ? "password" : "text";
-  $("#secret-toggle").textContent = shown ? "SHOW" : "HIDE";
+  const nowShown = field.type === "text";
+  field.type = nowShown ? "password" : "text";
+  markEye(!nowShown);
 }
 
 function storeCred() {
@@ -1643,12 +2041,13 @@ function forgetLink() {
 renderChips();
 loadLink();
 prefillSecret();
-showFetchBar();
+showNotice();
 
 window.sendCommand = sendCommand;
 window.renderChips = renderChips;
 window.saveLink = saveLink;
 window.loadLink = loadLink;
+window.STORE_KEY = STORE_KEY;
 window.forgetLink = forgetLink;
 window.saveCredentials = saveCredentials;
 window.prefillSecret = prefillSecret;
@@ -1678,8 +2077,12 @@ window.ipbanAdd = ipbanAdd;
 window.kick = kick;
 window.loadSettings = loadSettings;
 window.downloadHtml = downloadHtml;
-window.showFetchBar = showFetchBar;
+window.showNotice = showNotice;
+window.closeNotice = closeNotice;
 window.servedOverHttps = servedOverHttps;
+window.markEye = markEye;
+window.describe = describe;
+window.react = react;
 window.genSecret = genSecret;
 window.syncToml = syncToml;
 window.tomlBlock = tomlBlock;
@@ -1688,6 +2091,7 @@ window.sendCommand = sendCommand;
 window.renderChips = renderChips;
 window.saveLink = saveLink;
 window.loadLink = loadLink;
+window.STORE_KEY = STORE_KEY;
 window.forgetLink = forgetLink;
 window.saveCredentials = saveCredentials;
 window.prefillSecret = prefillSecret;
