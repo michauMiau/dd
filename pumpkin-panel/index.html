@@ -547,9 +547,15 @@ details.panel > .panel__body { border-top: var(--rule) solid var(--color-rule); 
 
 .rule:has(input:checked) .rule__state { color: var(--color-accent); }
 
+/* Szerokosc musi miescic najszersza realna wartosc, a nie typowa.
+   Reguly typu integer maja warteści 5-cyfrowe (32768, 65536) i przy
+   stalych 78px tresc nie miescila sie — pole przewijalo sie poziomo
+   i ostatnia cyfra byla ucieta. Przy 96px mieści sie cala, a 5 cyfr
+   w tym kroju jest najszerszym przypadkiem spośród 12 reguł integer
+   odczytanych z prawdziwego serwera. */
 .rule__num {
-  flex: 0 0 78px;
-  width: 78px;
+  flex: 0 0 96px;
+  width: 96px;
   text-align: right;
   font-variant-numeric: tabular-nums;
 }
@@ -919,7 +925,7 @@ details.fold > summary:focus-visible { outline: var(--rule-thick) solid var(--co
           </button>
         </span>
       </label>
-      <button class="primary" onclick="connect()">LINK</button>
+      <button class="primary" id="btn-link" onclick="connect()">LINK</button>
       <button onclick="disconnect()">CUT</button>
     </div>
 
@@ -1557,6 +1563,11 @@ function renderRules() {
   list.forEach(r => {
     const row = el("label", "rule");
     const name = el("span", "rule__name", ruleLabel(r.key));
+    // Nazwy reguł są długie ("ender pearls vanish on death") i w kolumnie
+    // bywają ucięte. Bez `title` skrócona nazwa jest stracona bezpowrotnie —
+    // najedz na element i nie ma skad dowiedzieć się, o którą regułę chodzi.
+    // Klucz surowy jest w tytule, bo to on identyfikuje regułę w API.
+    name.title = r.key + " — " + ruleLabel(r.key);
     row.appendChild(name);
 
     if (r.type === "boolean") {
