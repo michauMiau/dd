@@ -168,6 +168,7 @@ h1, h2, h3 { font-family: var(--font-display); font-style: normal; font-weight: 
 }
 
 .icon-btn {
+  position: relative;
   display: inline-grid;
   place-items: center;
   width: 34px;
@@ -532,9 +533,9 @@ details.panel > .panel__body { border-top: var(--rule) solid var(--color-rule); 
 .rule__name {
   flex: 1;
   min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  overflow: visible;
+  white-space: normal;
+  overflow-wrap: anywhere;
   text-transform: lowercase;
   letter-spacing: 0.02em;
 }
@@ -865,6 +866,16 @@ details.fold > summary:focus-visible { outline: var(--rule-thick) solid var(--co
     transition-duration: 0.01ms !important;
   }
 }
+
+.save-all {
+  position: fixed;
+  right: 18px;
+  bottom: 18px;
+  z-index: 100;
+  padding: 10px 16px;
+  font-weight: 700;
+  box-shadow: 4px 4px 0 var(--color-ink);
+}
 </style>
 </head>
 <body>
@@ -1009,17 +1020,10 @@ allowed_origins = ["*"]</div>
           <span class="readout__key">Protocol</span><span class="readout__val" id="r-proto">—</span>
           <span class="readout__key">Players online</span><span class="readout__val cell-num" id="r-count">—</span>
         </div>
-        <div class="row">
-          <button onclick="saveWorld()">SAVE WORLD</button>
-          <button onclick="broadcast()">MESSAGE ALL</button>
-          <button class="danger" onclick="stopServer()">WHY DID IT STOP?</button>
-          <p class="note" id="stop-note" hidden>
-            The management protocol has no stop method. It only subscribes to
-            <strong>server/stopping</strong>, which the server sends when it is already going down.
-            To stop the server, stop the Pumpkin app in TrueNAS. This button exists so nobody
-            loses ten minutes looking for a stop that the API cannot do.
-          </p>
-        </div>
+        <p class="note">
+          To stop the server, stop the Pumpkin app in TrueNAS — the management API has no stop method.
+          Sending chat happens in LIVE EVENTS below.
+        </p>
       </div>
     </section>
 
@@ -1036,44 +1040,6 @@ allowed_origins = ["*"]</div>
     <!-- Jedna sekcja, bo wejscie i wyjscie sa jednym strumieniem. Wczesniej
      wysylanie bylo w COMMAND DESK, a odpowiedzi w osobnym SERVER REPLIES,
      przez co panel wygladal jak dwie rozne rzeczy zamiast terminala. -->
-    <section class="panel deck__wide term-panel">
-      <div class="panel__head">
-        <h2 class="panel__title">COMMAND DESK</h2>
-        <span class="term-panel__hint">what you send, and what the server sends back</span>
-      </div>
-      <div class="panel__body stack">
-
-        <div class="term">
-          <div class="term__out" id="replies" role="log" aria-live="polite" aria-label="server replies"></div>
-          <div class="term__line">
-            <span class="term__prompt" aria-hidden="true">&gt;</span>
-            <input id="cmd_line" class="term__input" placeholder="/say hello" autocomplete="off"
-                   aria-label="command to send to chat"
-                   onkeydown="if (event.key === 'Enter') sendCommand()">
-            <select id="cmd_style" class="term__style" aria-label="send as">
-              <option value="chat">chat</option>
-              <option value="actionbar">action bar</option>
-            </select>
-            <button class="primary term__send" onclick="sendCommand()">SEND</button>
-          </div>
-        </div>
-
-        <details class="term-help">
-          <summary class="term-help__summary">[+] what this can and cannot do</summary>
-          <div class="term-help__body">
-            <p>This panel cannot run server commands, because the management API has no method
-            for that, in Pumpkin and in vanilla Minecraft alike. What it does is send your text
-            to everyone in chat or on the action bar, and show the messages the server pushes
-            back while you play.</p>
-            <p>A command like <span class="inline-code">/tp NAME X Y Z</span> still has to be
-            typed in the game by a player with the right permission. Everything the server
-            sends back, including chat replies, lands in the log above.</p>
-          </div>
-        </details>
-        <div class="cmd-chips" id="cmd_chips"></div>
-      </div>
-    </section>
-
     <section class="panel deck__wide">
       <div class="panel__head"><h2 class="panel__title">SETTINGS</h2></div>
       <div class="panel__body stack">
@@ -1083,7 +1049,6 @@ allowed_origins = ["*"]</div>
             <label for="s_motd">MOTD</label>
             <input id="s_motd">
           </div>
-          <button onclick="setStr('motd','message')">SAVE</button>
         </div>
 
         <div class="row" style="align-items:flex-end">
@@ -1124,8 +1089,6 @@ allowed_origins = ["*"]</div>
             <label for="s_autosave">Autosave</label>
             <input type="checkbox" id="s_autosave" onchange="setBool('autosave','enable')">
           </div>
-          <button onclick="pushNums()">SAVE 3</button>
-          <button onclick="setBool('autosave','enable')">SAVE AUTO</button>
         </div>
 
         <div class="row" style="align-items:flex-end">
@@ -1145,9 +1108,6 @@ allowed_origins = ["*"]</div>
             <label for="s_force">Force gamemode</label>
             <input type="checkbox" id="s_force" onchange="setBool('force_game_mode','force')">
           </div>
-          <button onclick="setInt('pause_when_empty_seconds','seconds')">SAVE PAUSE</button>
-          <button onclick="setInt('player_idle_timeout','seconds')">SAVE IDLE</button>
-          <button onclick="setInt('spawn_protection_radius','radius')">SAVE SPAWN</button>
         </div>
 
         <div class="row" style="align-items:flex-end">
@@ -1236,12 +1196,28 @@ allowed_origins = ["*"]</div>
 
     <section class="panel deck__wide">
       <div class="panel__head"><h2 class="panel__title">LIVE EVENTS</h2></div>
-      <div class="panel__body">
+      <div class="panel__body stack">
+        <div class="term">
+          <div class="term__out" id="replies" role="log" aria-live="polite" aria-label="server replies"></div>
+          <div class="term__line">
+            <span class="term__prompt" aria-hidden="true">&gt;</span>
+            <input id="cmd_line" class="term__input" placeholder="/say hello" autocomplete="off"
+                   aria-label="command to send to chat"
+                   onkeydown="if (event.key === 'Enter') sendCommand()">
+            <select id="cmd_style" class="term__style" aria-label="send as">
+              <option value="chat">chat</option>
+              <option value="actionbar">action bar</option>
+            </select>
+            <button class="primary term__send" onclick="sendCommand()">SEND</button>
+          </div>
+        </div>
+        <p class="note">Type a command or plain text and press SEND or Enter. This panel cannot execute server commands; it sends text to chat or the action bar.</p>
         <div class="log" id="log" role="log" aria-live="polite" aria-label="live server events"></div>
       </div>
     </section>
 
   </div>
+  <button class="save-all" onclick="saveAll()">SAVE ALL</button>
 </main>
 
 <script>
@@ -1638,6 +1614,25 @@ function loadSettings() {
 
 function saveWorld() {
   rpc("server/save", { flush: false });
+}
+
+function saveAll() {
+  try { saveWorld(); } catch (e) {}
+  try { setStr("motd", "message"); } catch (e) {}
+  try { pushNums(); } catch (e) {}
+  try { setEnum("difficulty", "difficulty"); } catch (e) {}
+  try { setEnum("game_mode", "mode"); } catch (e) {}
+  try { setBool("autosave", "enable"); } catch (e) {}
+  ["pause_when_empty_seconds","player_idle_timeout","spawn_protection_radius"].forEach((k, i) => {
+    const param = i === 0 ? "seconds" : i === 1 ? "seconds" : "radius";
+    try { setInt(k, param); } catch (e) {}
+  });
+  ["use_allowlist","enforce_allowlist","allow_flight","force_game_mode"].forEach((k) => {
+    try { setBool(k, SELECTORS[k].includes("use") ? "use" :
+                      k === "enforce_allowlist" ? "enforce" :
+                      k === "allow_flight" ? "allow" : "force"); } catch (e) {}
+  });
+  if (typeof log === "function") log("SAVE ALL: world, motd, limits and rules sent to Pumpkin", "ok");
 }
 
 function kick(name) {
@@ -2073,7 +2068,9 @@ window.renderRules = renderRules;
 window.connect = connect;
 window.disconnect = disconnect;
 window.saveWorld = saveWorld;
+window.saveAll = saveAll;
 window.broadcast = broadcast;
+window.saveAll = saveAll;
 window.stopServer = stopServer;
 window.setStr = setStr;
 window.setInt = setInt;
