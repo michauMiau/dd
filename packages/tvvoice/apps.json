@@ -35,5 +35,9 @@
       "shortDescription": "Home Assistant Assist voice client for webOS TV.",
       "fullDescriptionUrl": "https://michaumiau.github.io/dd/packages/tvvoice/manifest.json"
     }
-  ]
+  ],
+  "ipkHash": {
+    "sha256": "3211c641c076f1c36947445746255195de53b8e1c40d3af99c04fed674f98f89"
+  },
+  "ipkSize": 6522
 }
