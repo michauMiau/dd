@@ -24,9 +24,9 @@
         "rootRequired": false,
         "ipkUrl": "https://michaumiau.github.io/dd/packages/tvvoice/com.michau.tvvoice_0.0.5_all.ipk",
         "ipkHash": {
-          "sha256": "1494636517e4ca26ed8ea262bad7fa1c7367964336b68bf7fae16d554b82ce1a"
+          "sha256": "9ae8f3245ee0e08975d8cddab31724fd9747efaaa7946ea44dd09a2b050dfade"
         },
-        "ipkSize": 6556
+        "ipkSize": 6744
       },
       "pool": "main",
       "requirements": {
