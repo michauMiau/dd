@@ -1,0 +1,39 @@
+{
+  "paging": {
+    "page": 1,
+    "count": 1,
+    "maxPage": 1,
+    "itemsTotal": 1,
+    "prevUrl": null,
+    "nextUrl": null
+  },
+  "packages": [
+    {
+      "id": "com.michau.tvvoice",
+      "title": "HA Voice Assist",
+      "iconUri": "https://michaumiau.github.io/dd/packages/tvvoice/icon.png",
+      "manifestUrl": "https://michaumiau.github.io/dd/packages/tvvoice/manifest.json",
+      "manifest": {
+        "id": "com.michau.tvvoice",
+        "version": "0.0.5",
+        "type": "web",
+        "title": "HA Voice Assist",
+        "appDescription": "Home Assistant Assist voice client for webOS TV.",
+        "iconUri": "https://michaumiau.github.io/dd/packages/tvvoice/icon.png",
+        "sourceUrl": "https://github.com/michauMiau/dd/tree/main/packages/tvvoice",
+        "rootRequired": false,
+        "ipkUrl": "https://michaumiau.github.io/dd/packages/tvvoice/com.michau.tvvoice_0.0.5_all.ipk",
+        "ipkHash": {
+          "sha256": "abcd19966b78813f3ae22b2976cc91fcb290d50599dbb4c38473f0a9b69f7d4c"
+        },
+        "ipkSize": 6526
+      },
+      "pool": "main",
+      "requirements": {
+        "webosRelease": ">=4.0"
+      },
+      "shortDescription": "Home Assistant Assist voice client for webOS TV.",
+      "fullDescriptionUrl": "https://michaumiau.github.io/dd/packages/tvvoice/manifest.json"
+    }
+  ]
+}
