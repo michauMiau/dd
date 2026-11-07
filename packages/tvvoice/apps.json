@@ -10,29 +10,29 @@
   "packages": [
     {
       "id": "com.michau.tvvoice",
-      "title": "HA Voice Assist",
+      "title": "Home Assistant",
       "iconUri": "https://michaumiau.github.io/dd/packages/tvvoice/icon.png",
       "manifestUrl": "https://michaumiau.github.io/dd/packages/tvvoice/manifest.json",
       "manifest": {
         "id": "com.michau.tvvoice",
         "version": "0.0.5",
         "type": "web",
-        "title": "HA Voice Assist",
-        "appDescription": "Home Assistant Assist voice client for webOS TV.",
+        "title": "Home Assistant",
+        "appDescription": "Home Assistant frontend with built-in Assist voice button for webOS TV.",
         "iconUri": "https://michaumiau.github.io/dd/packages/tvvoice/icon.png",
         "sourceUrl": "https://github.com/michauMiau/dd/tree/main/packages/tvvoice",
         "rootRequired": false,
         "ipkUrl": "https://michaumiau.github.io/dd/packages/tvvoice/com.michau.tvvoice_0.0.5_all.ipk",
         "ipkHash": {
-          "sha256": "9ae8f3245ee0e08975d8cddab31724fd9747efaaa7946ea44dd09a2b050dfade"
+          "sha256": "9d6d29e206e5bbfba881d5970c340a015b4bc8248ce5cfb66c487be1ddea6fd4"
         },
-        "ipkSize": 6744
+        "ipkSize": 6730
       },
       "pool": "main",
       "requirements": {
         "webosRelease": ">=4.0"
       },
-      "shortDescription": "Home Assistant Assist voice client for webOS TV.",
+      "shortDescription": "Home Assistant frontend with voice button.",
       "fullDescriptionUrl": "https://michaumiau.github.io/dd/packages/tvvoice/manifest.json"
     }
   ]
