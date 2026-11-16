@@ -5,7 +5,7 @@
     },
     {
         "q": "Czy mogę zasugerować nową komendę?",
-        "a": "Tak! Możesz otworzyć issue na GitHubie z linkiem do repozytorium — po prostu opisz komendę, którą chciałbyś zobaczyć. Link znajdziesz w stopce strony."
+        "a": "Tak! Możesz otworzyć issue na GitHub— po prostu opisz komendę, którą chciałbyś zobaczyć. Link znajdziesz w stopce strony."
     },
     {
         "q": "Czy te komendy działają na serwerach?",

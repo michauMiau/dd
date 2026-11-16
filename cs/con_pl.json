@@ -145,8 +145,8 @@
         "cat": "Multiplayer"
     },
     {
-        "cmd": "mp_maxrounds 24",
-        "desc": "Maksymalna liczba rund w meczu (domyślnie 30)",
+        "cmd": "mp_maxrounds 32",
+        "desc": "Maksymalna liczba rund w meczu (domyślnie 24)",
         "cat": "Multiplayer"
     },
     {
@@ -211,17 +211,17 @@
     },
     {
         "cmd": "stop",
-        "desc": "Zatrzymuje nagrywanie demki",
+        "desc": "Zatrzymuje nagrywanie dema",
         "cat": "Demo"
     },
     {
         "cmd": "play demo_name",
-        "desc": "Odtwarza demkę z konsoli (wymaga sv_cheats 1)",
+        "desc": "Odtwarza demo z konsoli",
         "cat": "Demo"
     },
     {
         "cmd": "demo_list",
-        "desc": "Wyświetla listę dostępnych demek",
+        "desc": "Wyświetla listę dostępnych dem",
         "cat": "Demo"
     },
     {
@@ -256,12 +256,12 @@
     },
     {
         "cmd": "sv_cheats 1; host_timescale 0.6; weapon_accuracy_nospread true",
-        "desc": "CS-Slow - Gra w wolnym tempie, w normalnym tempie wygląda jakbyś miał Spinbot",
+        "desc": "CS-Slow - Gra w wolnym tempie",
         "cat": "quickgames"
     },
     {
-        "cmd": "sv_cheats 1; host_timescale 2",
-        "desc": "KetamineCS - Wszystko jest szybsze od ciebie, jedyne co jest wolniejsze to twoje FPSy",
+        "cmd": "tbd",
+        "desc": "Zombie - CT vs Zombie T, Respawn T co 30s. Tryb Uproszczony i Negev rekomendowany, też komendy Maraton",
         "cat": "quickgames"
     },
     {
@@ -270,8 +270,8 @@
         "cat": "quickgames"
     },
     {
-        "cmd": "mp_limitteams -1; mp_autoteambalance false; mp_autokick false",
-        "desc": "Chill - starter komenda dla niezbalansowanej zabawy",
+        "cmd": "mp_limitteams 0; mp_autoteambalance false; mp_autokick false; sv_allow_votes 0",
+        "desc": "Chill - starter komenda aby zapobiec banom",
         "cat": "quickgames"
     },
     {
@@ -285,8 +285,13 @@
         "cat": "quickgames"
     },
     {
-        "cmd": "mp_roundtime 999; mp_maxrounds 100; sv_cheats 1; mp_restartgame 1; sv_cheats 0",
+        "cmd": "mp_roundtime 999; mp_maxrounds 100; sv_allow_votes 0; mp_limitteams 0; mp_autoteambalance false; mp_autokick false",
         "desc": "Maraton - nieskończenie długie rundy, idealne na treningi i zabawę z kumplami",
+        "cat": "quickgames"
+    },
+    {
+        "cmd": "sv_cheats 1; sv_noclipspeed 0",
+        "desc": "VAC Cheat - Włącza cheaty ale zapobiega noclip (WH wciąż dostępne)",
         "cat": "quickgames"
     }
 ]
