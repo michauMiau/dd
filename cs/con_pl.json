@@ -260,8 +260,8 @@
         "cat": "quickgames"
     },
     {
-        "cmd": "tbd",
-        "desc": "Zombie - CT vs Zombie T, Respawn T co 30s. Tryb Uproszczony i Negev rekomendowany, też komendy Maraton",
+        "cmd": "mp_limitteams 0; mp_humanteam ct; mp_damage_scale_t_body 0.1; mp_damage_scale_t_head 0.2; mp_drop_knife_enable 1; bot_knives_only; bot_kick; bot_add_t; bot_add_t; bot_add_t; mp_roundtime 6; mp_afterroundmoney 0; mp_free_armor 0; mp_respawn_on_death_t 1; mp_startmoney 5000; sv_bot_buy_molotov_weight 2; sv_bot_buy_hegrenade_weight 2; sv_infinite_ammo 2; mp_restartgame 1; say cs.orangecatlinux.win",
+        "desc": "Zombie - CT vs Zombie T, Respawn T co 50s. Tryb Uproszczony i Negev rekomendowany, też komendy Maraton",
         "cat": "quickgames"
     },
     {
@@ -291,7 +291,7 @@
     },
     {
         "cmd": "sv_cheats 1; sv_noclipspeed 0",
-        "desc": "VAC Cheat - Włącza cheaty ale zapobiega noclip (WH wciąż dostępne)",
+        "desc": "VAC semi-Cheat - Włącza sv_cheats ale zapobiega noclip (WH wciąż dostępne)",
         "cat": "quickgames"
     }
 ]
