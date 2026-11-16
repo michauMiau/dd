@@ -44,8 +44,7 @@ nigdy nie zawiodła, nie dowodzi niczego o tym, co sprawdza.
 
 ## Zakres
 
-Linting obejmuje **tylko `kzones/`**. Pozostałe katalogi repo (`cs/`, `quiz/`, `vr/`,
-`sharp-aquasodium/`, …) to starsze ręcznie pisane strony — nie są nasze do
+Linting obejmuje **tylko `kzones/`**. Pozostałe katalogi repo (`cs/`, `quiz/`, `vr/`, …) to starsze ręcznie pisane strony — nie są nasze do
 przeformatowywania, a `check-links` celowo nie sprawdza ich linków bezwzględnych
 do `michaumiau.github.io`, bo wymagałoby sieci.
 

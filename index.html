@@ -1,113 +1,873 @@
 <!DOCTYPE html>
-<html>
+<html lang="pl">
 <head>
-    <meta charset='utf-8'>
-    <meta http-equiv='X-UA-Compatible' content='IE=edge'>
-    <title>Strona chleb</title>
-    <meta name='viewport' content='width=device-width, initial-scale=1'>
-    <link rel='stylesheet' type='text/css' media='screen' href='main.css'>
-    <link rel="icon" type="image/x-icon" href="favicon.png">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/x-icon" href="cs/favicon.jpg">
+    <title>CS2 — Komendy</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --orange: #ff8c42;
+            --blue: #3a86ff;
+            --bg: #0d1117;
+            --card-bg: #161b22;
+            --card-border: #30363d;
+            --text: #e6edf3;
+            --text-muted: #8b949e;
+            --input-bg: #0d1117;
+            --success: #3fb950;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Rajdhani', system-ui, -apple-system, sans-serif;
+            color: var(--text);
+            min-height: 100vh;
+            line-height: 1.6;
+        }
+
+        /* --- Tapeta CS gradient z paskami --- */
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            z-index: -1;
+            background:
+                repeating-linear-gradient(
+                    -45deg,
+                    transparent,
+                    transparent 30px,
+                    rgba(255, 140, 66, 0.03) 30px,
+                    rgba(255, 140, 66, 0.03) 32px
+                ),
+                repeating-linear-gradient(
+                    -45deg,
+                    transparent,
+                    transparent 60px,
+                    rgba(58, 134, 255, 0.03) 60px,
+                    rgba(58, 134, 255, 0.03) 62px
+                ),
+                linear-gradient(
+                    135deg,
+                    #0a0e14 0%,
+                    #0d1117 30%,
+                    #0f1520 60%,
+                    #0a0e14 100%
+                );
+        }
+
+        .container {
+            max-width: 960px;
+            margin: 0 auto;
+            padding: 32px 24px;
+        }
+
+        /* --- Nagłówek z gradientem na każdą literę (JS) --- */
+        h1 {
+            text-align: center;
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+            letter-spacing: 2px;
+            line-height: 1.2;
+        }
+
+        .h1-letter {
+            display: inline-block;
+            transition: color 0.3s ease;
+        }
+
+        /* Spacja — bez gradientu */
+        .h1-space {
+            -webkit-text-fill-color: var(--text);
+            color: var(--text);
+        }
+
+        .subtitle {
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            margin-bottom: 28px;
+        }
+
+        /* --- Górny pasek z przyciskami FAQ i Donate --- */
+        .top-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+            animation: fadeSlideDown 0.5s ease-out;
+        }
+
+        .top-btn {
+            padding: 8px 20px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            border: 1.5px solid var(--card-border);
+            border-radius: 8px;
+            background: transparent;
+            color: var(--text-muted);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-family: inherit;
+        }
+
+        .top-btn:hover {
+            border-color: var(--orange);
+            color: var(--orange);
+        }
+
+        /* --- Modal --- */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            z-index: 1000;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(4px);
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal-box {
+            background: var(--card-bg);
+            border: 1.5px solid var(--card-border);
+            border-radius: 16px;
+            padding: 28px 32px;
+            max-width: 540px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+            animation: modalIn 0.3s ease-out;
+        }
+
+        @keyframes modalIn {
+            from { opacity: 0; transform: scale(0.95) translateY(10px); }
+            to   { opacity: 1; transform: scale(1) translateY(0); }
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .modal-title {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: var(--text);
+        }
+
+        .modal-close {
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            font-size: 1.5rem;
+            cursor: pointer;
+            transition: color 0.2s;
+            line-height: 1;
+        }
+
+        .modal-close:hover {
+            color: var(--text);
+        }
+
+        /* FAQ items */
+        .faq-item {
+            margin-bottom: 16px;
+            border-bottom: 1px solid var(--card-border);
+            padding-bottom: 16px;
+        }
+
+        .faq-item:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
+
+        .faq-question {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--orange);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: color 0.2s;
+        }
+
+        .faq-question:hover {
+            color: #ffb366;
+        }
+
+        .faq-arrow {
+            font-size: 0.7rem;
+            transition: transform 0.3s ease;
+        }
+
+        .faq-item.open .faq-arrow {
+            transform: rotate(90deg);
+        }
+
+        .faq-answer {
+            display: none;
+            padding-top: 8px;
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            line-height: 1.5;
+        }
+
+        .faq-item.open .faq-answer {
+            display: block;
+            animation: fadeSlideUp 0.2s ease-out;
+        }
+
+        /* --- Wyszukiwarka --- */
+        .search-wrapper {
+            position: relative;
+            margin-bottom: 24px;
+            animation: fadeSlideDown 0.5s ease-out;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 14px 20px 14px 48px;
+            font-size: 1rem;
+            border: 2px solid var(--card-border);
+            border-radius: 12px;
+            background: var(--input-bg);
+            color: var(--text);
+            outline: none;
+            transition: border-color 0.3s, box-shadow 0.3s;
+            font-family: inherit;
+        }
+
+        .search-input:focus {
+            border-color: var(--blue);
+            box-shadow: 0 0 0 4px rgba(58, 134, 255, 0.15);
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-muted);
+            font-size: 1.2rem;
+            pointer-events: none;
+        }
+
+        /* --- Filtry kategorii --- */
+        .filter-bar {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 24px;
+            animation: fadeSlideDown 0.5s ease-out 0.1s both;
+        }
+
+        .filter-btn {
+            padding: 6px 16px;
+            font-size: 0.85rem;
+            border: 1.5px solid var(--card-border);
+            border-radius: 20px;
+            background: transparent;
+            color: var(--text-muted);
+            cursor: pointer;
+            transition: all 0.25s ease;
+            font-family: inherit;
+        }
+
+        .filter-btn:hover {
+            border-color: var(--blue);
+            color: var(--blue);
+        }
+
+        .filter-btn.active {
+            background: var(--blue);
+            border-color: var(--blue);
+            color: #fff;
+        }
+
+        /* --- Quickgames --- */
+        .quickgames-section {
+            margin-bottom: 28px;
+            animation: fadeSlideDown 0.5s ease-out 0.15s both;
+        }
+
+        .section-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .section-title .icon { color: var(--orange); }
+
+        .quickgames-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .quickgame-item {
+            padding: 14px 18px;
+            background: var(--card-bg);
+            border: 1.5px solid var(--card-border);
+            border-radius: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+            transition: border-color 0.2s, transform 0.15s;
+        }
+
+        .quickgame-item:hover {
+            border-color: var(--orange);
+            transform: translateY(-1px);
+        }
+
+        .quickgame-info {
+            flex: 1;
+            min-width: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .quickgame-name {
+            font-size: 0.95rem;
+            color: var(--text);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .quickgame-cmd {
+            display: block;
+            font-family: 'Cascadia Code', 'Fira Code', 'Consolas', monospace;
+            font-size: 0.82rem;
+            color: var(--orange);
+            background: rgba(255, 140, 66, 0.08);
+            padding: 4px 10px;
+            border-radius: 6px;
+            white-space: nowrap;
+            overflow-x: auto;
+            scrollbar-width: thin;
+        }
+
+        .quickgame-cmd::-webkit-scrollbar { height: 4px; }
+        .quickgame-cmd::-webkit-scrollbar-thumb { background: var(--card-border); border-radius: 2px; }
+
+        /* --- Lista komend --- */
+        .commands-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .command-card {
+            background: var(--card-bg);
+            border: 1.5px solid var(--card-border);
+            border-radius: 12px;
+            padding: 14px 18px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            transition: border-color 0.2s, transform 0.15s, opacity 0.3s;
+        }
+
+        .command-card:hover {
+            border-color: var(--blue);
+            transform: translateY(-1px);
+        }
+
+        .cmd-info { flex: 1; min-width: 0; }
+
+        .cmd-text {
+            font-family: 'Cascadia Code', 'Fira Code', 'Consolas', monospace;
+            font-size: 0.95rem;
+            color: var(--orange);
+            word-break: break-all;
+        }
+
+        .cmd-desc {
+            font-size: 0.82rem;
+            color: var(--text-muted);
+            margin-top: 3px;
+        }
+
+        .cmd-category {
+            display: inline-block;
+            padding: 2px 10px;
+            font-size: 0.72rem;
+            border-radius: 12px;
+            background: rgba(58, 134, 255, 0.15);
+            color: var(--blue);
+            margin-top: 5px;
+        }
+
+        .copy-btn {
+            flex-shrink: 0;
+            padding: 8px 14px;
+            font-size: 0.82rem;
+            border: 1.5px solid var(--card-border);
+            border-radius: 8px;
+            background: transparent;
+            color: var(--text-muted);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            white-space: nowrap;
+            font-family: inherit;
+        }
+
+        .copy-btn:hover {
+            border-color: var(--success);
+            color: var(--success);
+        }
+
+        .copy-btn.copied {
+            border-color: var(--success);
+            background: rgba(63, 185, 80, 0.12);
+            color: var(--success);
+        }
+
+        /* --- Brak wyników --- */
+        .no-results {
+            text-align: center;
+            padding: 40px 20px;
+            color: var(--text-muted);
+            display: none;
+        }
+
+        .no-results.visible { display: block; animation: fadeIn 0.3s ease-out; }
+
+        /* --- Animacje --- */
+        @keyframes fadeSlideDown {
+            from { opacity: 0; transform: translateY(-12px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes fadeSlideUp {
+            from { opacity: 0; transform: translateY(10px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to   { opacity: 1; }
+        }
+
+        /* --- Ładowanie --- */
+        .loading {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--text-muted);
+            font-size: 1.1rem;
+        }
+
+        /* --- Stopka z GitHub --- */
+        .footer {
+            margin-top: 48px;
+            text-align: center;
+            padding: 20px;
+            border-top: 1px solid var(--card-border);
+            color: var(--text-muted);
+            font-size: 0.85rem;
+        }
+
+        .footer a {
+            color: var(--orange);
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+
+        .footer a:hover {
+            color: #ffb366;
+        }
+
+        @media (max-width: 500px) {
+            h1 { font-size: 1.8rem; }
+            .container { padding: 20px 14px; }
+            .quickgames-grid { grid-template-columns: 1fr; }
+            .command-card { flex-wrap: wrap; }
+        }
+    </style>
 </head>
 <body>
-    <div id="ramkag" class="r">
- 
- 
-Strona Michała
 
+<div class="container">
+    <!-- Nagłówek z gradientem na każdą literę (renderowane przez JS) -->
+    <h1 id="title"></h1>
+    <p class="subtitle">Wyszukaj, skopiuj i wklej do konsoli! Bez reklam, No BS (nieukończone)</p>
 
-
-
-    </div>
-                   
-
-    <div id="a" class="r">
-        <h1>DD jumpscare</h1>
-        To jest pierwszy działający eksperyment który ja zrobiłem używając JS i CSS'a. Planuję zrobić wersję 2 gdzie można własny obraz przesłać
-        
-        <a href="https://michaumiau.github.io/dd/scary/">Link tu</a>
+    <!-- Górny pasek z przyciskami FAQ i Donate -->
+    <div class="top-bar">
+        <button class="top-btn" id="faqBtn">FAQ</button>
+        <a href="https://github.com/michauMiau/michauMiau/blob/93eb917fbb235605dc26d68128376fd0a1629652/FUNDING.md" target="_blank" class="top-btn" style="text-decoration:none;">Donate</a>
     </div>
 
-     <div id="b" class="r">
-         <span>
-
-         <h1>Generator liczb</h1>
-         Generator liczb od 1 do 10 z dźwiękami. Też używa js do dźwięku i liczb i css'a do wyglądu.
-         <a href="https://michaumiau.github.io/dd/number/">Kliknij mnie po generator liczb
-         </a>
-        </span>
+    <!-- Wyszukiwarka -->
+    <div class="search-wrapper">
+        <span class="search-icon">&#128269;</span>
+        <input type="text" class="search-input" id="searchInput" placeholder="Szukaj komendy, opisu lub kategorii...">
     </div>
 
-    <div id="c" class="r"> 
-        <h1>Kącik z rzeczami</h1>
+    <!-- Filtry kategorii -->
+    <div class="filter-bar" id="filterBar"></div>
 
-
-        Linki tutaj mogą być
-        <a href="https://michaumiau.github.io/dd/rainbow/">Tęcza z tekstem (dobre na imprezy!)
-            </a>
-        <a href="https://michaumiau.github.io/dd/htmx/">Test strony HTMX
-            </a>
-
-
-    </div>
-    <div id="d" class="r"> 
-        <h1>Linux Quiz</h1>
-
-        Quiz na komendy z linuxa, prosty.
-        
-        <a href="https://michaumiau.github.io/dd/quiz/quiz_linux.html">
-            Quiz
-            </a>
-    </div>
-    <div id="d" class="r"> 
-        <h1><b>CS2 KOMENDY</b></h1>
-
-        Wszystkie komendy do CS2 w ładnym formacie
-        
-        <a href="https://michaumiau.github.io/dd/Cs.html">
-            Tutaj
-            </a>
-    </div>
-    
-<div id="d" class="r"> 
-        <h1><b>KZones Layout Builder</b></h1>
-
-        Wizualny generator layoutów i stref dla skryptu KZones (KWin). Rysujesz strefy myszką, dostajesz gotowy JSON do settingsów KZones.
-        
-        <a href="https://michaumiau.github.io/dd/kzones/">
-            Otwórz generator
-            </a>
-    </div>
-    
-<div id="d" class="r">
-        <h1><b>Pumpkin Panel</b></h1>
-
-        Pikselowy panel administracyjny do Pumpkin Minecraft. Status, gracze, ustawienia, biała lista, bany, gamerules i zdarzenia na żywo przez WebSocket management.
-
-                <b>Ta strona jest tylko plikiem do pobrania, nie działa jako panel.</b>
-                Jest serwowana po <code>https</code>, a przeglądarka blokuje połączenie <code>https</code> → <code>ws://</code> z serwerem w LAN. Ściągnij plik i otwórz go z dysku.
-
-                <a href="https://michaumiau.github.io/dd/pumpkin-panel/" download="pumpkin-panel.html">
-                    Pobierz pumpkin-panel.html
-                </a>
+    <!-- Quickgames (renderowane dynamicznie) -->
+    <div class="quickgames-section" id="quickgamesSection">
+        <div class="section-title"><span class="icon">&#9889;</span> Quickgames</div>
+        <div class="quickgames-grid" id="quickgamesGrid"></div>
     </div>
 
-<div id="f" class="r">
-    <h1><b>TV Voice Assist</b></h1>
-    webOS Homebrew package for HA Voice Assist. Install through Homebrew Channel.
-    <a href="https://michaumiau.github.io/dd/packages/tvvoice/">
-        Package files
-    </a>
+    <!-- Lista komend -->
+    <div class="commands-list" id="commandsList"></div>
+
+    <!-- Brak wyników -->
+    <div class="no-results" id="noResults">Brak wyników wyszukiwania 😿</div>
+
+    <!-- Ładowanie -->
+    <div class="loading" id="loading">Ładowanie komend... 🐾</div>
+
+    <!-- Stopka z GitHub -->
+    <div class="footer">
+        Projekt na <a href="https://github.com/michauMiau/dd" target="_blank">GitHub</a> — zgłoś brakującą komendę lub błąd!
+    </div>
 </div>
 
-<div id="e" class="r">
-    If you wanna see this page in english click <a href="https://michaumiau.github.io/dd/en">here</a>
+<!-- Modal FAQ -->
+<div class="modal-overlay" id="faqModal">
+    <div class="modal-box">
+        <div class="modal-header">
+            <span class="modal-title">FAQ — Pytania i odpowiedzi</span>
+            <button class="modal-close" id="faqClose">&times;</button>
+        </div>
+        <div id="faqContent"></div>
+    </div>
 </div>
 
 
+<!-- ============================================
+     JS — Modularny (moduły: data, render, filter, utils)
+     ============================================ -->
+<script type="module">
+
+// --- MODUŁ 0: Gradient na każdą literę w nagłówku (PRZEZ COLOR, NIE BACKGROUND-CLIP!) ---
+
+const TITLE_TEXT = 'CS2 — Komendy Konsoli';
+// Jasny pomarańcz -> ciemny niebieski (12 kolorów gradientu)
+const GRADIENT_COLORS = ['#ffb366', '#ff8c42', '#e07030', '#d05a30', '#b04a35', '#904040', '#704050', '#504060', '#3a4070', '#2a4080', '#1a4090', '#1040a0'];
+
+function buildGradientTitle() {
+    const titleEl = document.getElementById('title');
+    if (!titleEl) return;
+    
+    // Budujemy fragment dokumentu z gradientem na każdej literze przez kolor (nie background-clip!)
+    const fragment = document.createDocumentFragment();
+    
+    let charIndex = 0;
+    for (let i = 0; i < TITLE_TEXT.length; i++) {
+        const char = TITLE_TEXT[i];
+        if (char === ' ') {
+            // Spacja — bez gradientu, zwykły biały kolor
+            const span = document.createElement('span');
+            span.className = 'h1-space';
+            span.innerHTML = '&nbsp;';
+            fragment.appendChild(span);
+        } else {
+            // Gradient na każdą literę — ustawiamy KOLOR (color), nie background-clip!
+            const colorIndex = Math.min(charIndex, GRADIENT_COLORS.length - 1);
+            
+            const span = document.createElement('span');
+            span.className = 'h1-letter';
+            span.textContent = char;
+            // Ustaw gradient na każdej literze PRZED dodaniem do DOM — KOLORYM (color) nie background!
+            span.style.color = GRADIENT_COLORS[colorIndex];
+            
+            fragment.appendChild(span);
+            charIndex++;
+        }
+    }
+    
+    titleEl.appendChild(fragment);
+}
+
+// --- MODUŁ 1: Ładowanie danych z plików JSON ---
+
+const DATA_URL = 'cs/con_pl.json';
+const FAQ_URL = 'cs/faq_pl.json';
+
+async function loadJSON(url) {
+    try {
+        const res = await fetch(url);
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        return await res.json();
+    } catch (err) {
+        console.error(`Nie udało się załadować ${url}:`, err);
+        return null;
+    }
+}
+
+// --- MODUŁ 2: Renderowanie (UI) ---
+
+const searchInput   = document.getElementById('searchInput');
+const filterBar     = document.getElementById('filterBar');
+const commandsList  = document.getElementById('commandsList');
+const quickgamesGrid= document.getElementById('quickgamesGrid');
+const quickgamesSection = document.getElementById('quickgamesSection');
+const noResults     = document.getElementById('noResults');
+const loadingEl     = document.getElementById('loading');
+
+// Modal elements
+const faqModal      = document.getElementById('faqModal');
+const faqContent    = document.getElementById('faqContent');
+
+let activeCategory = 'Wszystkie';
 
 
+function renderQuickgames(commands) {
+    const qgs = commands.filter(c => c.cat === 'quickgames');
+    if (qgs.length === 0) { quickgamesSection.style.display = 'none'; return; }
+
+    quickgamesSection.style.display = 'block';
+    quickgamesGrid.innerHTML = '';
+    qgs.forEach((q, i) => {
+        const el = document.createElement('div');
+        el.className = 'quickgame-item';
+        el.style.animationDelay = `${i * 0.05}s`;
+        el.innerHTML = `
+            <div class="quickgame-info">
+                <span class="quickgame-name">${escapeHtml(q.desc)}</span>
+                <code class="quickgame-cmd" title="${escapeHtml(q.cmd)}">${escapeHtml(q.cmd)}</code>
+            </div>
+            <button class="copy-btn" data-copy="${escapeHtml(q.cmd)}">Kopiuj</button>
+        `;
+        quickgamesGrid.appendChild(el);
+    });
+
+    // Przypisz copy handler do nowych przycisków
+    quickgamesGrid.querySelectorAll('.copy-btn').forEach(btn => {
+        btn.addEventListener('click', handleCopy);
+    });
+}
 
 
+function getCategories(commands) {
+    const cats = new Set();
+    commands.forEach(c => cats.add(c.cat));
+    return ['Wszystkie', ...Array.from(cats).sort((a,b) => a === 'quickgames' ? -1 : b === 'quickgames' ? 1 : a.localeCompare(b))];
+}
 
+
+function renderFilters(commands) {
+    filterBar.innerHTML = '';
+    getCategories(commands).forEach(cat => {
+        const btn = document.createElement('button');
+        btn.className = 'filter-btn' + (cat === activeCategory ? ' active' : '');
+        btn.textContent = cat;
+        btn.addEventListener('click', () => {
+            activeCategory = cat;
+            renderFilters(commands);
+            filterCommands(commands);
+        });
+        filterBar.appendChild(btn);
+    });
+}
+
+
+function renderCommands(filtered, animate) {
+    commandsList.innerHTML = '';
+
+    if (filtered.length === 0) {
+        noResults.classList.add('visible');
+        return;
+    }
+    noResults.classList.remove('visible');
+
+    filtered.forEach((c, i) => {
+        const card = document.createElement('div');
+        card.className = 'command-card';
+        // Animuj tylko jeśli lista się zmieniła lub to pierwsze renderowanie
+        if (animate) {
+            card.style.animation = `fadeSlideUp 0.3s ease-out ${i * 0.04}s both`;
+        }
+        card.innerHTML = `
+            <div class="cmd-info">
+                <div class="cmd-text">${escapeHtml(c.cmd)}</div>
+                <div class="cmd-desc">${escapeHtml(c.desc)}</div>
+                <span class="cmd-category">${escapeHtml(c.cat)}</span>
+            </div>
+            <button class="copy-btn" data-copy="${escapeHtml(c.cmd)}">Kopiuj</button>
+        `;
+        commandsList.appendChild(card);
+    });
+
+    document.querySelectorAll('.copy-btn').forEach(btn => {
+        btn.addEventListener('click', handleCopy);
+    });
+}
+
+
+// --- MODUŁ 3: Filtrowanie i wyszukiwanie ---
+
+function normalizeText(text) { return text.toLowerCase().replace(/_/g, ' '); }
+function normalizeQuery(q) { return q.toLowerCase().replace(/_/g, ' '); }
+function matchesQuery(text, query) { const terms = query.split(/\s+/).filter(Boolean); return terms.every(term => text.includes(term)); }
+
+
+let lastFilteredIds = '';  // do wykrywania zmian — porównujemy ID komend zamiast liczby
+
+function filterCommands(commands) {
+    const query = normalizeQuery(searchInput.value.trim());
+
+    // Quickgames zawsze wykluczone z głównej listy — są tylko w sekcji na górze
+    let filtered = commands.filter(c => c.cat !== 'quickgames');
+
+    if (activeCategory === 'quickgames') {
+        // Kliknięto kategorię quickgames — pokaż "Brak wyników", bo quickgames są tylko w sekcji na górze
+        filtered = [];
+    } else if (activeCategory !== 'Wszystkie') {
+        filtered = filtered.filter(c => c.cat === activeCategory);
+    }
+
+    if (query) {
+        filtered = filtered.filter(c => {
+            return matchesQuery(normalizeText(c.cmd), query) ||
+                   matchesQuery(normalizeText(c.desc), query) ||
+                   matchesQuery(normalizeText(c.cat), query);
+        });
+    }
+
+    // Quickgames sekcja: pokaż tylko gdy brak wyszukiwania i kategoria to "Wszystkie" lub "quickgames"
+    const showQg = !query && (activeCategory === 'Wszystkie' || activeCategory === 'quickgames');
+    quickgamesSection.style.display = showQg ? '' : 'none';
+
+    // Wykryj zmianę — animuj tylko jeśli lista komend się zmieniła (porównujemy ID)
+    const currentIds = filtered.map(c => c.cmd).join('|');
+    const animate = currentIds !== lastFilteredIds;
+    lastFilteredIds = currentIds;
+
+    renderCommands(filtered, animate);
+}
+
+
+// --- MODUŁ 4: Utility (copy, escape) ---
+
+function handleCopy(e) {
+    const btn = e.target.closest('.copy-btn');
+    if (!btn) return;
+    const text = btn.getAttribute('data-copy');
+    if (!text) return;
+
+    navigator.clipboard.writeText(text).then(() => {
+        btn.textContent = 'Skopiowano!';
+        btn.classList.add('copied');
+        setTimeout(() => { btn.textContent = 'Kopiuj'; btn.classList.remove('copied'); }, 1500);
+    }).catch(() => {
+        const ta = document.createElement('textarea');
+        ta.value = text; ta.style.position = 'fixed'; ta.style.opacity = '0';
+        document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta);
+        btn.textContent = 'Skopiowano!'; btn.classList.add('copied');
+        setTimeout(() => { btn.textContent = 'Kopiuj'; btn.classList.remove('copied'); }, 1500);
+    });
+}
+
+
+function escapeHtml(str) { const d = document.createElement('div'); d.textContent = str; return d.innerHTML; }
+
+// --- MODUŁ 5: Modal FAQ ---
+
+async function loadFaq() {
+    const faqData = await loadJSON(FAQ_URL);
+    if (!faqData || faqData.length === 0) {
+        faqContent.innerHTML = '<p style="color: var(--text-muted);">Błąd ładowania FAQ 😿</p>';
+        return;
+    }
+
+    faqContent.innerHTML = '';
+    faqData.forEach((item, i) => {
+        const el = document.createElement('div');
+        el.className = 'faq-item';
+        el.innerHTML = `
+            <div class="faq-question">
+                <span class="faq-arrow">▶</span>
+                ${escapeHtml(item.q)}
+            </div>
+            <div class="faq-answer">${escapeHtml(item.a)}</div>
+        `;
+
+        // Kliknięcie na pytanie — rozwijanie/zwijanie
+        el.querySelector('.faq-question').addEventListener('click', () => {
+            el.classList.toggle('open');
+        });
+
+        faqContent.appendChild(el);
+    });
+}
+
+
+// --- MODUŁ 6: Obsługa modali ---
+
+document.getElementById('faqBtn').addEventListener('click', () => {
+    faqModal.classList.add('active');
+});
+
+// Zamknięcie modala — przycisk X
+function closeModal(modal) {
+    modal.classList.remove('active');
+}
+
+document.getElementById('faqClose').addEventListener('click', () => closeModal(faqModal));
+
+// Zamknięcie modala — kliknięcie poza nim
+[faqModal].forEach(modal => {
+    modal.addEventListener('click', (e) => {
+        if (e.target === modal) closeModal(modal);
+    });
+});
+
+// Zamknięcie modala — Escape
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+        closeModal(faqModal);
+    }
+});
+
+
+// --- MODUŁ 7: Inicjalizacja ---
+
+searchInput.addEventListener('input', () => filterCommands(commands));
+
+let commands = [];
+
+buildGradientTitle();
+loadFaq();
+
+loadJSON(DATA_URL).then(data => {
+    if (!data) {
+        loadingEl.textContent = 'Błąd ładowania danych 😿';
+        return;
+    }
+    commands = data;
+    loadingEl.style.display = 'none';
+    renderQuickgames(commands);
+    renderFilters(commands);
+    filterCommands(commands);
+});
+
+</script>
 </body>
 </html>
